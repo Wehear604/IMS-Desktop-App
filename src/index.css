@@ -1,0 +1,52 @@
+
+
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap');
+:root {
+  --ck-color-image-caption-background: hsl(0, 0%, 97%);
+  --ck-color-image-caption-text: hsl(0, 0%, 20%);
+  --ck-color-mention-background: hsla(341, 100%, 30%, 0.1);
+  --ck-color-mention-text: hsl(341, 100%, 30%);
+  --ck-color-table-caption-background: hsl(0, 0%, 97%);
+  --ck-color-table-caption-text: hsl(0, 0%, 20%);
+  --ck-highlight-marker-blue: hsl(201, 97%, 72%);
+  --ck-highlight-marker-green: hsl(120, 93%, 68%);
+  --ck-highlight-marker-pink: hsl(345, 96%, 73%);
+  --ck-highlight-marker-yellow: hsl(60, 97%, 73%);
+  --ck-highlight-pen-green: hsl(112, 100%, 27%);
+  --ck-highlight-pen-red: hsl(0, 85%, 49%);
+  --ck-image-style-spacing: 1.5em;
+  --ck-inline-image-style-spacing: calc(var(--ck-image-style-spacing) / 2);
+  --ck-todo-list-checkmark-size: 16px;
+}
+*:not(ul):not(ol){
+  box-sizing: border-box;
+  margin: 0px;
+  padding: 0px;    
+  text-decoration: none;
+  /* scrollbar-width: none; */
+}
+body{
+  background-color: white !important;
+}
+.ck-editor__editable {
+  min-height: 300px;
+  max-height: 400px;
+}
+.react-transform-component,.react-transform-wrapper{
+  height: 100% !important;
+  width: 100% !important;
+}
+* {
+  font-family: 'Public Sans', sans-serif;  
+  
+}
+body,html,#root{
+  height: 100%;
+  width: 100%;
+}
+/*
+ * CKEditor 5 (v38.0.1) content styles.
+ * Generated on Wed, 21 Jun 2023 09:17:15 GMT.
+ * For more information, check out https://ckeditor.com/docs/ckeditor5/latest/installation/advanced/content-styles.html
+ */
+
