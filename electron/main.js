@@ -17,6 +17,8 @@ function createWindow() {
     const win = new BrowserWindow({
         width: 1024,
         height: 768,
+        autoHideMenuBar: true,      
+        frame: true,    
         icon: path.join(__dirname, "..", "public", "ims.png"),
         webPreferences: {
             // preload: path.join(__dirname, "preload.js"),
@@ -25,12 +27,10 @@ function createWindow() {
             webSecurity: false,
         },
     });
-    const isDev = !app.isPackaged;
-    // if (isDev) {
+    win.setMenu(null);
+    win.maximize();
         win.loadURL("http://localhost:3000");
-    // } else {
-    //     win.loadURL("https://ims1.wehear.in/");
-    // }
+    //     win.loadURL("https://ims1.wehear.in/");  //production
 }
 
 app.whenReady().then(createWindow);
