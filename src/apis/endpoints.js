@@ -1,4 +1,4 @@
-export const mode = "development";
+export const mode = "local";
 let domain = "";
 
 switch (mode) {
@@ -169,7 +169,7 @@ export default {
   downloadQrImage: `${domain}api/v1/inventoryLogs/download-qr`,
   generateInventoryLogQr: `${domain}api/v1/inventoryLogs/generate-qr-inventory-logs`,
   fetchInventoryLogById: `${domain}api/v1/inventoryLogs/fetch-by-id`,
-  fetchInventoryOutLogs: `${domain}api/v1/inventoryLogs//fetch-out-inventory`,
+  fetchInventoryOutLogs: `${domain}api/v1/inventoryLogs/fetch-out-inventory`,
 
   getMacAddress: `https://serverlkims.wehear.in/api/qr/fetch`,
   getQcResult: `https://serverlkims.wehear.in/api/rxtx/fetch-rxtx`,
