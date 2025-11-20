@@ -55,6 +55,8 @@ import DashboardListController from './pages/dashboard/DashboardListController'
 import PurchaseRequestListController from './pages/purchaseRequest/PurchaseRequestListController';
 import VersionsController from './pages/versions/VersionsController';
 import LocationMasterListController from "./pages/LocationMaster/LocationMasterListController"
+import DeviceQcListController from "./pages/wehearDeviceQc/DeviceQcListController"
+import ListControllerPurchaseRequest from "./pages/purchaseRequestNew/ListControllerPurchaseRequest"
 // import locationMasterListController from "./pages/LocationMaster/locationMasterListController";
 
 const loggedInPathElementRender = (login, allowed = [], permittedModule = [], Component, defaultRedirect, hideInPannel = false) => {
@@ -118,6 +120,21 @@ const defineRoutes = (user) => {
       title: "GRN",
       ...loggedInPathElementRender(user.isLoggedIn, [MODULES.GRN], allowedModules, <AppContainer ><InventoryLogsListController /> </AppContainer>, defaultRedirect),
     },
+
+    {
+      path: "purchase-request",
+      icon: <FactoryIcon />,
+      title: "Purchase Request",
+      ...loggedInPathElementRender(user.isLoggedIn, [MODULES.PURCHASE_REQUEST], allowedModules, <AppContainer ><ListControllerPurchaseRequest /> </AppContainer>, defaultRedirect),
+    },
+
+    {
+      path: "device-qc",
+      icon: <FactoryIcon />,
+      title: "Device QC",
+      ...loggedInPathElementRender(user.isLoggedIn, [MODULES.DEVICE_QC], allowedModules, <AppContainer ><DeviceQcListController /> </AppContainer>, defaultRedirect),
+    },
+
     {
       path: "stock",
       icon: <ImportExportIcon />,

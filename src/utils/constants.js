@@ -33,6 +33,8 @@ export const actions = {
   CALL_SNACKBAR_DATA: "CALL_SNACKBAR_DATA",
   SET_NOTIFICATION_DATA: "SET_NOTIFICATION_DATA",
   NOTIFICATION_READ: "NOTIFICATION_READ",
+  CONNECT_DEVICE: "CONNECT_DEVICE",
+  DISCONNECT_DEVICE: "DISCONNECT_DEVICE",
 
   FETCH_DATA_VENDER_LODING: "FETCH_DATA_VENDER_LODING",
   FETCH_DATA_VENDER_DATA: "FETCH_DATA_VENDER_DATA",
@@ -183,6 +185,59 @@ export const BUTTON_STATUS_COLOR_TYPE = (currentstatus) => {
     default:
       return "outlined";
   }
+};
+
+export const DEVICES_NAME = {
+  1: "BTE OPTIMA",
+  2: "BTE PRIME",
+  // 3: "GLASSES",
+  // 4: "BTE 32",
+  // 5: "BTE 24",
+  6: "RIC OPTIMA 16",
+  // 7: "RIC PRIME",
+  8: "RIC OPTIMA 8",
+  9: "ITE OPTIMA",
+  10: "POWER BTE",
+  11: "RIC OPTIMA 32",
+  12: "ITE PRIME",
+  13: "NECKBAND",
+
+  14: "WEHEAR OX",
+  15: "SAFE BUDS",
+  17: "WEHEAR 2.0"
+};
+
+export const LISTENING_SIDE = {
+  LEFT: 1,
+  RIGHT: 2,
+  BOTH: 3,
+};
+
+export const DOM_TYPE = {
+  OPEN: 1,
+  CLOSE: 2,
+  POWER: 3,
+  EAR_MOLD: 4,
+  TULIP: 5,
+  VENTED: 6,
+  STANDARD_DOM: 7
+};
+
+export const DEVICES = {
+  BTE_OPTIMA: 1,
+  BTE_PRIME: 2,
+  RIC_OPTIMA: 6,
+  RIC_OPTIMA_8: 8,
+  ITE_OPTIMA: 9,
+  // POWER_BTE: 10,
+  RIC_32: 11,
+  ITE_PRIME: 12,
+  NECKBAND: 13,
+
+  WEHEAR_OX: 14,
+  SAFE_BUDS: 15,
+  // SAFE_HEADPHONE: 16,
+  WEHEAR_2_0: 17
 };
 
 

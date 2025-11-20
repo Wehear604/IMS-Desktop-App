@@ -33,6 +33,8 @@ const MODULES = {
     MATERIAL_REQUEST: 32,
     VERSIONS: 33,
     LOCATION_MASTER: 34,
+    DEVICE_QC: 35,
+    PURCHASE_REQUEST: 36,
 };
 
 export default MODULES

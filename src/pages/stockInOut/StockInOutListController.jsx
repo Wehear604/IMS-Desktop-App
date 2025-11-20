@@ -218,6 +218,15 @@ const StockInOutListController = ({ Type }) => {
         renderValue: (params, setParams) => params?.category?.name || "NA",
       },
       {
+        id: 7,
+        fieldName: "",
+        label: "MPN",
+        align: "left",
+        sort: true,
+        // hide: Type === LOG_TYPE.In,
+        renderValue: (params, setParams) => params?.materialDetails?.mpn || "NA",
+      },
+      {
         id: 8,
         fieldName: "",
         label: "Invoice Number",

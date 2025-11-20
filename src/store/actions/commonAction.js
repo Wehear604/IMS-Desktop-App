@@ -1,8 +1,38 @@
 import { resetTokenApi } from "../../apis/auth.api";
-import { SNACK_BAR_VARIETNS } from "../../utils/constants";
+import { actions, SNACK_BAR_VARIETNS } from "../../utils/constants";
 import { accessToken, refreshToken } from "../../utils/main";
 import { callSnackBar } from "./snackbarAction";
 import { signOutAction } from "./userReducerAction";
+
+export const connectDevice = (
+  hardwareData,
+  deviceInfo,
+  deviceObj,
+  disconnectFun,
+  side
+) => {
+  console.log("Connecting to device:", deviceInfo);
+  console.log("Hardware Data:", hardwareData);
+  console.log("Device Object:", deviceObj);
+  console.log("Disconnect Function:", disconnectFun);
+  console.log("Side:", side);
+  return {
+    type: actions.CONNECT_DEVICE,
+    hardwareData,
+    deviceInfo,
+    deviceObj,
+    disconnectFun,
+    side: side,
+  };
+};
+
+export const disconnectDevice = (side, flag) => {
+  return async (dispatch, getState) => {
+    if (!flag)
+      dispatch(callSnackBar("Device Disconnected.", SNACK_BAR_VARIETNS.error));
+    dispatch({ type: actions.DISCONNECT_DEVICE, side: side });
+  };
+};
 
 export const callApiAction = (
   asyncFun,

@@ -11,9 +11,6 @@ switch (mode) {
   case "development":
     domain = "https://imsdevelopment.wehear.in/";
     break;
-  case "production":
-    domain = "https://inventory-management-backend-production.up.railway.app/";
-    break;
   case "production1":
     domain = "https://serverims.wehear.in/";
     break;
@@ -169,7 +166,7 @@ export default {
   downloadQrImage: `${domain}api/v1/inventoryLogs/download-qr`,
   generateInventoryLogQr: `${domain}api/v1/inventoryLogs/generate-qr-inventory-logs`,
   fetchInventoryLogById: `${domain}api/v1/inventoryLogs/fetch-by-id`,
-  fetchInventoryOutLogs: `${domain}api/v1/inventoryLogs/fetch-out-inventory`,
+  fetchInventoryOutLogs: `${domain}api/v1/inventoryLogs//fetch-out-inventory`,
 
   getMacAddress: `https://serverlkims.wehear.in/api/qr/fetch`,
   getQcResult: `https://serverlkims.wehear.in/api/rxtx/fetch-rxtx`,
@@ -222,4 +219,6 @@ export default {
   locationMasterDelete: `${domain}api/locationMaster/delete`,
   locationMasterUpdate: `${domain}api/locationMaster/update`,
   locationMasterFetchById: `${domain}api/locationMaster/by-id`,
+
+  purchaseRequestCreate: `${domain}api/v1/purchaseRequest/`,
 }
