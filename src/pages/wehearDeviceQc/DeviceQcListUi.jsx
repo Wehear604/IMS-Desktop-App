@@ -26,16 +26,16 @@ const modalStyle = {
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: 400,
+    width: 420,
     bgcolor: 'background.paper',
     border: '2px solid #000',
     boxShadow: 24,
-    p: 4,
+    p: 3,
     borderRadius: 2,
 };
 
-
 export default function DeviceQcListUi() {
+    // BLE states (existing)
     const [connected, setConnected] = useState(null);
     const [loading, setLoading] = useState(false);
     const [statusMessage, setStatusMessage] = useState("Click 'Start BLE Scan' to begin.");
@@ -46,6 +46,13 @@ export default function DeviceQcListUi() {
     const [scanStarted, setScanStarted] = useState(false);
     const [snackbarOpen, setSnackbarOpen] = useState(false);
 
+    // Classic Bluetooth states (new)
+    const [classicModalOpen, setClassicModalOpen] = useState(false);
+    const [classicScanStarted, setClassicScanStarted] = useState(false);
+    const [classicDevices, setClassicDevices] = useState([]);
+    const [classicConnectingAddr, setClassicConnectingAddr] = useState(null);
+    const [classicConnected, setClassicConnected] = useState(null);
+
     // --- IPC Listeners Setup ---
     useEffect(() => {
         if (!electronAPI) {
@@ -53,7 +60,7 @@ export default function DeviceQcListUi() {
             return;
         }
 
-        // 1. Listen for discovered devices
+        // --- BLE listeners (as in your original setup) ---
         const cleanupDeviceListener = electronAPI.onBleDevice((device) => {
             setDiscoveredDevices(prevDevices => {
                 if (!prevDevices.some(d => d.id === device.id)) {
@@ -64,7 +71,6 @@ export default function DeviceQcListUi() {
             });
         });
 
-        // 2. Listen for successful connection
         const cleanupConnectedListener = electronAPI.onBleConnected((dev) => {
             setModalOpen(false);
             setConnected(dev);
@@ -77,7 +83,6 @@ export default function DeviceQcListUi() {
             setSnackbarOpen(true);
         });
 
-        // 3. Listen for errors
         const cleanupErrorListener = electronAPI.onBleError((msg) => {
             console.error("BLE Error:", msg);
             setError(msg);
@@ -88,7 +93,6 @@ export default function DeviceQcListUi() {
             setScanStarted(false);
         });
 
-        // 4. Listen for status changes
         const cleanupStatusListener = electronAPI.onBleStatus((msg) => {
             setStatusMessage(msg);
             if (msg.includes("Scanning") || msg.includes("Attempting to connect")) {
@@ -98,15 +102,47 @@ export default function DeviceQcListUi() {
             }
         });
 
+        // --- Classic listeners (new) ---
+        const cleanupClassicDevice = electronAPI.onClassicDevice((dev) => {
+            setClassicDevices(prev => {
+                if (!prev.some(d => d.address === dev.address)) {
+                    return [...prev, dev];
+                }
+                return prev;
+            });
+        });
+
+        const cleanupClassicConnected = electronAPI.onClassicConnected((dev) => {
+            setClassicModalOpen(false);
+            setClassicConnected(dev);
+            setClassicConnectingAddr(null);
+            setClassicScanStarted(false);
+            setSnackbarOpen(true);
+            setStatusMessage(`Classic connected to ${dev.name || dev.address}`);
+        });
+
+        const cleanupClassicError = electronAPI.onClassicError((msg) => {
+            console.error("Classic BT Error:", msg);
+            setError(msg);
+            setClassicConnectingAddr(null);
+            setClassicScanStarted(false);
+            setClassicModalOpen(false);
+        });
+
+        // cleanup on unmount
         return () => {
             cleanupDeviceListener();
             cleanupConnectedListener();
             cleanupErrorListener();
             cleanupStatusListener();
+
+            cleanupClassicDevice();
+            cleanupClassicConnected();
+            cleanupClassicError();
         };
     }, []);
 
-    // --- IPC Action Handlers ---
+    // --- IPC Action Handlers (BLE) ---
 
     const handleStartScan = () => {
         if (!electronAPI || (loading && !connected)) {
@@ -136,25 +172,22 @@ export default function DeviceQcListUi() {
         setConnectingId(id);
         setLoading(true);
         const deviceToConnect = discoveredDevices.find(d => d.id === id);
-        setStatusMessage(`Attempting to connect to ${deviceToConnect.name}...`);
+        setStatusMessage(`Attempting to connect to ${deviceToConnect?.name || id}...`);
 
         // IPC call to initiate manual connection
         electronAPI.connectDevice(id);
     }
 
-    // 🔥 FIX: Immediately restart the scan after a manual disconnect
     const handleDisconnect = () => {
         const wasConnected = connected;
         const connectedId = connected?.id;
 
-        // 1. Send disconnect signal if connected or stop scan if scanning
         if (wasConnected) {
             electronAPI.disconnectDevice(connectedId);
         } else if (scanStarted) {
             electronAPI.stopBleScan();
         }
 
-        // 2. Reset UI state completely
         setConnected(null);
         setError(null);
         setDiscoveredDevices([]);
@@ -164,13 +197,12 @@ export default function DeviceQcListUi() {
         setModalOpen(false);
         setStatusMessage("Device disconnected. Starting new scan...");
 
-        // 3. Restart the scan process (No need for delay now that ble.js handles state cleanup immediately)
-        handleStartScan(); // <<< REMOVE setTimeout
+        // Restart new BLE scan
+        handleStartScan();
     };
 
     const handleCloseModal = () => {
         if (scanStarted) {
-            // Stop scan when the modal is manually closed
             electronAPI.stopBleScan();
             setScanStarted(false);
         }
@@ -180,10 +212,45 @@ export default function DeviceQcListUi() {
         setStatusMessage("Scan stopped. Ready to scan.");
     }
 
-    // --- Render Logic ---
+    // --- Classic Bluetooth Handlers (new) ---
+
+    const handleClassicScan = () => {
+        if (!electronAPI) {
+            setError("Electron API not available.");
+            return;
+        }
+        setError(null);
+        setClassicDevices([]);
+        setClassicConnected(null);
+        setClassicScanStarted(true);
+        setClassicModalOpen(true);
+        setStatusMessage("Starting Classic Bluetooth scan...");
+        electronAPI.startClassicScan();
+    }
+
+    const handleClassicConnect = (address) => {
+        if (!electronAPI || classicConnectingAddr) return;
+
+        setClassicConnectingAddr(address);
+        setStatusMessage(`Attempting to connect classic device ${address}...`);
+        // Stop scanning (so other discovery events pause)
+        electronAPI.stopClassicScan();
+        electronAPI.connectClassicDevice(address);
+    }
+
+    const handleCloseClassicModal = () => {
+        if (classicScanStarted) {
+            electronAPI.stopClassicScan();
+            setClassicScanStarted(false);
+        }
+        setClassicDevices([]);
+        setClassicModalOpen(false);
+        setStatusMessage("Classic scan stopped.");
+    }
+
+    // --- Render Helpers ---
 
     const renderDeviceList = () => {
-
         if (discoveredDevices.length > 0) {
             return (
                 <List dense>
@@ -199,7 +266,7 @@ export default function DeviceQcListUi() {
                                         onClick={() => handleConnectDevice(device.id)}
                                         disabled={connectingId !== null}
                                     >
-                                        {connectingId === device.id ? 'Connecting' : 'Connect'}
+                                        {connectingId === device.id ? 'Connecting' : 'Connect BLE'}
                                     </Button>
                                 }
                             >
@@ -237,10 +304,61 @@ export default function DeviceQcListUi() {
         return null;
     }
 
+    const renderClassicDeviceList = () => {
+        if (classicDevices.length > 0) {
+            return (
+                <List dense>
+                    {classicDevices.map((dev, index) => (
+                        <React.Fragment key={dev.address}>
+                            <ListItem
+                                secondaryAction={
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        size="small"
+                                        startIcon={classicConnectingAddr === dev.address ? <CircularProgress size={16} color="inherit" /> : <BluetoothConnectedIcon />}
+                                        onClick={() => handleClassicConnect(dev.address)}
+                                        disabled={classicConnectingAddr !== null}
+                                    >
+                                        {classicConnectingAddr === dev.address ? 'Connecting' : 'Connect'}
+                                    </Button>
+                                }
+                            >
+                                <ListItemText
+                                    primary={dev.name || `Unknown Device`}
+                                    secondary={`MAC: ${dev.address}`}
+                                />
+                            </ListItem>
+                            {index < classicDevices.length - 1 && <Divider component="li" />}
+                        </React.Fragment>
+                    ))}
+                </List>
+            );
+        }
+
+        if (classicScanStarted && classicDevices.length === 0) {
+            return (
+                <Box sx={{ mt: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <CircularProgress size={40} />
+                    <Typography variant="body2" sx={{ mt: 1 }}>
+                        Scanning for classic Bluetooth devices...
+                    </Typography>
+                </Box>
+            );
+        }
+
+        return (
+            <Alert severity="info" sx={{ mt: 2 }}>
+                No classic Bluetooth devices discovered yet.
+            </Alert>
+        );
+    }
+
+    // --- JSX Render ---
     return (
-        <Box sx={{ padding: 3, maxWidth: 500, margin: 'auto', textAlign: 'center' }}>
+        <Box sx={{ padding: 3, maxWidth: 700, margin: 'auto', textAlign: 'center' }}>
             <Typography variant="h4" gutterBottom>
-                BLE Device QC Connection
+                BLE & Classic Bluetooth Device QC
             </Typography>
 
             {/* Display Error/Status Alert */}
@@ -250,60 +368,67 @@ export default function DeviceQcListUi() {
                 </Alert>
             )}
 
-            {/* Main Action Button */}
+            {/* BLE Main Action Button */}
             <Button
                 onClick={connected ? handleDisconnect : handleStartScan}
                 variant="contained"
                 color={connected ? "error" : "primary"}
                 startIcon={connected ? null : <SearchIcon />}
-                sx={{ mt: 3, mb: 3, borderRadius: 5, padding: '10px 30px' }}
+                sx={{ mt: 3, mb: 2, borderRadius: 5, padding: '10px 30px' }}
                 disabled={loading && !connected}
             >
                 {connected ? "Disconnect & Restart Scan" : "Start BLE Scan"}
             </Button>
 
+            {/* Classic Scan Button */}
+            <Button
+                onClick={handleClassicScan}
+                variant="outlined"
+                color="secondary"
+                sx={{ mt: 1, mb: 3, ml: 2, borderRadius: 5, padding: '10px 30px' }}
+            >
+                Start Classic Scan
+            </Button>
+
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Current Status: **{statusMessage}**
+                Current Status: <strong>{statusMessage}</strong>
             </Typography>
 
-            {/* Connected UI */}
+            {/* BLE Connected UI */}
             {connected && (
-                <Box sx={{ mt: 2, p: 3, border: '1px solid #4caf50', borderRadius: 2, backgroundColor: '#e8f5e9' }}>
-                    <Typography variant="h5" sx={{ color: "green", mb: 2 }} component="div">
+                <Box sx={{ mt: 2, p: 3, border: '1px solid #4caf50', borderRadius: 2, backgroundColor: '#e8f5e9', textAlign: 'left' }}>
+                    <Typography variant="h6" sx={{ color: "green", mb: 1 }} component="div">
                         <CheckCircleOutlineIcon sx={{ verticalAlign: 'middle', mr: 1 }} />
-                        Connected Successfully!
+                        BLE Connected Successfully
                     </Typography>
-                    <Typography variant="body1" align="left"><b>Device Name:</b> {connected.name}</Typography>
-                    <Typography variant="body1" align="left"><b>MAC Address:</b> {connected.mac}</Typography>
-                    <Typography variant="body1" align="left"><b>Device ID:</b> {connected.id}</Typography>
+                    <Typography variant="body1"><b>Device Name:</b> {connected.name}</Typography>
+                    <Typography variant="body1"><b>MAC Address:</b> {connected.mac}</Typography>
+                    <Typography variant="body1"><b>Device ID:</b> {connected.id}</Typography>
                 </Box>
             )}
 
-            {/* Scan/Discovery Modal */}
-            <Modal
-                open={modalOpen}
-                onClose={handleCloseModal}
-                aria-labelledby="scan-modal-title"
-                aria-describedby="scan-modal-description"
-            >
+            {/* Classic Connected UI */}
+            {classicConnected && (
+                <Box sx={{ mt: 3, p: 2, border: "1px solid #1976d2", borderRadius: 2, backgroundColor: '#e3f2fd', textAlign: 'left' }}>
+                    <Typography variant="h6" sx={{ color: "#0d47a1", mb: 1 }}>
+                        Classic Bluetooth Connected
+                    </Typography>
+                    <Typography variant="body1"><b>Device Name:</b> {classicConnected.name || 'Unknown'}</Typography>
+                    <Typography variant="body1"><b>MAC Address:</b> {classicConnected.address}</Typography>
+                </Box>
+            )}
+
+            {/* BLE Scan Modal */}
+            <Modal open={modalOpen} onClose={handleCloseModal} aria-labelledby="scan-modal-title">
                 <Box sx={modalStyle}>
-                    <IconButton
-                        aria-label="close"
-                        onClick={handleCloseModal}
-                        sx={{
-                            position: 'absolute',
-                            right: 8,
-                            top: 8,
-                            color: (theme) => theme.palette.grey[500],
-                        }}
-                    >
+                    <IconButton aria-label="close" onClick={handleCloseModal} sx={{ position: 'absolute', right: 8, top: 8 }}>
                         <CloseIcon />
                     </IconButton>
                     <Typography id="scan-modal-title" variant="h6" component="h2" gutterBottom>
                         Scanning for BLE Devices
                     </Typography>
                     <Divider sx={{ mb: 2 }} />
-                    <Typography id="scan-modal-description" sx={{ mt: 1, mb: 2 }} color="text.secondary">
+                    <Typography sx={{ mt: 1, mb: 2 }} color="text.secondary">
                         {statusMessage}
                     </Typography>
                     <Box sx={{ maxHeight: 300, overflowY: 'auto' }}>
@@ -320,7 +445,31 @@ export default function DeviceQcListUi() {
                             *Scan finished. Select a device to connect.
                         </Typography>
                     )}
+                </Box>
+            </Modal>
 
+            {/* Classic Scan Modal */}
+            <Modal open={classicModalOpen} onClose={handleCloseClassicModal} aria-labelledby="classic-scan-modal">
+                <Box sx={modalStyle}>
+                    <IconButton aria-label="close" onClick={handleCloseClassicModal} sx={{ position: 'absolute', right: 8, top: 8 }}>
+                        <CloseIcon />
+                    </IconButton>
+                    <Typography id="classic-scan-modal" variant="h6" component="h2" gutterBottom>
+                        Scanning for Classic Bluetooth Devices
+                    </Typography>
+                    <Divider sx={{ mb: 2 }} />
+                    <Typography sx={{ mt: 1, mb: 2 }} color="text.secondary">
+                        {classicScanStarted ? "Scanning for devices..." : "Ready"}
+                    </Typography>
+                    <Box sx={{ maxHeight: 300, overflowY: 'auto' }}>
+                        {renderClassicDeviceList()}
+                    </Box>
+                    <Divider sx={{ mt: 2 }} />
+                    {!classicScanStarted && classicDevices.length > 0 && (
+                        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                            *Select a device to connect.
+                        </Typography>
+                    )}
                 </Box>
             </Modal>
 
