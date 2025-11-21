@@ -14,7 +14,11 @@ import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import { SnackbarProvider } from "notistack";
 
 
-  const store = configureStore({ reducer: rootReducer, middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(thunk) });
+  // const store = configureStore({ reducer: rootReducer, middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(thunk) });
+const store = configureStore({
+  reducer: rootReducer,
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware()
+});
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(

@@ -12,25 +12,32 @@ if (process.env.NODE_ENV === "development") {
         console.log("Auto-reload failed:", e);
     }
 }
-
+require("./ble");
 function createWindow() {
     const win = new BrowserWindow({
         width: 1024,
         height: 768,
-        autoHideMenuBar: true,      
-        frame: true,    
+        autoHideMenuBar: true,
+        frame: true,
         icon: path.join(__dirname, "..", "public", "ims.png"),
+        // webPreferences: {
+        //     // preload: path.join(__dirname, "preload.js"),
+        //     contextIsolation: false,
+        //     nodeIntegration: true,
+        //     webSecurity: false,
+        // },
+
         webPreferences: {
-            // preload: path.join(__dirname, "preload.js"),
-            contextIsolation: false,
-            nodeIntegration: true,
-            webSecurity: false,
-        },
+            nodeIntegration: false,
+            contextIsolation: true,
+            preload: path.join(__dirname, "preload.js"),
+        }
+
     });
-    win.setMenu(null);
+    // win.setMenu(null);
     win.maximize();
-        win.loadURL("http://localhost:3000");
-    //     win.loadURL("https://ims1.wehear.in/");  //production
+    // win.loadURL("http://localhost:3000");
+    win.loadURL("https://ims1.wehear.in/");  //production
 }
 
 app.whenReady().then(createWindow);

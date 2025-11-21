@@ -53,7 +53,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import DisplaySettingsIcon from '@mui/icons-material/DisplaySettings';
 import DashboardListController from './pages/dashboard/DashboardListController'
 import PurchaseRequestListController from './pages/purchaseRequest/PurchaseRequestListController';
-import VersionsController from './pages/versions/VersionsController';
+// import VersionsController from './pages/versions/VersionsController';
 import LocationMasterListController from "./pages/LocationMaster/LocationMasterListController"
 import DeviceQcListController from "./pages/wehearDeviceQc/DeviceQcListController"
 import ListControllerPurchaseRequest from "./pages/purchaseRequestNew/ListControllerPurchaseRequest"
@@ -302,12 +302,12 @@ const defineRoutes = (user) => {
           title: "Location Master",
           ...loggedInPathElementRender(user.isLoggedIn, [MODULES.LOCATION_MASTER], allowedModules, <LocationMasterListController />, defaultRedirect),
         },
-        {
-          path: "version",
-          icon: SystemUpdateAltIcon,
-          title: "version",
-          ...loggedInPathElementRender(user.isLoggedIn, [MODULES.VERSIONS], allowedModules, <VersionsController />, defaultRedirect),
-        },
+        // {
+        //   path: "version",
+        //   icon: SystemUpdateAltIcon,
+        //   title: "version",
+        //   ...loggedInPathElementRender(user.isLoggedIn, [MODULES.VERSIONS], allowedModules, <VersionsController />, defaultRedirect),
+        // },
       ]
     },
     {
