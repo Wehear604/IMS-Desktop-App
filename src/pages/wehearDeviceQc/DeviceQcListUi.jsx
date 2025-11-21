@@ -1,4 +1,3 @@
-// 🔥 ALL IMPORTS AT TOP
 import React, { useEffect, useState } from "react";
 import { Button, Typography, CircularProgress, Alert, Box } from "@mui/material";
 
@@ -13,6 +12,7 @@ export default function DeviceQcListUi() {
     const [discoveredDeviceId, setDiscoveredDeviceId] = useState(null); // The ID of the first device found
 
     // --- IPC Listeners and Auto-Connect Logic ---
+    // Changed dependency array to [] to ensure listeners are registered only once on mount.
     useEffect(() => {
         if (!electronAPI) {
             setError("Electron API not loaded. Check preload.js configuration.");
@@ -23,16 +23,21 @@ export default function DeviceQcListUi() {
         // 1. Listen for discovered devices
         const cleanupDeviceListener = electronAPI.onBleDevice((device) => {
             console.log("Device discovered:", device);
-            // This is the "Auto-Connect" logic: connect to the first device found
-            if (!connected && !discoveredDeviceId) {
-                setDiscoveredDeviceId(device.id);
-                setStatusMessage(`Device found: ${device.name}. Attempting to connect...`);
-                setLoading(true);
-                // Trigger the connection via IPC
-                electronAPI.connectDevice(device.id);
-            } else {
-                setLoading(false); // Stop general scanning loader once first device is found
-            }
+
+            // The main process (ble.js) handles the auto-connection immediately upon discovery.
+            // This UI logic just confirms we found something and updates the status.
+            setDiscoveredDeviceId(device.id); // Always update the discovered ID
+
+            // Only update status if not already connected
+            setConnected(currentConnected => {
+                if (!currentConnected) {
+                    // The status will change to "Attempting to connect..." via the onBleStatus listener shortly
+                    setStatusMessage(`Device found: ${device.name}. Waiting for connection...`);
+                    setLoading(true);
+                }
+                return currentConnected;
+            });
+            setLoading(false); // Stop general scanning loader once first device is found
         });
 
         // 2. Listen for successful connection
@@ -47,18 +52,26 @@ export default function DeviceQcListUi() {
         // 3. Listen for errors
         const cleanupErrorListener = electronAPI.onBleError((msg) => {
             console.error("BLE Error:", msg);
-            // Replaced alert(msg) with proper MUI Alert
             setError(msg);
             setLoading(false);
-            setStatusMessage("Connection failed. Check logs for details.");
             setConnected(null);
             setDiscoveredDeviceId(null); // Reset discovery state
+            // Status message will be updated via onBleStatus if scan resumes
         });
 
-        // 4. Listen for status changes (from ble.js stateChange/disconnect)
+        // 4. Listen for status changes (from ble.js stateChange/disconnect/timeout)
         const cleanupStatusListener = electronAPI.onBleStatus((msg) => {
             setStatusMessage(msg);
+            // We only show the initial loader if the status implies active scanning/connecting
+            if (msg.includes("Scanning") || msg.includes("Attempting to connect")) {
+                setLoading(true);
+            } else if (msg.includes("ready") || msg.includes("disconnected") || msg.includes("timeout")) {
+                setLoading(false);
+            }
         });
+
+        // Initial setup for the loading state while waiting for the first status
+        setLoading(true);
 
         return () => {
             // Cleanup listeners on component unmount
@@ -66,21 +79,21 @@ export default function DeviceQcListUi() {
             cleanupConnectedListener();
             cleanupErrorListener();
             cleanupStatusListener();
-            // Note: Noble scanning continues in main process unless explicitly stopped
         };
-    }, [connected, discoveredDeviceId]);
+    }, []); // <-- FIX: Empty dependency array ensures listeners are registered only once.
 
     const handleDisconnect = () => {
         if (connected) {
             // Send IPC message to main process to disconnect
             electronAPI.disconnectDevice(connected.id);
+            // Optimistically update UI
             setConnected(null);
             setError(null);
-            setStatusMessage("Manual disconnect. Scanning will resume.");
+            setStatusMessage("Manual disconnect. Scanning will resume...");
             setDiscoveredDeviceId(null);
-            setLoading(true); // Show loader for a moment while scan resumes
+            setLoading(true);
         } else {
-            // For disconnected state, just reload/reset UI if needed, or trigger rescan
+            // If disconnected, just reload/reset UI, which triggers a fresh scan via main.js
             window.location.reload();
         }
     };
@@ -128,9 +141,9 @@ export default function DeviceQcListUi() {
             )}
 
             {/* Fallback/Idle UI (e.g., if scanning finished and nothing found) */}
-            {!loading && !connected && !error && (
+            {!loading && !connected && !error && !statusMessage.includes("connected") && (
                 <Alert severity="info" sx={{ mt: 3 }}>
-                    <Typography>Scan finished or failed to auto-connect. Status: {statusMessage}</Typography>
+                    <Typography>Current Status: {statusMessage}</Typography>
                     <Button
                         onClick={() => window.location.reload()}
                         sx={{ mt: 1 }}

@@ -1,6 +1,5 @@
 const noble = require("@abandonware/noble");
-const { ipcMain, BrowserWindow } = require("electron");
-
+const { BrowserWindow, ipcMain } = require("electron");
 function send(channel, data) {
     BrowserWindow.getAllWindows().forEach(w => w.webContents.send(channel, data));
 }
@@ -9,10 +8,17 @@ let discovered = {};
 let isScanning = false;
 let isConnected = false; // Track connection status globally in main process
 
+const CONNECT_TIMEOUT_MS = 10000; // 10 seconds timeout for connecting
+
 // Function to start scanning and send status
 function startBleScan() {
-    // Only start if noble is ready and not already scanning
-    if (isScanning || noble.state !== "poweredOn" || isConnected) return;
+    if (noble.state !== "poweredOn") {
+        send("ble-status", `Bluetooth state: ${noble.state}`);
+        return;
+    }
+    // Only start if not already scanning and not already connected
+    if (isScanning || isConnected) return;
+
     console.log("Starting BLE Scan...");
     noble.startScanning([], true);
     isScanning = true;
@@ -21,28 +27,38 @@ function startBleScan() {
 
 // Listen for state changes to start scanning
 noble.on("stateChange", (state) => {
+    console.log("Noble state change:", state);
     if (state === "poweredOn") {
         send("ble-status", "Bluetooth adapter ready. Starting scan...");
         startBleScan();
     } else {
         isScanning = false;
         isConnected = false;
+        // Also stop scanning if the state changes away from 'poweredOn'
+        if (noble.state === "scanning") {
+            noble.stopScanning();
+        }
         send("ble-status", `Bluetooth state: ${state}`);
     }
 });
 
 // Listener for disconnection events
-noble.on("disconnect", (id) => {
-    console.log(`Device disconnected: ${id}`);
+noble.on("disconnect", (peripheralId) => {
+    console.log(`Device disconnected: ${peripheralId}`);
     isConnected = false;
+
+    // Clear connecting/connected state on peripheral object if it exists
+    if (discovered[peripheralId]) {
+        discovered[peripheralId].connecting = false;
+        discovered[peripheralId].connected = false;
+    }
+
     send("ble-status", `Device disconnected. Resuming scan.`);
     startBleScan(); // Always resume scanning after disconnection
 });
 
 
-// -------------------------------------------
 // 🔥🔥 AUTO CONNECT LOGIC HERE 🔥🔥
-// -------------------------------------------
 noble.on("discover", (p) => {
     const adv = p.advertisement;
 
@@ -55,13 +71,12 @@ noble.on("discover", (p) => {
 
     const name = adv.localName || "QC Device";
 
-    // Check if we are already connected or attempting to connect
+    // IMPORTANT: Check global isConnected state and local connecting flag
     if (isConnected || p.connecting) return;
 
-    // Store device for reference during disconnect
     discovered[p.id] = p;
 
-    // 🔥 Send device to UI (to show "Device Found")
+    // Send device to UI (to show "Device Found")
     send("ble-device", {
         id: p.id,
         mac: p.address,
@@ -78,10 +93,24 @@ noble.on("discover", (p) => {
         p.connecting = true; // Mark as connecting
         send("ble-status", `Attempting to connect to ${name}...`);
 
+        // Set up a connection timeout
+        const connectTimeout = setTimeout(() => {
+            if (p.connecting) {
+                p.connecting = false;
+                console.error(`Connection to ${name} timed out.`);
+                send("ble-error", `Connection to ${name} timed out.`);
+                p.disconnect(() => { // Attempt a clean disconnect if possible
+                    startBleScan();
+                });
+            }
+        }, CONNECT_TIMEOUT_MS);
+
         p.connect((err) => {
+            clearTimeout(connectTimeout); // Clear the timeout handler
             p.connecting = false; // Clear connecting flag regardless of outcome
 
             if (err) {
+                console.error("Connection error:", err.message);
                 send("ble-error", err.message);
                 startBleScan(); // Resume scanning after error
                 return;
@@ -93,6 +122,7 @@ noble.on("discover", (p) => {
                 mac: p.address,
                 name: name
             });
+            console.log(`Successfully connected to ${name}`);
         });
     }
 });
@@ -101,15 +131,18 @@ noble.on("discover", (p) => {
 ipcMain.on("ble-disconnect", (event, id) => {
     const p = discovered[id];
     if (p && p.state === 'connected') {
+        console.log(`Manual disconnect request for ${p.id}`);
         p.disconnect((err) => {
             if (err) console.error("Noble manual disconnect error:", err);
             // noble.on("disconnect") will handle the UI status and scan resume
         });
     } else {
-        isConnected = false;
-        startBleScan(); // If already disconnected, just make sure we are scanning
+        console.log("Manual disconnect request, but device was not connected. Resuming scan.");
+        isConnected = false; // Ensure global state is clear
+        startBleScan(); // Just make sure we are scanning
     }
 });
 
-// Manual connect request removed as connection is automatic.
-// ipcMain.on("ble-connect", ... )
+module.exports = {
+    startBleScan // Export for use in main.js
+}

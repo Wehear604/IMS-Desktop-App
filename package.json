@@ -6,7 +6,6 @@
   "description": "Desktop Inventory Management System",
   "author": "Rudren Patel",
   "main": "electron/main.js",
-
   "dependencies": {
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
@@ -39,21 +38,19 @@
     "recharts": "^3.1.2",
     "redux-thunk": "^3.1.0",
     "web-vitals": "^2.1.4",
-
     "@abandonware/noble": "^1.9.2-15"
   },
-
   "scripts": {
     "start": "cross-env BROWSER=none react-scripts start",
-    "build": "react-scripts build",
+    "build": "cross-env PUBLIC_URL=./ react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "electron": "electron .",
     "dev:electron": "nodemon --watch electron --exec electron .",
     "dev": "concurrently \"npm start\" \"npm run dev:electron\"",
-    "dist": "npm run build && electron-builder"
+    "dist": "npm run build && electron-builder --win --x64",
+    "postinstall": "electron-builder install-app-deps --arch=x64"
   },
-
   "build": {
     "appId": "com.company.inventory",
     "productName": "Inventory Management System",
@@ -63,8 +60,15 @@
     "files": [
       "build/**/*",
       "electron/**/*",
+      "!**/node_modules/*/{test,__tests__,example,docs}/**",
       "package.json"
     ],
+    "asar": true,
+    "asarUnpack": [
+      "**/node_modules/@abandonware/noble/**"
+    ],
+    "npmRebuild": false,
+    "nodeGypRebuild": false,
     "extraMetadata": {
       "main": "electron/main.js"
     },
@@ -79,14 +83,6 @@
       "allowToChangeInstallationDirectory": true
     }
   },
-
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-
   "browserslist": {
     "production": [
       ">0.2%",
@@ -98,13 +94,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-
-  "devDependencies": {
-    "concurrently": "^8.2.2",
-    "cross-env": "^7.0.3",
-    "electron": "24.6.0",
-    "electron-builder": "^26.0.12",
-    "nodemon": "^3.1.11"
   }
 }

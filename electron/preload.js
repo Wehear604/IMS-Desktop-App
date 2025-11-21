@@ -34,4 +34,5 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
     // ACTIONS
     disconnectDevice: (id) => ipcRenderer.send("ble-disconnect", id),
+    // Removed the manual connect/rescan request here as the logic is now fully automated in ble.js
 });
