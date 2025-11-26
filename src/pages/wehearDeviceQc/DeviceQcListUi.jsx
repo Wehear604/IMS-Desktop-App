@@ -7,7 +7,7 @@ import itePrimeWhite from "../../assets/images/ITE_PRIME_WHITE.svg";
 import iteOptimaBlack from "../../assets/images/ITE_OPTIMA_BLACK.svg";
 import METALIC_RIC_OPTIMA from "../../assets/images/metalic_ric.svg";
 import ric8WithoutDome from "../../assets/images/WITHOUT DOME.svg";
-import BTE from "../../assets/images/bte.png";
+import BTE from "../../assets/images/bteOptima.svg";
 import wehearox from "../../assets/images/wehearox.svg";
 import SAFE_BUDS from "../../assets/images/safebuds.svg";
 import wehear_2_0 from "../../assets/images/wehear 2 0.svg";
@@ -18,6 +18,9 @@ import CoonectDeviceModule from '../../components/bluetooth/CoonectDeviceModule'
 import { useDispatch } from 'react-redux';
 import SubmitButton from '../../components/button/SubmitButton';
 import { connectDevice, disconnectDevice } from '../../store/actions/commonAction';
+import AsyncSearchBar from '../../components/inputs/AsyncSearchBar';
+import { FiltersBox } from '../../components/layouts/OneViewBox';
+import PaddingBoxInDesktop from '../../components/layouts/PaddingBoxDesktop';
 
 const Header = styled(Box)(({ theme }) => ({
     border: "1px solid " + theme.palette.primary.main,
@@ -54,7 +57,7 @@ const ConnectButton = ({ connected, onClick, disconnect }) => {
 
 };
 
-const DeviceQcListUi = ({ data, fields, setFields }) => {
+const DeviceQcListUi = ({ data, fields, setFields, filters, setFilters }) => {
     const { state } = useLocation();
     const dispatch = useDispatch();
     const [isConnecting, setIsConnecting] = useState(false);
@@ -78,11 +81,6 @@ const DeviceQcListUi = ({ data, fields, setFields }) => {
     const [hovered10, setHovered10] = useState(false);
     const [hovered11, setHovered11] = useState(false);
     const [hovered12, setHovered12] = useState(false);
-    // const [expanded, setExpanded] = useState(
-    //     fields.left_fitted_device.selected
-    //         ? SELECTED_DEVICE_PANEL[fields.left_fitted_device.device_type]
-    //         : SELECTED_DEVICE_PANEL[fields.right_fitted_device.device_type]
-    // );
 
     const [selectedTube, setSelectedTube] = useState(
         fields?.right_fitted_device?.device_tube
@@ -98,31 +96,16 @@ const DeviceQcListUi = ({ data, fields, setFields }) => {
     );
 
     const [selectDevice, setSelectDevice] = useState(state ? state : null);
-    // useEffect(() => {
-    //     if (!expanded && suggestedProduct?.length === 0) {
-    //         setExpanded("panel1");
-    //     } else {
-    //         setExpanded(expanded);
-    //     }
-    // }, [suggestedProduct])
-
-    // React.useEffect(() => {
-    //     setSelectedSide(selectDevice);
-    // }, [selectDevice]);
 
     const [device, setDevice] = useState(
         state
             ? state === LISTENING_SIDE.LEFT
                 ? fields?.left_fitted_device?.device_type
                     ? fields?.left_fitted_device?.device_type
-                    : // : fields.left_fitted_device.selected
-                    // ? DEVICES.BTE_PRIME
-                    null
+                    : null
                 : fields?.right_fitted_device?.device_type
                     ? fields?.right_fitted_device?.device_type
-                    : // : fields.right_fitted_device.selected
-                    // ? DEVICES.BTE_PRIME
-                    null
+                    : null
             : null
     );
 
@@ -150,6 +133,7 @@ const DeviceQcListUi = ({ data, fields, setFields }) => {
         }
     });
 
+    // NEW: filters state for search
 
 
     const handleMouseOver = () => {
@@ -167,8 +151,6 @@ const DeviceQcListUi = ({ data, fields, setFields }) => {
     const handleMouseOut1 = () => {
         setHovered1(false);
     };
-
-
 
     const handleMouseOver4 = () => {
         setHovered4(true);
@@ -241,114 +223,6 @@ const DeviceQcListUi = ({ data, fields, setFields }) => {
     const handleMouseOut12 = () => {
         setHovered12(false);
     };
-
-    // const SuggestedProductData = (productType) => {
-    //     const updateSuggestedProduct = (selectedDevice) => {
-    //         setDevice(selectedDevice);
-    //         setFields((prev) => ({
-    //             ...prev,
-    //             device: selectedDevice,
-    //             suggestedProduct: selectButton === "Suggested_Devices" ? suggestedProduct.map((item) => item?.product) : [selectedDevice],
-    //             has_hearing_loss: hasLoss
-    //         }));
-    //     };
-
-    //     const baseConfig = {
-    //         border: device === productType,
-    //         backgroundColor: device === productType,
-    //     };
-
-    //     switch (productType) {
-    //         case DEVICES.BTE_OPTIMA:
-    //             return {
-    //                 ...baseConfig,
-    //                 src: BTE,
-    //                 OnClickCenter: () => updateSuggestedProduct(DEVICES.BTE_OPTIMA),
-    //             };
-
-    //         case DEVICES.BTE_PRIME:
-    //             return {
-    //                 ...baseConfig,
-    //                 src: BTE,
-    //                 OnClickCenter: () => updateSuggestedProduct(DEVICES.BTE_PRIME),
-    //             };
-
-    //         case DEVICES.RIC_OPTIMA_8:
-    //             return {
-    //                 ...baseConfig,
-    //                 src: ric8WithoutDome,
-    //                 OnClickCenter: () => updateSuggestedProduct(DEVICES.RIC_OPTIMA_8),
-    //             };
-
-    //         case DEVICES.RIC_OPTIMA:
-    //             return {
-    //                 ...baseConfig,
-    //                 src: METALIC_RIC_OPTIMA,
-    //                 sideColor: {
-    //                     METALIC: "#C6C1C5",
-    //                     BLACK: "#000000",
-    //                     BEIGE: "#D6B19F",
-    //                 },
-    //                 OnClickCenter: () => updateSuggestedProduct(DEVICES.RIC_OPTIMA),
-    //             };
-
-    //         case DEVICES.RIC_32:
-    //             return {
-    //                 ...baseConfig,
-    //                 src: METALIC_RIC_OPTIMA,
-    //                 sideColor: {
-    //                     METALIC: "#C6C1C5",
-    //                     BLACK: "#000000",
-    //                     BEIGE: "#D6B19F",
-    //                 },
-    //                 OnClickCenter: () => updateSuggestedProduct(DEVICES.RIC_32),
-    //             };
-
-    //         case DEVICES.ITE_OPTIMA:
-    //             return {
-    //                 ...baseConfig,
-    //                 src: iteOptimaBlack,
-    //                 sideColor: { BLACK: "#000000", WHITE: "#FFFFFF" },
-    //                 OnClickCenter: () => updateSuggestedProduct(DEVICES.ITE_OPTIMA),
-    //             };
-
-    //         case DEVICES.WEHEAR_OX:
-    //             return {
-    //                 ...baseConfig,
-    //                 src: wehearox,
-    //                 OnClickCenter: () => updateSuggestedProduct(DEVICES.WEHEAR_OX),
-    //             };
-    //         case DEVICES.SAFE_BUDS:
-    //             return {
-    //                 ...baseConfig,
-    //                 src: SAFE_BUDS,
-    //                 OnClickCenter: () => updateSuggestedProduct(DEVICES.SAFE_BUDS),
-    //             };
-    //         case DEVICES.WEHEAR_2_0:
-    //             return {
-    //                 ...baseConfig,
-    //                 src: wehear_2_0,
-    //                 OnClickCenter: () => updateSuggestedProduct(DEVICES.WEHEAR_2_0),
-    //             };
-    //         case DEVICES.ITE_PRIME:
-    //             return {
-    //                 ...baseConfig,
-    //                 src: itePrimeWhite,
-    //                 OnClickCenter: () => updateSuggestedProduct(DEVICES.ITE_PRIME),
-    //             };
-
-    //         case DEVICES.NECKBAND:
-    //             return {
-    //                 ...baseConfig,
-    //                 src: neckbandBlack,
-    //                 IsOnlyBoth: "OnlyBoth",
-    //                 OnClickCenter: () => updateSuggestedProduct(DEVICES.NECKBAND),
-    //             };
-
-    //         default:
-    //             return {};
-    //     }
-    // };
 
     const SuggestedProductData = (productType) => {
         switch (productType) {
@@ -647,11 +521,6 @@ const DeviceQcListUi = ({ data, fields, setFields }) => {
                     OnClickRight: () => {
                         setSelectDevice(LISTENING_SIDE.RIGHT);
                         setDevice(DEVICES.RIC_OPTIMA);
-                        // setSelectedColorOptima(
-                        //     selectedColorOptima == DEVICE_COLORS.WHITE
-                        //         ? DEVICE_COLORS.METALIC
-                        //         : selectedColorOptima
-                        // );
                         setSelectedDome(
                             selectedDome == DOM_TYPE.EAR_MOLD ||
                                 selectedDome == DOM_TYPE.VENTED
@@ -663,10 +532,6 @@ const DeviceQcListUi = ({ data, fields, setFields }) => {
                             right_fitted_device: {
                                 ...fields.right_fitted_device,
                                 device_type: DEVICES.RIC_OPTIMA,
-                                // device_color:
-                                //     selectedColorOptima == DEVICE_COLORS.WHITE
-                                //         ? DEVICE_COLORS.METALIC
-                                //         : selectedColorOptima,
                                 device_dome:
                                     selectedDome == DOM_TYPE.EAR_MOLD ||
                                         selectedDome == DOM_TYPE.VENTED
@@ -679,11 +544,6 @@ const DeviceQcListUi = ({ data, fields, setFields }) => {
                     OnClickCenter: () => {
                         setSelectDevice(LISTENING_SIDE.BOTH);
                         setDevice(DEVICES.RIC_OPTIMA);
-                        // setSelectedColorOptima(
-                        //     selectedColorOptima == DEVICE_COLORS.WHITE
-                        //         ? DEVICE_COLORS.METALIC
-                        //         : selectedColorOptima
-                        // );
                         setSelectedDome(
                             selectedDome == DOM_TYPE.EAR_MOLD ||
                                 selectedDome == DOM_TYPE.VENTED
@@ -702,10 +562,6 @@ const DeviceQcListUi = ({ data, fields, setFields }) => {
                             right_fitted_device: {
                                 ...fields.right_fitted_device,
                                 device_type: DEVICES.RIC_OPTIMA,
-                                // device_color:
-                                //     selectedColorOptima == DEVICE_COLORS.WHITE
-                                //         ? DEVICE_COLORS.METALIC
-                                //         : selectedColorOptima,
                                 device_dome:
                                     selectedDome == DOM_TYPE.EAR_MOLD ||
                                         selectedDome == DOM_TYPE.VENTED
@@ -715,10 +571,6 @@ const DeviceQcListUi = ({ data, fields, setFields }) => {
                             left_fitted_device: {
                                 ...fields.left_fitted_device,
                                 device_type: DEVICES.RIC_OPTIMA,
-                                // device_color:
-                                //     selectedColorOptima == DEVICE_COLORS.WHITE
-                                //         ? DEVICE_COLORS.METALIC
-                                //         : selectedColorOptima,
                                 device_dome:
                                     selectedDomeLeft == DOM_TYPE.EAR_MOLD ||
                                         selectedDomeLeft == DOM_TYPE.VENTED
@@ -731,11 +583,6 @@ const DeviceQcListUi = ({ data, fields, setFields }) => {
                     OnClickLeft: () => {
                         setSelectDevice(LISTENING_SIDE.LEFT);
                         setDevice(DEVICES.RIC_OPTIMA);
-                        // setSelectedColorOptima(
-                        //     selectedColorOptima == DEVICE_COLORS.WHITE
-                        //         ? DEVICE_COLORS.METALIC
-                        //         : selectedColorOptima
-                        // );
                         setSelectedDomeLeft(
                             selectedDomeLeft == DOM_TYPE.EAR_MOLD ||
                                 selectedDomeLeft == DOM_TYPE.VENTED
@@ -747,10 +594,6 @@ const DeviceQcListUi = ({ data, fields, setFields }) => {
                             left_fitted_device: {
                                 ...fields.left_fitted_device,
                                 device_type: DEVICES.RIC_OPTIMA,
-                                // device_color:
-                                //     selectedColorOptima == DEVICE_COLORS.WHITE
-                                //         ? DEVICE_COLORS.METALIC
-                                //         : selectedColorOptima,
                                 device_dome:
                                     selectedDomeLeft == DOM_TYPE.EAR_MOLD ||
                                         selectedDomeLeft == DOM_TYPE.VENTED
@@ -778,11 +621,6 @@ const DeviceQcListUi = ({ data, fields, setFields }) => {
                     OnClickRight: () => {
                         setSelectDevice(LISTENING_SIDE.RIGHT);
                         setDevice(DEVICES.RIC_32);
-                        // setSelectedColorOptima(
-                        //     selectedColorOptima == DEVICE_COLORS.WHITE
-                        //         ? DEVICE_COLORS.METALIC
-                        //         : selectedColorOptima
-                        // );
                         setSelectedDome(
                             selectedDome == DOM_TYPE.EAR_MOLD ||
                                 selectedDome == DOM_TYPE.VENTED
@@ -794,10 +632,6 @@ const DeviceQcListUi = ({ data, fields, setFields }) => {
                             right_fitted_device: {
                                 ...fields.right_fitted_device,
                                 device_type: DEVICES.RIC_32,
-                                // device_color:
-                                //     selectedColorOptima == DEVICE_COLORS.WHITE
-                                //         ? DEVICE_COLORS.METALIC
-                                //         : selectedColorOptima,
                                 device_dome:
                                     selectedDome == DOM_TYPE.EAR_MOLD ||
                                         selectedDome == DOM_TYPE.VENTED
@@ -810,11 +644,6 @@ const DeviceQcListUi = ({ data, fields, setFields }) => {
                     OnClickCenter: () => {
                         setSelectDevice(LISTENING_SIDE.BOTH);
                         setDevice(DEVICES.RIC_32);
-                        // setSelectedColorOptima(
-                        //     selectedColorOptima == DEVICE_COLORS.WHITE
-                        //         ? DEVICE_COLORS.METALIC
-                        //         : selectedColorOptima
-                        // );
                         setSelectedDome(
                             selectedDome == DOM_TYPE.EAR_MOLD ||
                                 selectedDome == DOM_TYPE.VENTED
@@ -833,10 +662,6 @@ const DeviceQcListUi = ({ data, fields, setFields }) => {
                             right_fitted_device: {
                                 ...fields.right_fitted_device,
                                 device_type: DEVICES.RIC_32,
-                                // device_color:
-                                //     selectedColorOptima == DEVICE_COLORS.WHITE
-                                //         ? DEVICE_COLORS.METALIC
-                                //         : selectedColorOptima,
                                 device_dome:
                                     selectedDome == DOM_TYPE.EAR_MOLD ||
                                         selectedDome == DOM_TYPE.VENTED
@@ -846,10 +671,6 @@ const DeviceQcListUi = ({ data, fields, setFields }) => {
                             left_fitted_device: {
                                 ...fields.left_fitted_device,
                                 device_type: DEVICES.RIC_32,
-                                // device_color:
-                                //     selectedColorOptima == DEVICE_COLORS.WHITE
-                                //         ? DEVICE_COLORS.METALIC
-                                //         : selectedColorOptima,
                                 device_dome:
                                     selectedDomeLeft == DOM_TYPE.EAR_MOLD ||
                                         selectedDomeLeft == DOM_TYPE.VENTED
@@ -862,11 +683,6 @@ const DeviceQcListUi = ({ data, fields, setFields }) => {
                     OnClickLeft: () => {
                         setSelectDevice(LISTENING_SIDE.LEFT);
                         setDevice(DEVICES.RIC_32);
-                        // setSelectedColorOptima(
-                        //     selectedColorOptima == DEVICE_COLORS.WHITE
-                        //         ? DEVICE_COLORS.METALIC
-                        //         : selectedColorOptima
-                        // );
                         setSelectedDomeLeft(
                             selectedDomeLeft == DOM_TYPE.EAR_MOLD ||
                                 selectedDomeLeft == DOM_TYPE.VENTED
@@ -878,10 +694,6 @@ const DeviceQcListUi = ({ data, fields, setFields }) => {
                             left_fitted_device: {
                                 ...fields.left_fitted_device,
                                 device_type: DEVICES.RIC_32,
-                                // device_color:
-                                //     selectedColorOptima == DEVICE_COLORS.WHITE
-                                //         ? DEVICE_COLORS.METALIC
-                                //         : selectedColorOptima,
                                 device_dome:
                                     selectedDomeLeft == DOM_TYPE.EAR_MOLD ||
                                         selectedDomeLeft == DOM_TYPE.VENTED
@@ -1099,22 +911,6 @@ const DeviceQcListUi = ({ data, fields, setFields }) => {
                         });
                     },
 
-                    // OnClickCenter: () => {
-                    //     setSelectDevice(LISTENING_SIDE.BOTH);
-                    //     setDevice(DEVICES.ITE_PRIME);
-                    //     setFields({
-                    //         ...fields,
-                    //         right_fitted_device: {
-                    //             ...fields.right_fitted_device,
-                    //             device_type: DEVICES.ITE_PRIME,
-                    //         },
-                    //         left_fitted_device: {
-                    //             ...fields.left_fitted_device,
-                    //             device_type: DEVICES.ITE_PRIME,
-                    //         },
-                    //     });
-                    // },
-
                     OnClickLeft: () => {
                         setSelectDevice(LISTENING_SIDE.LEFT);
                         setDevice(DEVICES.SAFE_BUDS);
@@ -1132,102 +928,66 @@ const DeviceQcListUi = ({ data, fields, setFields }) => {
                 return;
         }
     };
-    // console.log("object selectDevice", selectDevice);
+
+    // NEW: filtered entries based on search filter
+    const deviceEntries = Object.entries(DEVICES).filter(([key, value]) => {
+        const search = (filters.search || "").trim().toLowerCase();
+        if (!search) return true;
+        const name = (DEVICES_NAME[value] || "").toString().toLowerCase();
+        const valStr = value.toString().toLowerCase();
+        const keyStr = key.toString().toLowerCase();
+        return name.includes(search) || valStr.includes(search) || keyStr.includes(search);
+    });
+
     return (
         <Box mb={1}>
-            {/* <ButtonGroup sx={{ display: "flex", width: "100%", mb: 3, mt: 1 }}>
-                <Button sx={{
-                    fontFamily: "League spartan",
-                    width: "50%",
+            <Box
+                // mt={4}
+                // mb={2}
+                sx={{
                     display: "flex",
-                    justifyContent: "center",
-                    backgroundColor:
-                        selectButton === "Suggested_Devices"
-                            ? "#EDF0F7"
-                            : "white",
-                    border:
-                        selectButton === "Suggested_Devices"
-                            ? "1px solid #2D3B67"
-                            : ""
+                    justifyContent: "space-between",
+                    alignItems: "center",
                 }}
-                    onClick={() => {
-                        setselectButton("Suggested_Devices");
-                    }}>
-                    <Typography
-                        fontWeight={700}
-                        fontSize={"16px"}
-                        sx={{ color: "#2D3B67" }}
-                    >
-                        Suggested Devices
-                    </Typography>
-                </Button>
-                <Button sx={{
-                    fontFamily: "League spartan",
-                    width: "50%",
-                    display: "flex",
-                    justifyContent: "center",
-                    backgroundColor:
-                        selectButton === "All_Devices"
-                            ? "#EDF0F7"
-                            : "white",
-                    border:
-                        selectButton === "All_Devices"
-                            ? "1px solid #2D3B67"
-                            : ""
-                }}
-                    onClick={() => {
-                        setselectButton("All_Devices");
-                    }}>
-                    <Typography
-                        fontWeight={700}
-                        fontSize={"16px"}
-                        sx={{ color: "#2D3B67" }}
-                    >
-                        All Devices
-                    </Typography>
-                </Button>
-            </ButtonGroup> */}
-            {/* {selectButton === "Suggested_Devices" && <Box sx={{ flexGrow: 1 }}>
+            >
+                {/* Left – Title */}
+                <Typography variant="h3" color={"primary"} fontWeight="bold">
+                    Select Device for QC Test
+                </Typography>
+
+                {/* Right – Search Bar */}
+                <Box sx={{ width: "20vw" }}>
+                    <AsyncSearchBar
+                        fullWidth
+                        title="Search for any Device"
+                        size="small"
+                        placeholder={"Search for any Device"}
+                        defaultValue={filters.search}
+                        onChange={(changedVal) => {
+                            setFilters({
+                                ...filters,
+                                pageNo: 1,
+                                pageSize: 10,
+                                search: changedVal,
+                            });
+                        }}
+                    />
+                </Box>
+            </Box>
+
+
+            {selectButton === "All_Devices" && <Box sx={{ flexGrow: 1, p: 2 }}>
                 <Grid container spacing={2}>
-                    {suggestedProduct.map((item, idx) => {
-                        const data = SuggestedProductData(item.product);
-                        return (
-                            <Grid item xs={12} sm={6} md={2} key={`${item.product}-${idx}`}>
-                                <AccordionDetailsUi
-                                    side={data?.IsOnlyBoth ? data?.IsOnlyBoth : item.side}
-                                    setDevice={setDevice}
-                                    Title={DEVICES_NAME[item.product]}
-                                    setFields={setFields}
-                                    sideColor={data?.sideColor}
-                                    // Right_src={RIGHT}
-                                    // Center_src={CENTER}
-                                    // Left_src={LEFT}
-                                    isBorder={data?.border}
-                                    isBackgroundColor={data?.backgroundColor}
-                                    img_src={data?.src}
-                                    OnClickCenter={data?.OnClickCenter}
-                                    device={item.product}
-                                />
-                            </Grid>
-                        );
-                    })}
-                </Grid>
-            </Box>} */}
-            {selectButton === "All_Devices" && <Box sx={{ flexGrow: 1 }}>
-                <Grid container spacing={2}>
-                    {Object.entries(DEVICES).map(([key, value], idx) => {
+                    {deviceEntries.map(([key, value], idx) => {
                         const data = SuggestedProductData(value);
                         return (
                             <Grid item xs={12} sm={6} md={2} key={`${value}-${idx}`}>
                                 <AccordionDetailsUi
                                     setDevice={setDevice}
                                     Title={DEVICES_NAME[value]}
-                                    // selectedColorOptima={selectedColorOptima}
                                     setFields={setFields}
-                                    // setSelectedColorOptima={setSelectedColorOptima}
                                     sideColor={data?.sideColor}
                                     Right_src={RIGHT}
-                                    // Center_src={CENTER}
                                     Left_src={LEFT}
                                     isBorder={data?.border}
                                     isBackgroundColor={data?.backgroundColor}
@@ -1243,12 +1003,11 @@ const DeviceQcListUi = ({ data, fields, setFields }) => {
                             </Grid>
                         );
                     })}
-
                 </Grid>
 
             </Box>}
 
-            <Box mt={6}>
+            {/* <Box p={2} mt={4} sx={{ width: "100%", display: "flex", justifyContent: "flex-end" }}>
                 <CoonectDeviceModule
                     setIsConnecting={setIsConnecting}
                     onConnectWithDevice={(data, deviceInfo, disconnectFun) => {
@@ -1257,34 +1016,15 @@ const DeviceQcListUi = ({ data, fields, setFields }) => {
                                 data,
                                 deviceInfo,
                                 disconnectFun,
-                                // fitting.device_side
                             )
                         );
                     }}
                     Component={ConnectButton}
-                    // onLoadingChange={(loader, message) => {
-                    //     dispatch(
-                    //         changeLoadinfMessages(
-                    //             loader,
-                    //             message,
-                    //             fitting.device_side
-                    //         )
-                    //     );
-                    // }}
-                    // onEnableChange={(val) =>
-                    //     dispatch(
-                    //         changeDeviceCompatiblity(val, fitting.device_side)
-                    //     )
-                    // }
-                    // onWriteFunctionEnabled={(fun) =>
-                    //     dispatch(onWriteFunctionChange(fun, fitting.device_side))
-                    // }
                     onDisconnect={() =>
                         dispatch(disconnectDevice())
                     }
-                // fitting={fitting}
                 />
-            </Box>
+            </Box> */}
         </Box>
     );
 };
