@@ -145,8 +145,6 @@ noble.on("discover", (peripheral) => {
     }
 });
 
-// -------------------- Scanning control --------------------
-
 function startBleScanWithType(type = 1) {
     if (noble.state !== "poweredOn") {
         send("ble-status", `Bluetooth state: ${noble.state}`);
