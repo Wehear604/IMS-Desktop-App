@@ -6,13 +6,15 @@ const DeviceQcListController = () => {
     const [data, setData] = useState({})
     const { state } = useLocation();
     const [fields, setFields] = useState(state?.patientData || { suggestedProduct: [], device: null });
-    return (
+    return (<>
         <DeviceQcListUi
             data={data}
             setData={setData}
             fields={fields}
             setFields={setFields}
         />
+        
+            </>
     )
 }
 

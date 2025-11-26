@@ -46,7 +46,7 @@ function createWindow() {
     // } else {
         // Load the React development server for local testing
         win.loadURL("http://localhost:3000");
-        win.webContents.openDevTools();
+        // win.webContents.openDevTools();
         console.log("Loading development server: http://localhost:3000");
     // }
 }
