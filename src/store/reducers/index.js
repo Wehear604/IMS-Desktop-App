@@ -4,12 +4,14 @@ import snackBarReducer from "./snackbarReducer";
 import modalReducer from "./modalReducer";
 import notificationReducer from "./notificationReducer";
 import settingsReducer from "./settingsReducer";
+import deviceReducer from "./deviceReducer";
 
 const rootReducer = combineReducers({
     user: userReducer,
     snackBar: snackBarReducer,
     modal: modalReducer,
     notifications: notificationReducer,
-    settings : settingsReducer,
+    settings: settingsReducer,
+    device: deviceReducer
 });
 export default rootReducer;

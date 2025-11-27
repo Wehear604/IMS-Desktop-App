@@ -1,84 +1,26 @@
-// preload.js
-const { contextBridge, ipcRenderer } = require("electron");
+const { contextBridge, ipcRenderer } = require('electron/renderer');
 
-contextBridge.exposeInMainWorld("electronAPI", {
-    // ---- SCAN CONTROL ----
-    startBleScan: (type) => ipcRenderer.send("ble-scan-start", type),
-    stopBleScan: () => ipcRenderer.send("ble-scan-stop"),
+contextBridge.exposeInMainWorld('electronAPI', {
+    // --- Send to Main ---
+    selectBluetoothDevice: (deviceId) => ipcRenderer.send('bluetooth-device-selected', deviceId),
+    cancelBluetoothRequest: () => ipcRenderer.send('cancel-bluetooth-request'),
+    bluetoothPairingResponse: (response) => ipcRenderer.send('bluetooth-pairing-response'),
 
-    // ---- CONNECT / DISCONNECT ----
-    connectDevice: (payload) => ipcRenderer.send("ble-connect-manual", payload),
-    disconnectDevice: (id) => ipcRenderer.send("ble-disconnect", id),
+    // --- NEW: Window Controls ---
+    minimizeWindow: () => ipcRenderer.send('minimize-window'),
+    maximizeWindow: () => ipcRenderer.send('maximize-window'),
+    closeWindow: () => ipcRenderer.send('close-window'), // <-- The missing function
 
-    // ---- WRITE ----
-    writeToDevice: (payload) => ipcRenderer.send("ble-write", payload),
-
-    // ---- BASIC EVENT STREAM ----
-    onBleDevice: (cb) => {
-        const listener = (ev, d) => cb(d);
-        ipcRenderer.on("ble-device", listener);
-        return () => ipcRenderer.removeListener("ble-device", listener);
+    // --- Receive from Main ---
+    onBluetoothDeviceList: (callback) => {
+        ipcRenderer.on('bluetooth-device-list', (_event, deviceList) => {
+            callback(deviceList);
+        });
     },
-    onBleStatus: (cb) => {
-        const listener = (ev, d) => cb(d);
-        ipcRenderer.on("ble-status", listener);
-        return () => ipcRenderer.removeListener("ble-status", listener);
-    },
-    onBleError: (cb) => {
-        const listener = (ev, d) => cb(d);
-        ipcRenderer.on("ble-error", listener);
-        return () => ipcRenderer.removeListener("ble-error", listener);
-    },
-    onBleConnected: (cb) => {
-        const listener = (ev, d) => cb(d);
-        ipcRenderer.on("ble-connected", listener);
-        return () => ipcRenderer.removeListener("ble-connected", listener);
-    },
-    onBleData: (cb) => {
-        const listener = (ev, d) => cb(d);
-        ipcRenderer.on("ble-data", listener);
-        return () => ipcRenderer.removeListener("ble-data", listener);
-    },
-    onBleWriteReady: (cb) => {
-        const listener = (ev, d) => cb(d);
-        ipcRenderer.on("ble-write-ready", listener);
-        return () => ipcRenderer.removeListener("ble-write-ready", listener);
-    },
-
-    // ---- VOLUME READ ----
-    readVolume: (payload) => ipcRenderer.send("ble-read-volume", payload),
-    onReadVolumeResponse: (cb) => {
-        const listener = (ev, d) => cb(d);
-        ipcRenderer.on("ble-read-volume-response", listener);
-        return () => ipcRenderer.removeListener("ble-read-volume-response", listener);
-    },
-    onVolumeUpdated: (cb) => {
-        const listener = (ev, d) => cb(d);
-        ipcRenderer.on("ble-volume-updated", listener);
-        return () => ipcRenderer.removeListener("ble-volume-updated", listener);
-    },
-
-    // ---- NEW: One-shot readVolumeNow ----
-    readVolumeNow: (payload) => ipcRenderer.send("ble-read-volume-now", payload),
-    onReadVolumeNowResponse: (cb) => {
-        const listener = (ev, d) => cb(d);
-        ipcRenderer.on("ble-read-volume-now-response", listener);
-        return () => ipcRenderer.removeListener("ble-read-volume-now-response", listener);
-    },
-
-    // -------------------------------------------
-    // 🔥 NEW: DEVICE ACTIVITY CONSOLE INTEGRATION
-    // -------------------------------------------
-
-    // Live stream of activity logs (console-style)
-    onBleActivity: (cb) => {
-        const listener = (_ev, entry) => cb(entry);
-        ipcRenderer.on("ble-activity", listener);
-        return () => ipcRenderer.removeListener("ble-activity", listener);
-    },
-
-    // Fetch past activity history (IPC handle)
-    getBleActivityHistory: (payload) => ipcRenderer.invoke("ble-activity-get", payload),
-    getDebugDump: (payload) => ipcRenderer.invoke("ble-debug-dump", payload),
-
+    onBluetoothPairingRequest: (callback) => {
+        ipcRenderer.on('bluetooth-pairing-request', (_event, details) => {
+            callback(details);
+        });
+    }
 });
+
