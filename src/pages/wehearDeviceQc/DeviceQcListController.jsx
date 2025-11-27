@@ -3,6 +3,7 @@ import DeviceQcListUi from './DeviceQcListUi'
 import { useLocation } from 'react-router-dom';
 import { Box, Button, Paper, Typography } from '@mui/material';
 import CoonectDeviceModule from '../../components/bluetooth/CoonectDeviceModule';
+import DeviceConnectUi from './DeviceConnectUi';
 
 const DeviceQcListController = () => {
     const [data, setData] = useState({})
@@ -12,16 +13,17 @@ const DeviceQcListController = () => {
         search: ""
     });
     return (
-        <Paper elevation={3} sx={{ padding: '20px', display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+        <Paper elevation={3} sx={{ padding: '20px', display: "flex", flexDirection: "column", justifyContent: "space-between", minHeight:"85vh" }}>
             <Box>
-                <DeviceQcListUi
+                {/* <DeviceQcListUi
                     data={data}
                     setData={setData}
                     fields={fields}
                     setFields={setFields}
                     filters={filters}
                     setFilters={setFilters}
-                />
+                /> */}
+                <DeviceConnectUi />
             </Box>
 
             <Box p={2} mt={4} sx={{ width: "100%", display: "flex", justifyContent: "flex-end" }}>
