@@ -1,5 +1,3 @@
-
-
 import {
     Button, CircularProgress, Typography, Paper, Modal, Box, List, ListItem,
     ListItemText,
@@ -13,14 +11,7 @@ import { findObjectKeyByValue } from "../../utils/main";
 import { callSnackBar } from "../../store/actions/snackbarAction";
 import { SNACK_BAR_VARIETNS } from "../../utils/constants";
 import { Bluetooth } from "@mui/icons-material";
-const getBLEProfile = (deviceType) => {
-    return {
-        serviceUUID: SERVICE_UUID[deviceType],
-        manufacturerId: parseInt(MANUFACTURER_IDENTIFIER[deviceType]),
-        charReadWrite: CHARACTERISTIC_UUID_READ_WRITE[deviceType],
-        charReadNotify: CHARACTERISTIC_UUID_READ_NOTIFY[deviceType],
-    };
-};
+
 // Style for the modal
 const modalStyle = {
     position: 'absolute',
@@ -35,47 +26,34 @@ const modalStyle = {
 };
 
 const BleConnectDeviceModule = ({
+    onEnableChange = (val) => { },
+    onLoadingChange = (loader, messages) => { },
     onConnectWithDevice = (hardwareData, deviceInformation, disconnectFun) => { },
     onDisconnect = () => { },
+    onWriteFunctionEnabled = (fun) => { },
+    // onEqCharacteristicChange = ()=>{},
     Component,
     fitting,
 }) => {
-    // const [enabled, // setEnabled] = useState(false);
     const dispatch = useDispatch();
     const [connected, setConnected] = useState();
-    const [loading, setLoading] = useState(true); // Start true for initial check
-    // const [loadingMessage, // setLoadingMessage] = useState("Checking Bluetooth...");
-    // const [servers, // setServer] = useState(null);
-    // const [services, // setServer] = useState(null);
-    // const [charateristic, // setCharacteristics] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [deviceObj, setDeviceObj] = useState(null);
     const [deviceInfo, setDeviceInfo] = useState({ name: "", id: "" });
     const [device, setDevices] = useState(null);
     const [selectingDeviceId, setSelectingDeviceId] = useState(null);
 
-    // --- State migrated from App.js ---
     const [deviceFunctions, setDeviceFunctions] = useState(null);
     const [data, setData] = useState(null); // This was `readData` in App.js
     const [deviceList, setDeviceList] = useState([]);
-    // const [isPickerOpen, // setIsPickerOpen] = useState(false);
 
-    // useEffect(() => {
-    //     onWriteFunctionEnabled(deviceFunctions);
-    // }, [deviceFunctions]);
-
-
-    // --- Electron API Listeners (from App.js) ---
     useEffect(() => {
-        // Check if the electronAPI is on the window
         if (window.electronAPI) {
-            // Listen for the device list from main.js
             window.electronAPI.onBluetoothDeviceList((devices) => {
                 console.log('Received device list in React:', devices);
                 setDeviceList(devices);
-                // setIsPickerOpen(false); // Open the device picker modal
             });
 
-            // Listen for pairing requests
             window.electronAPI.onBluetoothPairingRequest((details) => {
                 const response = {};
                 switch (details.pairingKind) {
@@ -97,44 +75,20 @@ const BleConnectDeviceModule = ({
                     default:
                         response.confirmed = false;
                 }
-                // Send response back to main process
                 window.electronAPI.bluetoothPairingResponse(response);
             });
         } else {
             console.warn('electronAPI is not available. Running in a standard browser.');
         }
-    }, []); // Empty array means this runs once on mount
+    }, []); 
 
-
-    // --- Bluetooth Availability Check (Fixed) ---
     useEffect(() => {
         const checkBluetooth = async () => {
-            if (window.navigator && window.navigator.bluetooth) {
-                try {
-                    const isAvailable = await navigator.bluetooth.getAvailability();
-                    if (isAvailable) {
-                        // setLoadingMessage("");
-                        // setEnabled(true);
-                    } else {
-                        // setLoadingMessage("Bluetooth is turned off. Please turn on Bluetooth in your system settings.");
-                        // setEnabled(false);
-                    }
-                } catch (error) {
-                    console.error("Error checking Bluetooth availability:", error);
-                    // setLoadingMessage("Could not check Bluetooth status. Ensure permissions are granted.");
-                    // setEnabled(false);
-                }
-            } else {
-                // setLoadingMessage("Web Bluetooth is not supported by this application.");
-                // setEnabled(false);
-            }
             setLoading(false);
         };
         checkBluetooth();
     }, []);
 
-
-    // --- BLE Helper Functions (Original) ---
     const readDeviceNameValue = async (characteristic) => {
         const value = await characteristic.readValue();
         setDevices(new TextDecoder().decode(value));
@@ -171,102 +125,75 @@ const BleConnectDeviceModule = ({
             onConnectWithDevice(data, deviceInfo, () => disconnect(true));
     }, [deviceObj, data, deviceInfo, connected]);
 
-
-    // --- Core Connect/Disconnect Logic (Fixed) ---
     const connectDevice = async () => {
         try {
             setLoading(true);
+            console.log("Requesting Bluetooth Device...");
 
-            const deviceType = fitting?.device_type;  // <<--- YOU MUST PASS THIS IN PROPS
-            const profile = getBLEProfile(deviceType);
+            const serviceUUid = "e093f3b5-00a3-a9e5-9eca-40016e0edc24";
 
-            if (!profile.serviceUUID) {
-                console.error("Invalid Device Type UUID mappings not found");
+            // FIX: Filter by services, not manufacturerData
+            const device = await navigator.bluetooth
+                .requestDevice({
+                    filters: [
+                        { manufacturerData: [{ companyIdentifier: parseInt("0x0362") }] },
+                    ],
+                    optionalServices: [serviceUUid],
+                })
+                .catch((e) => {
+
+                });
+            // FIX: Removed the .catch() block here
+
+            if (!device) {
+                setLoading(false);
                 return;
             }
 
-            console.log("Using BLE Profile:", profile);
-
-            // Request device based on MANUFACTURER ID
-            const device = await navigator.bluetooth.requestDevice({
-                filters: [
-                    {
-                        manufacturerData: [{ companyIdentifier: profile.manufacturerId }]
-                    }
-                ],
-                optionalServices: [profile.serviceUUID],
-            });
-
-            if (!device) return;
-
-            // Validate L / R side
             if (
                 (fitting.device_side === LISTENING_SIDE.LEFT && !device.name.endsWith("L")) ||
                 (fitting.device_side === LISTENING_SIDE.RIGHT && !device.name.endsWith("R"))
             ) {
                 const side = findObjectKeyByValue(fitting.device_side, LISTENING_SIDE);
                 dispatch(
-                    callSnackBar(`Please connect the ${side} side device`, SNACK_BAR_VARIETNS.error)
+                    callSnackBar(`Please connect the ${side} side device `, SNACK_BAR_VARIETNS.error)
                 );
                 setLoading(false);
                 return;
             }
 
             setDeviceInfo({ name: device.name, id: device.id });
-            device.ongattserverdisconnected = () => disconnect(false);
+            device.ongattserverdisconnected = () => disconnect(false); // Pass 'false'
+            setDeviceObj(device);
 
+            console.log("Connecting to GATT Server...", device);
             const server = await device.gatt.connect();
-            const service = await server.getPrimaryService(profile.serviceUUID);
+            console.log("GATT Server connected:", server);
+            const service = await server.getPrimaryService(serviceUUid);
+            console.log("Primary service:", service);
 
             const characteristics = await service.getCharacteristics();
 
-            let notifyCharacteristic = null;
-            let rwCharacteristic = null;
-
-            for (const char of characteristics) {
-                if (char.uuid === profile.charReadNotify) {
-                    notifyCharacteristic = char;
-                }
-                if (char.uuid === profile.charReadWrite) {
-                    rwCharacteristic = char;
+            for (const characteristic of characteristics) {
+                switch (characteristic.uuid) {
+                    case window.BluetoothUUID.getCharacteristic("gap.device_name"):
+                        await readDeviceNameValue(characteristic);
+                        break;
+                    case "e093f3b5-00a3-a9e5-9eca-40036e0edc24": // Your specific characteristic
+                        await readAppearanceValue(characteristic);
+                        break;
+                    default:
+                        break;
                 }
             }
-
-            if (!notifyCharacteristic || !rwCharacteristic) {
-                console.error("Required characteristics not found for device type", deviceType);
-            }
-
-            // Setup Read/Write functions
-            setDeviceFunctions({
-                readData: async () => {
-                    const value = await rwCharacteristic.readValue();
-                    return Array.from(new Uint8Array(value.buffer));
-                },
-                writeData: async (arr) => {
-                    const buffer = Uint8Array.from(arr);
-                    return await rwCharacteristic.writeValueWithoutResponse(buffer);
-                }
-            });
-
-            // Enable Notify Listener
-            await notifyCharacteristic.startNotifications();
-            notifyCharacteristic.addEventListener("characteristicvaluechanged", (event) => {
-                const v = event.target.value;
-                let arr = [];
-                for (let i = 0; i < v.byteLength; i++) arr.push(v.getUint8(i));
-                setData(arr);
-            });
-
             setConnected(true);
-            setDeviceObj(device);
             setLoading(false);
-
-        } catch (err) {
-            console.error("Connection failed:", err);
+        } catch (e) {
+            console.error("BLE Connection Failed:", e);
+            setLoadingMessage(e.message ?? "OOPsss!!");
             setLoading(false);
         }
     };
-
 
     const disconnect = (isButtonPress) => {
         setSelectingDeviceId(null);
@@ -282,18 +209,12 @@ const BleConnectDeviceModule = ({
         setDeviceInfo({});
         setConnected(false);
         setDeviceObj(null);
-        // setServer(null);
         setDevices(null);
         onDisconnect();
         // setCharacteristics(null);
-        // setServer(null);
-        setData(null); // Clear read data
-        setDeviceFunctions(null); // Clear functions
-        // setLoadingMessage("");
-        // No more onDisconnect() callback
+        setData(null); 
+        setDeviceFunctions(null); 
     };
-
-
     // --- Handlers for Modal (from App.js) ---
     const handleDeviceSelected = (deviceId) => {
         // setIsPickerOpen(true);
