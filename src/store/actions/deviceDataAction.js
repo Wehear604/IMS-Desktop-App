@@ -60,3 +60,7 @@ export const disconnectAction = (side, flag = false) => {
         });
     };
 };
+
+export const onWriteFunctionChange = (value, side) => {
+    return { type: actions.CHANGE_WRITE_FUN, value, side: side };
+};

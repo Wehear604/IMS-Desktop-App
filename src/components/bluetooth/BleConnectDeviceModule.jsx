@@ -57,14 +57,11 @@ const BleConnectDeviceModule = ({
     const [deviceFunctions, setDeviceFunctions] = useState(null);
     const [data, setData] = useState(null); // This was `readData` in App.js
     const [deviceList, setDeviceList] = useState([]);
-    // const [isPickerOpen, // setIsPickerOpen] = useState(false);
-
-    // useEffect(() => {
-    //     onWriteFunctionEnabled(deviceFunctions);
-    // }, [deviceFunctions]);
-
-
-    // --- Electron API Listeners (from App.js) ---
+    console.log("first deviceFunctions", deviceFunctions)
+    useEffect(() => {
+        onWriteFunctionEnabled(deviceFunctions);
+    }, [deviceFunctions]);
+    
     useEffect(() => {
         // Check if the electronAPI is on the window
         if (window.electronAPI) {
@@ -260,9 +257,8 @@ const BleConnectDeviceModule = ({
             setConnected(true);
             setDeviceObj(device);
             setLoading(false);
-
-        } catch (err) {
-            console.error("Connection failed:", err);
+        } catch (e) {
+            console.error("BLE Connection Failed:", e);
             setLoading(false);
         }
     };

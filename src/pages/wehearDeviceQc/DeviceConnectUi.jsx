@@ -1,6 +1,5 @@
-// src/views/DeviceConnectUi/DeviceConnectUi.jsx
-import React, { useState } from "react";
-import { Box, Typography, Card, CardActionArea, Avatar, CircularProgress, Grid, Divider, Button } from "@mui/material";
+import React, { useEffect, useRef, useState } from "react";
+import { Box, Typography, Card, CardActionArea, Avatar, CircularProgress, Grid, Chip, Divider, Paper, Button } from "@mui/material";
 import { styled } from "@mui/system";
 import leftDevice from "../../assets/images/bteLeft.svg";
 import rightDevice from "../../assets/images/bteRight.svg";
@@ -10,7 +9,7 @@ import { LISTENING_SIDE, DEVICES } from "../../utils/constants";
 import connectIcon4 from "../../assets/images/connectIcon(4).svg";
 import connectIcon1 from "../../assets/images/connectIcon(1).svg";
 import { useDispatch, useSelector } from "react-redux";
-import { connectDevice, DeviceSideAction, disconnectAction } from "../../store/actions/deviceDataAction";
+import { connectDevice, DeviceSideAction, disconnectAction, onWriteFunctionChange } from "../../store/actions/deviceDataAction";
 import BleConnectDeviceModule from "../../components/bluetooth/BleConnectDeviceModule";
 import neckbandBlack from "../../assets/images/neckband.svg";
 import itePrimeWhite from "../../assets/images/ITE_PRIME_WHITE.svg";
@@ -124,7 +123,8 @@ const ConnectButton = ({
         return (
             <Button
                 onClick={() => {
-                    disconnect();}}
+                    disconnect();
+                }}
                 loading={loading}
                 sx={{
                     height: "60px",
@@ -170,35 +170,34 @@ const DeviceConnectUi = () => {
         { side: "R", label: "BTE", value: LISTENING_SIDE.RIGHT },
     ];
 
-    const getDeviceUI = (deviceType) => {
-        switch (deviceType) {
-            case DEVICES.BTE_OPTIMA:
-            case DEVICES.BTE_PRIME:
-                return { img: BTE, name: "BTE" };
-            case DEVICES.RIC_OPTIMA_8:
-                return { img: ric8WithoutDome, name: "RIC OPTIMA 8" };
-            case DEVICES.RIC_OPTIMA:
-                return { img: METALIC_RIC_OPTIMA, name: "RIC OPTIMA" };
-            case DEVICES.RIC_32:
-                return { img: METALIC_RIC_OPTIMA, name: "RIC 32" };
-            case DEVICES.ITE_OPTIMA:
-                return { img: iteOptimaBlack, name: "ITE OPTIMA" };
-            case DEVICES.ITE_PRIME:
-                return { img: itePrimeWhite, name: "ITE PRIME" };
-            case DEVICES.WEHEAR_OX:
-                return { img: wehearox, name: "WeHear OX" };
-            case DEVICES.SAFE_BUDS:
-                return { img: SAFE_BUDS, name: "Safe Buds" };
-            case DEVICES.WEHEAR_2_0:
-                return { img: wehear_2_0, name: "WeHear 2.0" };
-            case DEVICES.NECKBAND:
-                return { img: neckbandBlack, name: "Neckband" };
-            default:
-                return { img: null, name: "" };
-        }
+    const [isReading, setIsReading] = useState(false);
+    const readInterval = useRef(null);
+
+    const startReading = () => {
+        if (isReading) return;
+
+        setIsReading(true);
+
+        readInterval.current = setInterval(async () => {
+            try {
+                const data = await device.writeFun.readData();
+                console.log("Read Data:", data);
+            } catch (error) {
+                console.error("Read Error:", error);
+            }
+        }, 3000);
     };
 
-    const selectedDeviceUI = getDeviceUI(device?.device_type);
+    const stopReading = () => {
+        clearInterval(readInterval.current); 
+        readInterval.current = null;
+        setIsReading(false);
+    };
+
+    useEffect(() => {
+        return () => clearInterval(readInterval.current);  
+    }, [!device.connected]);
+
 
     return (
         <Box>
@@ -259,17 +258,25 @@ const DeviceConnectUi = () => {
                     Component={ConnectButton}
                     onLoadingChange={(loader, message) => {
                     }}
-                    onEnableChange={(val) =>{}}
+                    onWriteFunctionEnabled={(fun) =>
+                        dispatch(
+                            onWriteFunctionChange(fun, device.device_side)
+                        )
+                    }
                     onDisconnect={() => {
                         dispatch(disconnectAction(device.device_side, true));
                     }}
+                    // fitting={device?.device_type}
                     fitting={{
                         device_type: device?.device_type,
                         device_side: device?.device_side,
                         connected: device.isConnecting
                     }}
+                // fetchingData={fetchingData}
                 />
             </CenterArea>
+            <Button onClick={startReading}>Start Reading</Button>
+            <Button onClick={stopReading}>Stop Reading</Button>
         </Box>
     );
 }

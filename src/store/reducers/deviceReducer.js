@@ -13,6 +13,8 @@ const initialState = {
     deviceObj: {},
     read_only: false,
     disconnectFun: undefined,
+    writeFun: undefined,
+
 }
 const deviceReducer = (state = initialState, action) => {
     switch (action.type) {
@@ -35,6 +37,9 @@ const deviceReducer = (state = initialState, action) => {
                 read_only: false,
                 disconnectFun: action.disconnectFun,
             };
+        
+        case actions.CHANGE_WRITE_FUN:
+            return { ...state, writeFun: action.value };
         
         case actions.DISCONNECT_DEVICE:
             return { ...initialState };
