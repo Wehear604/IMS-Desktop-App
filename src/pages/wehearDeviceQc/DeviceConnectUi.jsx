@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Box, Typography, Card, CardActionArea, Avatar, CircularProgress, Grid, Chip, Divider, Paper, Button } from "@mui/material";
 import { styled } from "@mui/system";
 import leftDevice from "../../assets/images/bteLeft.svg";
@@ -9,7 +9,7 @@ import { LISTENING_SIDE } from "../../utils/constants";
 import connectIcon4 from "../../assets/images/connectIcon(4).svg";
 import connectIcon1 from "../../assets/images/connectIcon(1).svg";
 import { useDispatch, useSelector } from "react-redux";
-import { connectDevice, DeviceSideAction, disconnectAction } from "../../store/actions/deviceDataAction";
+import { connectDevice, DeviceSideAction, disconnectAction, onWriteFunctionChange } from "../../store/actions/deviceDataAction";
 import BleConnectDeviceModule from "../../components/bluetooth/BleConnectDeviceModule";
 
 const Header = styled(Typography)(({ theme }) => ({
@@ -114,7 +114,8 @@ const ConnectButton = ({
         return (
             <Button
                 onClick={() => {
-                    disconnect();}}
+                    disconnect();
+                }}
                 loading={loading}
                 sx={{
                     height: "60px",
@@ -159,6 +160,35 @@ const DeviceConnectUi = () => {
         { side: "L", label: "BTE", value: LISTENING_SIDE.LEFT },
         { side: "R", label: "BTE", value: LISTENING_SIDE.RIGHT },
     ];
+
+    const [isReading, setIsReading] = useState(false);
+    const readInterval = useRef(null);
+
+    const startReading = () => {
+        if (isReading) return;
+
+        setIsReading(true);
+
+        readInterval.current = setInterval(async () => {
+            try {
+                const data = await device.writeFun.readData();
+                console.log("Read Data:", data);
+            } catch (error) {
+                console.error("Read Error:", error);
+            }
+        }, 3000);
+    };
+
+    const stopReading = () => {
+        clearInterval(readInterval.current); 
+        readInterval.current = null;
+        setIsReading(false);
+    };
+
+    useEffect(() => {
+        return () => clearInterval(readInterval.current);  
+    }, [!device.connected]);
+
 
     return (
         <Box>
@@ -223,26 +253,25 @@ const DeviceConnectUi = () => {
                         //     )
                         // );
                     }}
-                    onEnableChange={(val) =>{}
-                        // dispatch(
-                        //     changeDeviceCompatiblity(
-                        //         val,
-                        //         device?.device_side
-                        //     )
-                        // )
+                    onWriteFunctionEnabled={(fun) =>
+                        dispatch(
+                            onWriteFunctionChange(fun, device.device_side)
+                        )
                     }
                     onDisconnect={() => {
                         dispatch(disconnectAction(device.device_side, true));
                     }}
                     // fitting={device?.device_type}
-                    fitting={{  
+                    fitting={{
                         device_type: device?.device_type,
                         device_side: device?.device_side,
                         connected: device.isConnecting
                     }}
-                    // fetchingData={fetchingData}
+                // fetchingData={fetchingData}
                 />
             </CenterArea>
+            <Button onClick={startReading}>Start Reading</Button>
+            <Button onClick={stopReading}>Stop Reading</Button>
         </Box>
     );
 }

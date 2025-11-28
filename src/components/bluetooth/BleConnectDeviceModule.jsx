@@ -46,7 +46,11 @@ const BleConnectDeviceModule = ({
     const [deviceFunctions, setDeviceFunctions] = useState(null);
     const [data, setData] = useState(null); // This was `readData` in App.js
     const [deviceList, setDeviceList] = useState([]);
-
+    console.log("first deviceFunctions", deviceFunctions)
+    useEffect(() => {
+        onWriteFunctionEnabled(deviceFunctions);
+    }, [deviceFunctions]);
+    
     useEffect(() => {
         if (window.electronAPI) {
             window.electronAPI.onBluetoothDeviceList((devices) => {
@@ -190,7 +194,6 @@ const BleConnectDeviceModule = ({
             setLoading(false);
         } catch (e) {
             console.error("BLE Connection Failed:", e);
-            setLoadingMessage(e.message ?? "OOPsss!!");
             setLoading(false);
         }
     };
