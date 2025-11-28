@@ -11,6 +11,7 @@ import connectIcon1 from "../../assets/images/connectIcon(1).svg";
 import { useDispatch, useSelector } from "react-redux";
 import { connectDevice, DeviceSideAction, disconnectAction, onWriteFunctionChange } from "../../store/actions/deviceDataAction";
 import BleConnectDeviceModule from "../../components/bluetooth/BleConnectDeviceModule";
+import RicConnectDevice from "../../components/bluetooth/RicConnectDeviceModule";
 
 const Header = styled(Typography)(({ theme }) => ({
     color: theme.palette.text.secondary,
@@ -222,7 +223,7 @@ const DeviceConnectUi = () => {
                     ))}
                 </Grid>
 
-                <BleConnectDeviceModule
+                <RicConnectDevice
                     side={device?.device_side === LISTENING_SIDE.RIGHT ? "Right" : "Left"}
                     // setIsConnecting={setIsConnecting}
                     isConnecting={device?.isConnecting}
@@ -259,7 +260,7 @@ const DeviceConnectUi = () => {
                         )
                     }
                     onDisconnect={() => {
-                        dispatch(disconnectAction(device.device_side, true));
+                        dispatch(disconnectAction(device.device_side));
                     }}
                     // fitting={device?.device_type}
                     fitting={{

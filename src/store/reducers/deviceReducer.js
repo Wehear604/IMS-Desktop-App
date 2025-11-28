@@ -42,7 +42,10 @@ const deviceReducer = (state = initialState, action) => {
             return { ...state, writeFun: action.value };
         
         case actions.DISCONNECT_DEVICE:
-            return { ...initialState };
+            return {
+                ...initialState ,
+                device_type: state.device_type,
+                device_side: state.device_side };
         default: return { ...state }
     }
 
