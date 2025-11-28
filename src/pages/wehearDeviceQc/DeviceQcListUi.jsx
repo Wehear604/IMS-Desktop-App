@@ -1,6 +1,7 @@
-import { Box, Grid,  Typography } from '@mui/material'
+// src/views/DeviceQcListUi/DeviceQcListUi.jsx
+import { Box, Grid, Typography } from '@mui/material'
 import React, { useState } from 'react'
-import { DEVICES, DEVICES_NAME, LISTENING_SIDE, DOM_TYPE } from '../../utils/constants';
+import { DEVICES, DEVICES_NAME } from '../../utils/constants';
 import AccordionDetailsUi from '../../components/layouts/common/AccordionDetailsUi';
 import neckbandBlack from "../../assets/images/neckband.svg";
 import itePrimeWhite from "../../assets/images/ITE_PRIME_WHITE.svg";
@@ -12,11 +13,12 @@ import wehearox from "../../assets/images/wehearox.svg";
 import SAFE_BUDS from "../../assets/images/safebuds.svg";
 import wehear_2_0 from "../../assets/images/wehear 2 0.svg";
 import AsyncSearchBar from '../../components/inputs/AsyncSearchBar';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { DeviceSelectAction } from '../../store/actions/deviceDataAction';
 
-const DeviceQcListUi = ({fields, setFields, filters, setFilters }) => {
-    const [device, setDevice] = useState();
+const DeviceQcListUi = ({ fields, setFields, filters, setFilters }) => {
+    const deviceData = useSelector((state) => state.device);
+    const [device, setDevice] = useState(deviceData?.device_type);
     const dispatch = useDispatch()
     const SuggestedProductData = (productType) => {
         const updateSuggestedProduct = (selectedDevice) => {
@@ -166,7 +168,7 @@ const DeviceQcListUi = ({fields, setFields, filters, setFilters }) => {
                 </Box>
             </Box>
 
-            { <Box sx={{ flexGrow: 1, p: 2 }}>
+            <Box sx={{ flexGrow: 1, p: 2 }}>
                 <Grid container spacing={2}>
                     {deviceEntries.map(([key, value], idx) => {
                         const data = SuggestedProductData(value);
@@ -188,8 +190,7 @@ const DeviceQcListUi = ({fields, setFields, filters, setFilters }) => {
                         );
                     })}
                 </Grid>
-
-            </Box>}
+            </Box>
         </Box>
     );
 };
