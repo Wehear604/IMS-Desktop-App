@@ -11,6 +11,7 @@ import { findObjectKeyByValue } from "../../utils/main";
 import { callSnackBar } from "../../store/actions/snackbarAction";
 import { SNACK_BAR_VARIETNS } from "../../utils/constants";
 import { Bluetooth } from "@mui/icons-material";
+import { DeviceSideAction } from "../../store/actions/deviceDataAction";
 
 // Style for the modal
 const modalStyle = {
@@ -42,7 +43,6 @@ const BleConnectDeviceModule = ({
     const [deviceInfo, setDeviceInfo] = useState({ name: "", id: "" });
     const [device, setDevices] = useState(null);
     const [selectingDeviceId, setSelectingDeviceId] = useState(null);
-
     const [deviceFunctions, setDeviceFunctions] = useState(null);
     const [data, setData] = useState(null); // This was `readData` in App.js
     const [deviceList, setDeviceList] = useState([]);
@@ -200,6 +200,7 @@ const BleConnectDeviceModule = ({
 
     const disconnect = (isButtonPress) => {
         setSelectingDeviceId(null);
+        dispatch(DeviceSideAction(null))
         if (isButtonPress === true) {
             if (deviceObj?.gatt?.connected) {
                 deviceObj.gatt?.disconnect?.();
@@ -222,6 +223,7 @@ const BleConnectDeviceModule = ({
     const handleDeviceSelected = (deviceId) => {
         // setIsPickerOpen(true);
         setSelectingDeviceId(deviceId);
+        dispatch(DeviceSideAction(deviceId))
         if (window.electronAPI) {
             window.electronAPI.selectBluetoothDevice(deviceId);
         }
@@ -230,6 +232,7 @@ const BleConnectDeviceModule = ({
     const handleCancelSelect = () => {
         // setIsPickerOpen(false);
         setSelectingDeviceId(null);
+        dispatch(DeviceSideAction(null))
         if (window.electronAPI) {
             window.electronAPI.cancelBluetoothRequest();
         }

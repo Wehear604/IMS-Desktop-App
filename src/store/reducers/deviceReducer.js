@@ -3,6 +3,7 @@ import { actions } from "../../utils/constants";
 const initialState = {
     device_type: null,
     device_side: null,
+    mac:null,
     connected: false,
     isConnecting: false,
     read_only: false,
@@ -23,6 +24,9 @@ const deviceReducer = (state = initialState, action) => {
 
         case actions.SET_DEVICE_CONNECT:
             return { ...state, isConnecting: action.isConnecting };
+        
+        case actions.SET_DEVICE_MAC:
+            return { ...state, mac: action.mac };
 
         case actions.CONNECT_DEVICE:
             return {

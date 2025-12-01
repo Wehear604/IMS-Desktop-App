@@ -1,4 +1,4 @@
-import { CHARACTERISTIC_UUID_READ_NOTIFY, CHARACTERISTIC_UUID_READ_WRITE, DEVICES, SERVICE_UUI } from "../../../utils/constants";
+import { CHARACTERISTIC_UUID_READ_NOTIFY, CHARACTERISTIC_UUID_READ_WRITE, DEVICES, SERVICE_UUI, SERVICE_UUID } from "../../../utils/constants";
 
 const primeCommandQueue = [];
 let primeIsProcessing = false;

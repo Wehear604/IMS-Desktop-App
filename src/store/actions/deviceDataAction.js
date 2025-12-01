@@ -9,6 +9,9 @@ export const DeviceSelectAction = (device_type) => {
 export const DeviceSideAction = (device_side) => {
     return { type: actions.SET_DEVICE_SIDE, device_side }
 }
+export const DeviceMACAction = (mac) => {
+    return { type: actions.SET_DEVICE_MAC, mac }
+}
 
 export const DeviceIsConnectingAction = (isConnecting) => {
     return { type: actions.SET_DEVICE_CONNECT, isConnecting }
