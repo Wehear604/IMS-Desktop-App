@@ -279,7 +279,7 @@ const DeviceConnectUi = () => {
         return { volume, mode, batteryLevel: parseInt(batteryLevel, 16) }
     }
 
-    const getITEOptimaBattery = async () => {
+    const getITEPrimeBattery = async () => {
         const command = [0x00, 0x05, 0x00];
         const response = await ReadITEPrimeDataFromDevice(command, device?.device_side, BLE_STORE.deviceObj);
         const batteryPercentage =
@@ -288,30 +288,30 @@ const DeviceConnectUi = () => {
                 : response[
                 device?.device_type == DEVICES.NECKBAND ? 3 : 4
                 ];
-
+        console.log("batteryPercentage", batteryPercentage)
         return { batteryLevel: batteryPercentage }
     }
 
-    const getITEOptimaMode = async () => {
+    const getITEPrimeaMode = async () => {
         const command = [0x02, 0x05, 0x00];
         const response = await ReadITEPrimeDataFromDevice(command, device?.device_side, BLE_STORE.deviceObj);
         const mode = response[4];
-
+console.log("mode",mode)
         return { mode: mode }
     }
-    const getITEOptimaVolume = async () => {
+    const getITEPrimeaVolume = async () => {
         const command = [0x02, 0x0d, 0x00]
         const response = await ReadITEPrimeDataFromDevice(command, device?.device_side, BLE_STORE.deviceObj);
         const parts = response;
         const payload = parts.slice(3);
         let volume = 0;
-
+        console.log("payload", payload)
+        let finalVolume = 0
         if (device?.device_side === LISTENING_SIDE.LEFT) {
             volume = payload[4];
         } else {
             volume = payload[22];
         }
-
         if (parseInt(volume) > 127) {
             finalVolume = volume - 256;
         } else {
@@ -331,10 +331,15 @@ const DeviceConnectUi = () => {
                     const data = await BLE_STORE.writeFun.readData();
                     console.log("Read Data:", data);
                 } else {
-                    await getRic8Data()
+                    // await getRic8Data()
                     // await getMode()
-                    await getBattery()
+                    // await getBattery()
                     // await getVolume()
+
+                    // await getITEPrimeBattery()
+                    // await getITEPrimeaMode()
+                    // await getITEPrimeaVolume()
+
                 }
 
             } catch (err) {

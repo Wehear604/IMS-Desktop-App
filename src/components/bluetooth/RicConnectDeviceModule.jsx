@@ -173,10 +173,15 @@ const RicConnectDevice = ({
 
             const filterData = {};
             const filter = {
-                manufacturerData: [{ companyIdentifier: parseInt(MANUFACTURER_IDENTIFIER[fitting.device_type]) ?? null }]
+                manufacturerData: [{ companyIdentifier: parseInt(MANUFACTURER_IDENTIFIER[fitting.device_type]) ?? null }],
             };
-
-            if (filter.manufacturerData[0].companyIdentifier) {
+            if (fitting.device_type === DEVICES.ITE_PRIME) {
+                filterData.filters = [
+                    {
+                        namePrefix: "ITE"
+                    }
+                ];
+            } else if (filter.manufacturerData[0].companyIdentifier) {
                 filterData.filters = [filter];
             } else {
                 filterData.acceptAllDevices = true;
