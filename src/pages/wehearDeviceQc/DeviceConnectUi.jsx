@@ -34,6 +34,9 @@ import ReadRicDataFromDevice from "./ric/ReadRicDataToDevice";
 import ReadITEDataFromDevice from "./ite/ReadITEDataFromDevice";
 import ReadITEPrimeDataFromDevice from "./ite/ReadITEPrimeDataFromDevice";
 import BleConnectDeviceModule from "../../components/bluetooth/BleConnectDeviceModule";
+import DeviceAudioMicCheckUi from "./DeviceAudioMicCheckUi";
+import { openModal } from '../../store/actions/modalAction';
+
 
 const Header = styled(Typography)(({ theme }) => ({
     color: theme.palette.text.secondary,
@@ -93,25 +96,25 @@ const ConnectButton = ({
 }) => {
     const { device } = useSelector((state) => state);
     const isConnected = device.connected;
-    // const dispatch = useDispatch();
+    const dispatch = useDispatch();
 
-    // const AudioAndMicCheck = () => {
-    //     dispatch(openModal(
-    //         <DeviceAudioMicCheckUi
+    const AudioAndMicCheck = () => {
+        dispatch(openModal(
+            <DeviceAudioMicCheckUi
                 
-    //         />,
-    //         "sm",
-    //         false,
-    //         "deviceAudioMicCheck"
-    //     ));
-    // };
+            />,
+            "sm",
+            false,
+            "deviceAudioMicCheck"
+        ));
+    };
 
 
-    // useEffect(() => {
-    //     if (isConnected) {
-    //         AudioAndMicCheck();
-    //     }
-    // }, [isConnected]);
+    useEffect(() => {
+        if (isConnected) {
+            AudioAndMicCheck();
+        }
+    }, [isConnected]);
 
 
     if (!isConnected) {
