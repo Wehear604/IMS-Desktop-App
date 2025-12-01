@@ -93,7 +93,27 @@ const ConnectButton = ({
 }) => {
     const { device } = useSelector((state) => state);
     const isConnected = device.connected;
-    // NOTE: 'device' here is from redux store — we assume it contains serializable flags
+    // const dispatch = useDispatch();
+
+    // const AudioAndMicCheck = () => {
+    //     dispatch(openModal(
+    //         <DeviceAudioMicCheckUi
+                
+    //         />,
+    //         "sm",
+    //         false,
+    //         "deviceAudioMicCheck"
+    //     ));
+    // };
+
+
+    // useEffect(() => {
+    //     if (isConnected) {
+    //         AudioAndMicCheck();
+    //     }
+    // }, [isConnected]);
+
+
     if (!isConnected) {
         return (
             <Button
