@@ -5,74 +5,75 @@ import {
 } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import audioUrl from "../../assets/images/AirplaneInterior.mp3";
-import { CHARACTERISTIC_UUID_READ_WRITE } from "../../utils/constants";
+import { CHARACTERISTIC_UUID_READ_WRITE, DEVICES_NAME, LISTENING_SIDE } from "../../utils/constants";
 import { useSelector } from "react-redux";
 import { sendPauseCommand, sendPlayCommand } from "../../components/bluetooth/BleConnectDeviceModule";
+import bluetoothIcon from "../../assets/images/bluetoothIcon.svg";
+import { findObjectKeyByValue } from "../../utils/main";
+import PauseIcon from '@mui/icons-material/Pause';
+import CustomDialog from "../../components/layouts/common/CustomDialog";
+import disabledChecked from "../../assets/images/checkIconDisabled.svg";
+import enabledChecked from "../../assets/images/checkIconEnabled.svg";
 
 const DeviceAudioMicCheckUi = () => {
-    const audioRef = useRef(null);
     const { device } = useSelector((state) => state);
-    const [isReady, setIsReady] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
 
     return (
-        <Box sx={{ minHeight: "50vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", bgcolor: "background.default", p: 4 }}>
-            <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                Device Connected <span style={{ color: "#28a745" }}>▸</span>
-            </Typography>
 
-            <Card sx={{ width: 550, borderRadius: 2, boxShadow: 0, border: "1px solid #e6e6e6", mt: 2 }}>
-                <CardContent>
-                    <List>
-                        <ListItem sx={{ alignItems: "center" }}>
-                            <ListItemAvatar>
-                                <Avatar sx={{ bgcolor: "transparent" }} />
-                            </ListItemAvatar>
+        <CustomDialog
+            id={`deviceAudioMicCheck`}
+            // onSubmit={onSubmit}
+            closeText="Close"
+        // confirmText={`${isUpdate ? "Update" : "Create"}`}
+        >
+            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", bgcolor: "background.default", }}>
+                <Typography variant="h4" sx={{ fontWeight: 700 }}>
+                    Device Connected <img src={bluetoothIcon} alt="Bluetooth Icon" />
+                </Typography>
 
-                            <ListItemText
-                                primary={<Typography variant="h6">Audio Check</Typography>}
-                                secondary={<Typography variant="body2">Test device audio output </Typography>}
-                            />
+                <Typography variant="h5" sx={{ color: "#DDD" }}>
+                    {DEVICES_NAME[device?.device_type]} {findObjectKeyByValue(device?.device_side, LISTENING_SIDE)}
+                </Typography>
 
-                            <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}>
-                                <Stack direction="row" spacing={0.5} alignItems="center" sx={{ mr: 2 }}>
-                                    {/* visual levels or icons could go here */}
-                                </Stack>
+                <Typography variant="h6" >
+                    {device?.mac}
+                </Typography>
 
-                                <Button
-                                    variant="contained"
-                                    onClick={sendPlayCommand}
-                                    startIcon={<PlayArrowIcon />}
-                                    sx={{ bgcolor: "#0d5966", textTransform: "none", borderRadius: 1, px: 2, mr: 1, "&:hover": { bgcolor: "#0b4a52" } }}
-                                >
-                                    {isPlaying ? "Playing" : "Start"}
-                                </Button>
+                <Card sx={{ width: "40vw", borderRadius: 2, boxShadow: 0, border: "1px solid #e6e6e6", }}>
+                    <CardContent>
+                        <List>
+                            <ListItem sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                                <Box display={"flex"} gap={4}>
+                                    <ListItemText sx={{display:"flex", alignItems:"center"}}>
+                                        <img src={isPlaying ? enabledChecked : disabledChecked} alt="Check Icon" />
 
-                                <Button variant="outlined" onClick={sendPauseCommand} sx={{ textTransform: "none", borderRadius: 1, px: 2 }}>
-                                    Stop
-                                </Button>
-                            </Box>
-                        </ListItem>
+                                    </ListItemText>
 
-                        <Divider />
-                    </List>
-                </CardContent>
-            </Card>
+                                    <ListItemText
+                                        primary={<Typography variant="h5">Audio Check</Typography>}
+                                        secondary={<Typography variant="h6">Test device audio output </Typography>}
+                                    />
+                                </Box>
 
-            <Grid container spacing={2} sx={{ width: 640, mt: 4, justifyContent: "space-between" }}>
-                <Grid item>
-                    <Button variant="outlined" sx={{ textTransform: "none", borderRadius: 2 }}>
-                        Cancel
-                    </Button>
-                </Grid>
+                                <Box>
+                                    {<Button
+                                        variant="contained"
+                                        onClick={() => isPlaying ? (setIsPlaying(false), sendPauseCommand()) : (setIsPlaying(true), sendPlayCommand())}
+                                        startIcon={isPlaying ? <PauseIcon sx={{ ml: 2 }} /> : <PlayArrowIcon sx={{ ml: 2 }} />}
+                                        sx={{ bgcolor: "#0d5966", borderRadius: "25%", display: "flex", alignItems: "center", justifyContent: "center", p: 0, height: "6vh" }}
+                                    />}
+                                </Box>
+                            </ListItem>
 
-                <Grid item>
-                    <Button variant="contained" sx={{ textTransform: "none", borderRadius: 2 }}>
-                        Start QC
-                    </Button>
-                </Grid>
-            </Grid>
-        </Box>
+                            {/* <Divider /> */}
+                        </List>
+                    </CardContent>
+                </Card>
+
+
+            </Box>
+        </CustomDialog>
     );
 };
 
