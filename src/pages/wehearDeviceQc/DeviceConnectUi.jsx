@@ -35,7 +35,7 @@ import ReadITEDataFromDevice from "./ite/ReadITEDataFromDevice";
 import ReadITEPrimeDataFromDevice from "./ite/ReadITEPrimeDataFromDevice";
 import BleConnectDeviceModule from "../../components/bluetooth/BleConnectDeviceModule";
 import DeviceAudioMicCheckUi from "./DeviceAudioMicCheckUi";
-import { openModal } from '../../store/actions/modalAction';
+import { closeModal, openModal } from '../../store/actions/modalAction';
 
 
 const Header = styled(Typography)(({ theme }) => ({
@@ -115,6 +115,13 @@ const ConnectButton = ({
             AudioAndMicCheck();
         }
     }, [isConnected]);
+
+    useEffect(() => {
+        if(!isConnected) {
+            dispatch(closeModal("deviceAudioMicCheck"));
+
+        }
+    }, [!isConnected]);
 
 
     if (!isConnected) {

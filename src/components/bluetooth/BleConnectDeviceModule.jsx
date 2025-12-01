@@ -25,6 +25,7 @@ const modalStyle = {
     boxShadow: 24,
     p: 4,
 };
+let controlCharacteristic = null;
 
 const BleConnectDeviceModule = ({
     onEnableChange = (val) => { },
@@ -50,7 +51,7 @@ const BleConnectDeviceModule = ({
     useEffect(() => {
         onWriteFunctionEnabled(deviceFunctions);
     }, [deviceFunctions]);
-    
+
     useEffect(() => {
         if (window.electronAPI) {
             window.electronAPI.onBluetoothDeviceList((devices) => {
@@ -84,7 +85,7 @@ const BleConnectDeviceModule = ({
         } else {
             console.warn('electronAPI is not available. Running in a standard browser.');
         }
-    }, []); 
+    }, []);
 
     useEffect(() => {
         const checkBluetooth = async () => {
@@ -177,6 +178,7 @@ const BleConnectDeviceModule = ({
             console.log("Primary service:", service);
 
             const characteristics = await service.getCharacteristics();
+            controlCharacteristic = await service.getCharacteristic("e093f3b5-00a3-a9e5-9eca-40036e0edc24");
 
             for (const characteristic of characteristics) {
                 switch (characteristic.uuid) {
@@ -216,8 +218,8 @@ const BleConnectDeviceModule = ({
         setDevices(null);
         onDisconnect();
         // setCharacteristics(null);
-        setData(null); 
-        setDeviceFunctions(null); 
+        setData(null);
+        setDeviceFunctions(null);
     };
     // --- Handlers for Modal (from App.js) ---
     const handleDeviceSelected = (deviceId) => {
@@ -238,11 +240,6 @@ const BleConnectDeviceModule = ({
         }
     };
 
-    // --- Handlers for Read/Write (from App.js) ---
-
-
-
-    // --- Merged UI (from App.js and ConnectDevice.js) ---
     return (
         <>
             <Component
@@ -304,3 +301,29 @@ const BleConnectDeviceModule = ({
 
 };
 export default memo(BleConnectDeviceModule);
+
+export async function sendPlayCommand() {
+    if (!controlCharacteristic) return;
+
+    const playByteArray = new Uint8Array([170, 171, 3, 0, 11, 184, 0]);
+
+    try {
+        await controlCharacteristic.writeValueWithoutResponse(playByteArray);
+        console.log("Play command sent");
+    } catch (err) {
+        console.error("Play write failed:", err);
+    }
+}
+
+export async function sendPauseCommand() {
+    if (!controlCharacteristic) return;
+
+    const pauseByteArray = new Uint8Array([170, 171, 3, 0, 0, 0, 0]);
+
+    try {
+        await controlCharacteristic.writeValueWithoutResponse(pauseByteArray);
+        console.log("Pause command sent");
+    } catch (err) {
+        console.error("Pause write failed:", err);
+    }
+}
