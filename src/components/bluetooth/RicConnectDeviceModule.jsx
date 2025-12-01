@@ -1,23 +1,33 @@
+// RicConnectDevice.jsx
 import React, { useState, useEffect } from "react";
 import {
     Button,
     Box,
     CircularProgress,
     Typography,
-    Modal, // <-- Added for Electron Modal
-    List, // <-- Added for Electron Modal
-    ListItem, // <-- Added for Electron Modal
-    ListItemButton, // <-- Added for better UI
-    ListItemIcon, // <-- Added for better UI
-    ListItemText // <-- Added for better UI
+    Modal,
+    List,
+    ListItem,
+    ListItemButton,
+    ListItemIcon,
+    ListItemText
 } from "@mui/material";
-import BluetoothIcon from '@mui/icons-material/Bluetooth'; // <-- Added for better UI
-import { CHARACTERISTIC_UUID_READ_NOTIFY, CHARACTERISTIC_UUID_READ_WRITE, DEVICES, LISTENING_SIDE, MANUFACTURER_IDENTIFIER, SERVICE_UUID } from "../../utils/constants";
+import BluetoothIcon from '@mui/icons-material/Bluetooth';
+import {
+    CHARACTERISTIC_UUID_READ_NOTIFY,
+    CHARACTERISTIC_UUID_READ_WRITE,
+    DEVICES,
+    LISTENING_SIDE,
+    MANUFACTURER_IDENTIFIER,
+    SERVICE_UUID,
+    SNACK_BAR_VARIETNS
+} from "../../utils/constants";
 
-import { useDispatch, useSelector } from "react-redux";
-import { SNACK_BAR_VARIETNS } from "../../utils/constants";
+import { BLE_STORE } from "../../utils/bleStore"; // <-- Make sure this file exports BLE_STORE
+import { useDispatch } from "react-redux";
 import { callSnackBar } from "../../store/actions/snackbarAction";
 import { DeviceIsConnectingAction, disconnectAction } from "../../store/actions/deviceDataAction";
+import WriteRicDataToDevice from "./WriteRicDataToDevice";
 
 const modalStyle = {
     position: 'absolute',
@@ -31,8 +41,8 @@ const modalStyle = {
     p: 4,
 };
 
-// --- Helper Functions (from your file) ---
 const hexStringToUint8Array = (hexString) => {
+    if (!hexString) return new Uint8Array([]);
     const bytes = hexString
         .trim()
         .split(" ")
@@ -42,59 +52,56 @@ const hexStringToUint8Array = (hexString) => {
 
 const RicConnectDevice = ({
     side,
-    onConnectWithDevice= ()=>{},
+    onConnectWithDevice = () => { },
     Component,
     onEnableChange = () => { },
     onDisconnect = () => { },
     fitting,
-    // fetchingData,
-    // setIsConnecting,
 }) => {
-    // --- State from your RicConnectDevice ---
+    // UI / serializable state only
     const [leftVolume, setLeftVolume] = useState(40);
     const [rightVolume, setRightVolume] = useState(40);
     const [leftDeviceConnected, setLeftDeviceConnected] = useState(false);
     const [rightDeviceConnected, setRightDeviceConnected] = useState(false);
-    const [leftDeviceCharacteristic, setLeftDeviceCharacteristic] =
-        useState(null);
-    const [rightDeviceCharacteristic, setRightDeviceCharacteristic] =
-        useState(null);
     const [loading, setLoading] = useState(false);
-    const [loadingMessage, setLoadingMessage] = useState(
-        "Checking Browser Support"
-    );
+    const [loadingMessage, setLoadingMessage] = useState("Checking Browser Support");
     const [deviceInfo, setDeviceInfo] = useState({ name: "", id: "" });
-    const [deviceObj, setDeviceObj] = useState(null);
-    const [data, setData] = useState([]);
-    const [connected, setConnected] = useState();
+    const [data, setData] = useState([]); // serializable activity data (e.g., parsed notifications)
+    const [connected, setConnected] = useState(false);
     const [enabled, setEnabled] = useState(false);
-    const dispatch = useDispatch();
-    // const { fitting, fitting } = useSelector((state) => state);
 
-    // --- State for Electron Modal (from our old component) ---
+    // Electron picker state
     const [deviceList, setDeviceList] = useState([]);
     const [isPickerOpen, setIsPickerOpen] = useState(false);
     const [selectingDeviceId, setSelectingDeviceId] = useState(null);
 
-    // --- Electron API Listeners ---
+    const dispatch = useDispatch();
+
+    // Electron API listeners
     useEffect(() => {
         if (window.electronAPI) {
-            window.electronAPI.onBluetoothDeviceList((devices) => {
+            const onList = (devices) => {
                 setDeviceList(devices);
-                setIsPickerOpen(true); // Open the modal
-            });
+                setIsPickerOpen(true);
+            };
+            window.electronAPI.onBluetoothDeviceList(onList);
 
-            window.electronAPI.onBluetoothPairingRequest((details) => {
+            const onPair = (details) => {
                 const response = {};
-                // (Your pairing logic here)
                 window.electronAPI.bluetoothPairingResponse(response);
-            });
+            };
+            window.electronAPI.onBluetoothPairingRequest(onPair);
+
+            return () => {
+                // if the electronAPI provides off/unsubscribe, use it — otherwise cleanup local handlers
+                // (no-op here)
+            };
         } else {
             console.warn('electronAPI is not available. Running in a standard browser.');
         }
-    }, []); // Runs once on mount
+    }, []);
 
-    // --- Bluetooth Availability Check ---
+    // Bluetooth availability
     useEffect(() => {
         const checkBluetooth = async () => {
             if (window.navigator && window.navigator.bluetooth) {
@@ -124,9 +131,10 @@ const RicConnectDevice = ({
             dispatch(DeviceIsConnectingAction(false));
         };
         checkBluetooth();
-    }, []); // Run once
+        // cleanup not necessary
+    }, []); // run once
 
-    // Effect to close modal on main loading
+    // Close electron picker if main loading starts
     useEffect(() => {
         if (loading && isPickerOpen) {
             setIsPickerOpen(false);
@@ -134,35 +142,39 @@ const RicConnectDevice = ({
         }
     }, [loading, isPickerOpen]);
 
+    // Cleanup when component unmounts: disconnect any active BLE device
+    useEffect(() => {
+        return () => {
+            try {
+                if (BLE_STORE.deviceObj?.gatt?.connected) {
+                    BLE_STORE.deviceObj.gatt.disconnect();
+                }
+            } catch (err) {
+                // ignore
+            }
+            // clear BLE_STORE
+            BLE_STORE.deviceObj = null;
+            BLE_STORE.writeFun = null;
+            BLE_STORE.disconnectFun = null;
+            BLE_STORE.hardwareData = null;
+        };
+    }, []);
 
     const connectDeviceFun = async (e) => {
-        e.preventDefault(); // This might not be needed if 'e' isn't passed
-        // dispatch(closeModal("instruction")); // Removed Redux modal
+        if (e && e.preventDefault) e.preventDefault();
         try {
             setLoadingMessage("Connecting Device...");
             setLoading(true);
             dispatch(DeviceIsConnectingAction(true));
 
-            const serviceUuid =
-                side === "Left"
-                    ? SERVICE_UUID[fitting.device_type]
-                    : SERVICE_UUID[fitting.device_type];
-
-            const characteristicUuidReadNotify =
-                side === "Left"
-                    ? CHARACTERISTIC_UUID_READ_NOTIFY[fitting.device_type]
-                    : CHARACTERISTIC_UUID_READ_NOTIFY[fitting.device_type];
-
-            const characteristicUuidReadWrite =
-                side === "Left"
-                    ? CHARACTERISTIC_UUID_READ_WRITE[fitting.device_type]
-                    : CHARACTERISTIC_UUID_READ_WRITE[fitting.device_type];
+            const serviceUuid = SERVICE_UUID[fitting.device_type];
+            const characteristicUuidReadNotify = CHARACTERISTIC_UUID_READ_NOTIFY[fitting.device_type];
+            const characteristicUuidReadWrite = CHARACTERISTIC_UUID_READ_WRITE[fitting.device_type];
 
             const filterData = {};
-            const filter =
-                side === "Left"
-                    ? { manufacturerData: [{ companyIdentifier: parseInt(MANUFACTURER_IDENTIFIER[fitting.device_type]) ?? null }] }
-                    : { manufacturerData: [{ companyIdentifier: parseInt(MANUFACTURER_IDENTIFIER[fitting.device_type]) ?? null }] };
+            const filter = {
+                manufacturerData: [{ companyIdentifier: parseInt(MANUFACTURER_IDENTIFIER[fitting.device_type]) ?? null }]
+            };
 
             if (filter.manufacturerData[0].companyIdentifier) {
                 filterData.filters = [filter];
@@ -170,13 +182,11 @@ const RicConnectDevice = ({
                 filterData.acceptAllDevices = true;
             }
 
-            // **FIX 1: Removed the .catch() block**
-            const device = await navigator.bluetooth
-                .requestDevice({
-                    ...filterData,
-                    optionalServices: [serviceUuid],
-                });
-            console.log("Device ", device)
+            const device = await navigator.bluetooth.requestDevice({
+                ...filterData,
+                optionalServices: [serviceUuid],
+            });
+
             if (!device) {
                 setLoadingMessage("No device selected.");
                 setLoading(false);
@@ -184,12 +194,13 @@ const RicConnectDevice = ({
                 return;
             }
 
-            // (Your device name check logic)
+            // Device name check for R/L suffix (RIC_OPTIMA)
             if (
-                ((side === "Left" && fitting.device_type === DEVICES.RIC_OPTIMA) ||
-                    (side === "Right" && fitting.device_type === DEVICES.RIC_OPTIMA)) &&
-                ((side === "Left" && !device.name.endsWith("L")) ||
-                    (side === "Right" && !device.name.endsWith("R")))
+                (fitting.device_type === DEVICES.RIC_OPTIMA) &&
+                (
+                    (side === "Left" && !device.name?.endsWith("L")) ||
+                    (side === "Right" && !device.name?.endsWith("R"))
+                )
             ) {
                 setLoadingMessage(`Please connect the correct device for the ${side} side.`);
                 dispatch(callSnackBar(`Please connect the ${side} side device `, SNACK_BAR_VARIETNS.error));
@@ -198,62 +209,98 @@ const RicConnectDevice = ({
                 return;
             }
 
-            // (Other device checks...)
-
             const server = await device.gatt.connect();
-
-            // **FIX 2: Removed the .catch() block**
             const service = await server.getPrimaryService(serviceUuid);
-            console.log("Services ", service)
-            const characteristicReadNotify = await service.getCharacteristic(
-                characteristicUuidReadNotify
-            );
-            const characteristicReadWrite = await service.getCharacteristic(
-                characteristicUuidReadWrite
-            );
-            console.log("characteristicReadWrite", characteristicReadWrite)
+            const characteristicReadNotify = await service.getCharacteristic(characteristicUuidReadNotify);
+            const characteristicReadWrite = await service.getCharacteristic(characteristicUuidReadWrite);
 
-            // Update the connected state
+            // store non-serializable bluetooth objects in BLE_STORE (not in React state)
+            BLE_STORE.deviceObj = device;
+            BLE_STORE.writeFun = characteristicReadWrite; // use BLE_STORE.writeFun.writeValue(...) when writing
+            BLE_STORE.disconnectFun = () => disconnect(side);
+            BLE_STORE.hardwareData = data;
+
+            try {
+                await characteristicReadNotify.startNotifications();
+                characteristicReadNotify.addEventListener("characteristicvaluechanged", (event) => {
+                    try {
+                        const value = event.target.value; // DataView
+                        // example parse: convert to hex string
+                        const arr = [];
+                        for (let i = 0; i < value.byteLength; i++) {
+                            arr.push(("0" + value.getUint8(i).toString(16)).slice(-2));
+                        }
+                        const hex = arr.join(" ");
+                        // Keep `data` serializable and small
+                        setData(prev => {
+                            const next = [...prev.slice(-49), { ts: Date.now(), hex }];
+                            BLE_STORE.hardwareData = next;
+                            return next;
+                        });
+                    } catch (err) {
+                        console.error("Error parsing notification", err);
+                    }
+                });
+            } catch (err) {
+                console.warn("Could not start notifications:", err);
+            }
+
+            // Update UI-connected flags (serializable booleans)
             if (side === "Left") {
                 setLeftDeviceConnected(true);
-                setLeftDeviceCharacteristic(characteristicReadWrite);
-                setConnected(true);
             } else {
                 setRightDeviceConnected(true);
-                setRightDeviceCharacteristic(characteristicReadWrite);
-                setConnected(true);
             }
+            setConnected(true);
+
             setLoadingMessage("Device connected successfully");
             setLoading(false);
             dispatch(DeviceIsConnectingAction(false));
 
             const currentDeviceInfo = { name: device.name, id: device.id };
             setDeviceInfo(currentDeviceInfo);
-            device.ongattserverdisconnected = (error) => {
+            if (fitting.device_type === DEVICES.RIC_OPTIMA_8) {
+                await WriteRicDataToDevice(
+                    "0x02",
+                    side,
+                    BLE_STORE.deviceObj || device
+                );
+                if (side === "Left") {
+                    await WriteRicDataToDevice("0x0B", side, BLE_STORE.deviceObj || device);
+                } else {
+                    await WriteRicDataToDevice("0x0B", side, BLE_STORE.deviceObj || device);
+                }
+            }
+
+            device.ongattserverdisconnected = (err) => {
+                console.log("GATT disconnected:", err);
                 if (side === "Left") {
                     setLeftDeviceConnected(false);
-                    console.log("Disconnected left device");
                     dispatch(disconnectAction(LISTENING_SIDE.LEFT, true));
                 } else {
-                    console.log("Disconnected right device");
                     setRightDeviceConnected(false);
                     dispatch(disconnectAction(LISTENING_SIDE.RIGHT, true));
                 }
                 setLoadingMessage("Device disconnected");
+                // clear BLE_STORE
+                BLE_STORE.deviceObj = null;
+                BLE_STORE.writeFun = null;
+                BLE_STORE.disconnectFun = null;
             };
-            setDeviceObj(device);
+            console.log("BLE_STORE.deviceObj", BLE_STORE.deviceObj)
+            // Notify parent with serializable data and BLE_STORE device object reference if they want it
+            onConnectWithDevice(data, currentDeviceInfo);
 
-            // (Your logic for connecting second device `res?.code == 192`...)
-            // ...
-            onConnectWithDevice(data, currentDeviceInfo, device.BluetoothDevice, () => disconnect(side));
-
-            // (Your post-connection writes for Volume and Mode)
-            // ...
+            // Optionally perform initial writes (example: volume/mode)
+            // Example: write leftVolume/rightVolume to device (uncomment & adapt if needed)
+            // if (BLE_STORE.writeFun && side === "Left") {
+            //     const payload = hexStringToUint8Array("01 02 ...");
+            //     await BLE_STORE.writeFun.writeValue(payload);
+            // }
 
         } catch (error) {
-            // **This now correctly catches "User cancelled"**
             console.error("Error:", error);
-            setLoadingMessage("Failed to connect: " + error.message);
+            setLoadingMessage("Failed to connect: " + (error?.message || String(error)));
             setLoading(false);
             dispatch(DeviceIsConnectingAction(false));
             if (side === "Left") {
@@ -264,30 +311,35 @@ const RicConnectDevice = ({
         }
     };
 
-    // --- Disconnect Function (from your file) ---
-    const disconnect = (side) => {
-        if (deviceObj?.gatt?.connected) {
-            deviceObj.gatt.disconnect();
-        } else {
-            setLoadingMessage("already Disconnected..");
+    const disconnect = (sideParam) => {
+        try {
+            if (BLE_STORE.deviceObj?.gatt?.connected) {
+                BLE_STORE.deviceObj.gatt.disconnect();
+            } else {
+                setLoadingMessage("already Disconnected..");
+            }
+        } catch (err) {
+            console.warn("Disconnect error:", err);
         }
-        if (side === "Left") {
+
+        // clear BLE_STORE
+        BLE_STORE.deviceObj = null;
+        BLE_STORE.writeFun = null;
+        BLE_STORE.disconnectFun = null;
+        BLE_STORE.hardwareData = null;
+
+        if (sideParam === "Left") {
             setLeftDeviceConnected(false);
         } else {
             setRightDeviceConnected(false);
         }
         setConnected(false);
         setDeviceInfo({});
-        setDeviceObj(null);
         setLoadingMessage("");
         onDisconnect();
     };
 
-    // --- Other functions (handleLeftVolumeChange, etc.) ---
-    // ... (Your other functions like handleLeftVolumeChange) ...
-
-
-    // --- Handlers for Electron Modal ---
+    // Electron modal handlers
     const handleDeviceSelected = (deviceId) => {
         setSelectingDeviceId(deviceId);
         if (window.electronAPI) {
@@ -296,27 +348,23 @@ const RicConnectDevice = ({
     };
 
     const handleCancelSelect = () => {
-        if (selectingDeviceId) return; // Don't cancel while selecting
+        if (selectingDeviceId) return;
         setIsPickerOpen(false);
         if (window.electronAPI) {
             window.electronAPI.cancelBluetoothRequest();
         }
     };
 
-    // --- Removed the 'onConnect' function that opened the Redux modal ---
-
     return (
         <>
             <Component
                 loading={loading}
                 connected={side === "Left" ? leftDeviceConnected : rightDeviceConnected}
-                // **This now calls connectDeviceFun directly**
-                onClick={(e)=>connectDeviceFun(e)}
+                onClick={(e) => connectDeviceFun(e)}
                 disconnect={() => disconnect(side)}
                 deviceSide={fitting?.device_side}
             />
 
-            {/* --- ELECTRON DEVICE PICKER MODAL --- */}
             <Modal open={loading} onClose={handleCancelSelect}>
                 <Box sx={modalStyle}>
                     <Typography variant="h6" component="h2" sx={{ mb: 2 }}>

@@ -1,3 +1,4 @@
+import { BLE_STORE } from "../../utils/bleStore"
 import { actions, SNACK_BAR_VARIETNS } from "../../utils/constants"
 import { callSnackBar } from "./snackbarAction"
 
@@ -8,59 +9,51 @@ export const DeviceSelectAction = (device_type) => {
 export const DeviceSideAction = (device_side) => {
     return { type: actions.SET_DEVICE_SIDE, device_side }
 }
+
 export const DeviceIsConnectingAction = (isConnecting) => {
     return { type: actions.SET_DEVICE_CONNECT, isConnecting }
 }
 
 export const connectDevice = (
-    hardwareData,
     deviceInfo,
-    deviceObj,
-    disconnectFun,
     side
 ) => {
-    console.log("Connecting to device:", deviceInfo);
-    console.log("Hardware Data:", hardwareData);
-    console.log("Device Object:", deviceObj);
-    console.log("Disconnect Function:", disconnectFun);
-    console.log("Side:", side);
+
     return {
         type: actions.CONNECT_DEVICE,
-        hardwareData,
         deviceInfo,
-        deviceObj,
-        disconnectFun,
-        side: side,
-    };
-};
+        side
+    }
+}
 
 export const disconnectAction = (side, flag = false) => {
-    return async (dispatch, getState) => {
-        const state = getState();
-        const fitting = state.device;
-
+    return async (dispatch) => {
         try {
-            if (fitting.deviceObj?.gatt?.connected) {
-                fitting.deviceObj.gatt.disconnect();
+            if (BLE_STORE.deviceObj?.gatt?.connected) {
+                BLE_STORE.deviceObj.gatt.disconnect()
             }
 
-            dispatch(callSnackBar("Device Disconnected.", SNACK_BAR_VARIETNS.error));
+            BLE_STORE.deviceObj = null
+            BLE_STORE.disconnectFun = null
+            BLE_STORE.writeFun = null
+            BLE_STORE.hardwareData = null
+
+            dispatch(callSnackBar("Device Disconnected.", SNACK_BAR_VARIETNS.error))
 
             if (flag) {
-                dispatch(callSnackBar("Please try connecting again.", SNACK_BAR_VARIETNS.error));
+                dispatch(callSnackBar("Please try connecting again.", SNACK_BAR_VARIETNS.error))
             }
 
-        } catch (err) {
-            console.error("Error disconnecting:", err);
-        }
+        } catch (err) { }
 
         dispatch({
             type: actions.DISCONNECT_DEVICE,
-            side,
-        });
-    };
-};
+            side
+        })
+    }
+}
 
 export const onWriteFunctionChange = (value, side) => {
-    return { type: actions.CHANGE_WRITE_FUN, value, side: side };
-};
+    BLE_STORE.writeFun = value
+    return { type: actions.CHANGE_WRITE_FUN, side }
+}

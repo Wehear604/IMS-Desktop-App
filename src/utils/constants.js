@@ -351,3 +351,31 @@ export const APP_TYPES = {
   WEB: 1,
   APP: 2
 }
+
+export const MODES = {
+  "0b": 0,
+  "0c": 1,
+  "0d": 2,
+  "0e": 3,
+};
+
+export const VOLUME_COMMANDS_REVERSE = {
+  10: 0,
+  11: 2,
+  12: 4,
+  13: 6,
+  14: 8,
+  15: 10,
+  16: 12,
+  17: 14,
+  18: 16,
+  19: 18,
+  "1a": 20,
+  "1b": 22,
+  "1c": 24,
+  "1d": 26,
+  "1e": 28,
+  "1f": 30,
+};
+
+export const EQ_LEVEL = [20, 30, 70, 50, 60];
