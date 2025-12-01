@@ -30,7 +30,16 @@ const DeviceQcListController = () => {
                 </Box>
             </>}
             {step === 1 && <>
-                <DeviceConnectUi /></>}
+                <DeviceConnectUi />
+
+                <Box p={2} mt={4} sx={{ width: "100%", display: "flex", justifyContent: "flex-start" }}>
+                    <Button variant='contained' sx={{ width: "8vw" }} onClick={() => setStep(step - 1)}>
+                        <Typography variant="h5" sx={{ textTransform: "none" }}>
+                            Back
+                        </Typography>
+                    </Button>
+                </Box>
+            </>}
         </Paper>
     )
 }

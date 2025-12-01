@@ -12,11 +12,12 @@ import wehearox from "../../assets/images/wehearox.svg";
 import SAFE_BUDS from "../../assets/images/safebuds.svg";
 import wehear_2_0 from "../../assets/images/wehear 2 0.svg";
 import AsyncSearchBar from '../../components/inputs/AsyncSearchBar';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { DeviceSelectAction } from '../../store/actions/deviceDataAction';
 
 const DeviceQcListUi = ({fields, setFields, filters, setFilters }) => {
-    const [device, setDevice] = useState();
+    const deviceData = useSelector((state) => state.device);
+    const [device, setDevice] = useState(deviceData?.device_type);
     const dispatch = useDispatch()
     const SuggestedProductData = (productType) => {
         const updateSuggestedProduct = (selectedDevice) => {

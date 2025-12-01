@@ -157,7 +157,7 @@ const ConnectButton = ({
 };
 
 const DeviceConnectUi = () => {
-    const [selected, setSelected] = useState("L");
+    const [selected, setSelected] = useState("");
     const { device } = useSelector((state) => state);
     const dispatch = useDispatch();
 
