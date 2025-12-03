@@ -71,21 +71,6 @@ const DeviceCard = styled(Card, {
     padding: theme.spacing(1),
 }));
 
-const DeviceImage = styled("img")(({ theme }) => ({
-    width: 86,
-    height: 86,
-    objectFit: "contain",
-    marginBottom: theme.spacing(1),
-}));
-
-const ChipRow = styled(Box)(({ theme }) => ({
-    display: "flex",
-    alignItems: "center",
-    gap: theme.spacing(1),
-    justifyContent: "center",
-    marginTop: theme.spacing(1),
-}));
-
 const ConnectButton = ({
     connected,
     onClick,
@@ -101,10 +86,10 @@ const ConnectButton = ({
     const AudioAndMicCheck = () => {
         dispatch(openModal(
             <DeviceAudioMicCheckUi
-                
+
             />,
             "sm",
-            false,
+            true,
             "deviceAudioMicCheck"
         ));
     };
@@ -117,7 +102,7 @@ const ConnectButton = ({
     }, [isConnected]);
 
     useEffect(() => {
-        if(!isConnected) {
+        if (!isConnected) {
             dispatch(closeModal("deviceAudioMicCheck"));
 
         }
@@ -138,8 +123,8 @@ const ConnectButton = ({
                     border: "2px solid",
                     borderColor: "#DDDDDD",
                     borderRadius: "8px",
-                    width: "80%",
-                    marginLeft: deviceSide == LISTENING_SIDE.LEFT ? "20%" : "",
+                    width: "25vw",
+                    // marginLeft: deviceSide == LISTENING_SIDE.LEFT ? "20%" : "",
                     marginTop: "5px",
                 }}
             >
@@ -167,11 +152,11 @@ const ConnectButton = ({
                     alignItems: "center",
                     justifyContent: "center",
                     border: "2px solid",
-                    borderColor: deviceSide == LISTENING_SIDE.LEFT ? "#2D3B67" : "#C24747",
+                    borderColor: deviceSide == LISTENING_SIDE.LEFT ? "#C24747" : "#2D3B67",
                     borderRadius: "8px",
-                    width: "80%",
-                    marginLeft: deviceSide == LISTENING_SIDE.LEFT ? "20%" : "",
-                    backgroundColor: deviceSide == LISTENING_SIDE.LEFT ? "#EDF0F7" : "#FCF7F7",
+                    width: "25vw",
+                    // marginLeft: deviceSide == LISTENING_SIDE.LEFT ? "20%" : "",
+                    backgroundColor: deviceSide == LISTENING_SIDE.LEFT ? "#FCF7F7" : "#EDF0F7",
                     marginTop: "5px",
                 }}
             >
@@ -275,7 +260,7 @@ const DeviceConnectUi = () => {
         let volume = VOLUME_COMMANDS_REVERSE[responseParts[5]];
 
         let mode = MODES[responseParts[6]];
-        console.log("{ volume, mode ",  volume, mode )
+        console.log("{ volume, mode ", volume, mode)
         return { volume, mode }
     }
 
@@ -326,7 +311,7 @@ const DeviceConnectUi = () => {
         const command = [0x02, 0x05, 0x00];
         const response = await ReadITEPrimeDataFromDevice(command, device?.device_side, BLE_STORE.deviceObj);
         const mode = response[4];
-console.log("mode",mode)
+        console.log("mode", mode)
         return { mode: mode }
     }
     const getITEPrimeaVolume = async () => {
@@ -404,11 +389,13 @@ console.log("mode",mode)
     }, [device?.connected]);
 
     return (
-        <Box>
-            <Header variant="h4">Device Dashboard</Header>
+        <>
+            <Header sx={{ m: 4 }} variant="h4">Device Dashboard</Header>
+            <Divider orientation="horizontal" />
+            <Box sx={{ minHeight: "70vh", display: "flex", flexDirection: "column", justifyContent: "space-evenly", alignItems: "center" }}>
 
-            <CenterArea>
-                <Instruction variant="h5">Select device to establish connection</Instruction>
+                {/* <CenterArea> */}
+                <Instruction variant="h4">Select device to establish connection</Instruction>
 
                 <Grid container spacing={3} justifyContent="center">
                     {devices.map((item) => (
@@ -420,21 +407,23 @@ console.log("mode",mode)
                                 dispatch(DeviceSideAction(item.value));
                             }}
                         >
-                            <DeviceCard selected={selected === item.side}>
-                                <CardActionArea sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                                        <DeviceImage src={item?.side === "L" ? leftDevice : rightDevice} alt={`device-${item.side}`} />
-                                        <ChipRow>
-                                            <Box gap={2} sx={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-around" }}>
-                                                <Avatar sx={{ width: 22, height: 22, bgcolor: selected === item.side ? "primary.main" : "grey.200", color: selected === item.side ? "white" : "text.primary", fontSize: 12 }}>
-                                                    {item?.side === "L" ? <img src={leftSideLogo} alt="L" /> : <img src={rightSideLogo} alt="R" />}
-                                                </Avatar>
-                                                <Divider orientation="vertical" variant="middle" flexItem sx={{ color: "#DDD" }} />
-                                                <Typography variant="h6" sx={{ ml: 0.5, fontWeight: "bold" }}>{item.label}</Typography>
-                                            </Box>
-                                        </ChipRow>
+                            <DeviceCard selected={selected === item.side} sx={{ width: "14vw", height: "35vh" }}>
+                                {/* <CardActionArea sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}> */}
+                                <Box sx={{ display: "flex", height: "100%", flexDirection: "column", alignItems: "center", justifyContent: "space-evenly" }}>
+                                    <Box sx={{ height: "10vh", justifyContent: "flex-start" }}>
+                                        <img src={item?.side === "L" ? leftDevice : rightDevice} alt={`device-${item.side}`} />
                                     </Box>
-                                </CardActionArea>
+                                    {/* <ChipRow> */}
+                                    <Box gap={2} sx={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                        <Avatar sx={{ width: 22, height: 22, bgcolor: selected === item.side ? "primary.main" : "grey.200", color: selected === item.side ? "white" : "text.primary", fontSize: 12 }}>
+                                            {item?.side === "L" ? <img src={leftSideLogo} alt="L" /> : <img src={rightSideLogo} alt="R" />}
+                                        </Avatar>
+                                        <Divider orientation="vertical" variant="middle" flexItem sx={{ color: "#DDD", height: "3vh", display: "flex", alignItems: "flex-end" }} />
+                                        <Typography variant="h6" sx={{ ml: 0.5, fontWeight: "bold" }}>{item.label}</Typography>
+                                    </Box>
+                                    {/* </ChipRow> */}
+                                </Box>
+                                {/* </CardActionArea> */}
                             </DeviceCard>
                         </Grid>
                     ))}
@@ -488,17 +477,18 @@ console.log("mode",mode)
                             connected: device.isConnecting
                         }}
                     />}
-            </CenterArea>
+                {/* </CenterArea> */}
 
-            <Box sx={{ display: "flex", gap: 2, justifyContent: "center", mt: 3 }}>
+                {/* <Box sx={{ display: "flex", gap: 2, justifyContent: "center", mt: 3 }}>
                 <Button onClick={startReading} variant="contained" disabled={!BLE_STORE.readFun && !BLE_STORE.writeFun || isReading}>
                     Start Reading
                 </Button>
                 <Button onClick={stopReading} variant="outlined" disabled={!isReading}>
                     Stop Reading
                 </Button>
+            </Box> */}
             </Box>
-        </Box>
+        </>
     );
 };
 

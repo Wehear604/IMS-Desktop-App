@@ -136,7 +136,7 @@ const DeviceQcListUi = ({fields, setFields, filters, setFilters }) => {
     });
 
     return (
-        <Box mb={1}>
+        <Box mb={1} p={4} sx={{ display: "flex", flexDirection: "column", height: "75vh" }}>
             <Box
                 sx={{
                     display: "flex",

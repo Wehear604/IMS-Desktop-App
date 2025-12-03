@@ -47,7 +47,7 @@ const BleConnectDeviceModule = ({
     const [deviceFunctions, setDeviceFunctions] = useState(null);
     const [data, setData] = useState(null); // This was `readData` in App.js
     const [deviceList, setDeviceList] = useState([]);
-    console.log("first deviceFunctions", deviceFunctions)
+    // console.log("first deviceFunctions", deviceFunctions)
     useEffect(() => {
         onWriteFunctionEnabled(deviceFunctions);
     }, [deviceFunctions]);
@@ -55,7 +55,6 @@ const BleConnectDeviceModule = ({
     useEffect(() => {
         if (window.electronAPI) {
             window.electronAPI.onBluetoothDeviceList((devices) => {
-                console.log('Received device list in React:', devices);
                 setDeviceList(devices);
             });
 

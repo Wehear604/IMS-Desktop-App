@@ -21,7 +21,6 @@ export async function sendPlayCommand(dispatch) {
     try {
         await BLE_STORE.writeFun.writeData(playPacket);
         dispatch(DeviceIsAudioCheck(true));
-        console.log("Play command sent");
     } catch (err) {
         console.error("Play write failed:", err);
         dispatch(DeviceIsAudioCheck(true));
@@ -39,7 +38,6 @@ export async function sendPauseCommand() {
 
     try {
         await BLE_STORE.writeFun.writeData(pausePacket);
-        console.log("Pause command sent");
     } catch (err) {
         console.error("Pause write failed:", err);
     }

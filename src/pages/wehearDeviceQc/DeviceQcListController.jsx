@@ -11,7 +11,7 @@ const DeviceQcListController = () => {
     });
     const [step, setStep] = useState(0)
     return (
-        <Paper elevation={3} sx={{ padding: '20px', display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+        <Paper elevation={3} sx={{  display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
             {step === 0 && <> <Box>
                 <DeviceQcListUi
                     fields={fields}
@@ -32,7 +32,7 @@ const DeviceQcListController = () => {
             {step === 1 && <>
                 <DeviceConnectUi />
 
-                <Box p={2} mt={4} sx={{ width: "100%", display: "flex", justifyContent: "flex-start" }}>
+                <Box p={2} mt={4} m={2} sx={{ width: "100%", display: "flex", justifyContent: "flex-start" }}>
                     <Button variant='contained' sx={{ width: "8vw" }} onClick={() => setStep(step - 1)}>
                         <Typography variant="h5" sx={{ textTransform: "none" }}>
                             Back
