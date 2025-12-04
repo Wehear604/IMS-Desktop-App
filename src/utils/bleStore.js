@@ -8,6 +8,7 @@ export const BLE_STORE = {
     readFun: null,
     disconnectFun: null,
     hardwareData: null,
+    BTEdisconnect: false
 };
 
 export async function sendPlayCommand(dispatch) {

@@ -189,13 +189,13 @@ const ProductDetailsQcUi = () => {
 
   return (
     <Box sx={{ p: 4 }}>
-          <Typography
-            variant="h4"
-            sx={{ fontWeight: 700, mb: 3, textAlign: { xs: "center", md: "left" } }}
-          >
-            Package Details
-          </Typography>
-      <Grid container sx={{padding:4}}>
+      <Typography
+        variant="h4"
+        sx={{ fontWeight: 700, mb: 3, textAlign: { xs: "center", md: "left" } }}
+      >
+        Package Details
+      </Typography>
+      <Grid container sx={{ padding: 4 }}>
         <Grid item xs={12} md={4} >
 
           <Grid container spacing={4}>
@@ -283,26 +283,26 @@ const ProductDetailsQcUi = () => {
                   {scannerActive ? <QrScannerPopup onClose={() => setScannerActive(false)} onScan={(data) => console.log(data)} /> : <Box sx={{ p: 4 }}>
                     <Typography
                       variant="h4"
-                      sx={{ fontWeight: 700, mb: 3, cursor:"pointer", textDecoration:"underline", fontFamily:"League Spartan", display:"flex", alignItems:"center", gap:2 }}
+                      sx={{ fontWeight: 700, mb: 3, cursor: "pointer", textDecoration: "underline", fontFamily: "League Spartan", display: "flex", alignItems: "center", gap: 2 }}
                     >
-                    <img src={qrScanLogo} alt="QR Scan Logo" />
+                      <img src={qrScanLogo} alt="QR Scan Logo" />
                       Scan Box ID
                     </Typography>
                   </Box>}
                 </Paper>
               </Stack>
-              <Box sx={{ display:"flex", justifyContent:"center" }}>
+              <Box sx={{ display: "flex", justifyContent: "center" }}>
                 <Typography variant="h4" sx={{ mt: 2 }}>
-                  OR 
+                  OR
                 </Typography>
               </Box>
               <Box sx={{ display: "flex", gap: 2, alignItems: "center", justifyContent: "center", mt: 2 }}>
-                <Button variant="outlined" startIcon={<BarcodeIcon />} onClick={() => setScannerActive(true)} sx={{width:"50vw", height:"5vh"}}>
-                 <Typography variant="h4" sx={{ textTransform: "none" }}>
-                  Barcode Scanner
-                </Typography>
+                <Button variant="outlined" startIcon={<BarcodeIcon />} onClick={() => setScannerActive(true)} sx={{ width: "50vw", height: "5vh" }}>
+                  <Typography variant="h4" sx={{ textTransform: "none" }}>
+                    Barcode Scanner
+                  </Typography>
                 </Button>
-                </Box>
+              </Box>
             </Grid>
           </Grid>
         </Grid>

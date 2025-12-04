@@ -6,7 +6,8 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import audioUrl from "../../assets/images/AirplaneInterior.mp3";
 import {
-    CHARACTERISTIC_UUID_READ_WRITE, DEVICES, DEVICES_NAME, LISTENING_SIDE
+    CHARACTERISTIC_UUID_READ_WRITE, DEVICES, DEVICES_NAME, LISTENING_SIDE,
+    SNACK_BAR_VARIETNS
 } from "../../utils/constants";
 import { useDispatch, useSelector } from "react-redux";
 import bluetoothIcon from "../../assets/images/bluetoothIcon.svg";
@@ -16,8 +17,9 @@ import disabledChecked from "../../assets/images/checkIconDisabled.svg";
 import enabledChecked from "../../assets/images/checkIconEnabled.svg";
 import { BLE_STORE, sendPauseCommand, sendPlayCommand } from "../../utils/bleStore";
 import { BteDeviceCurrentVolume, BteDeviceMode, BteDeviceVolume } from "../../store/actions/deviceQcAction";
-import { DeviceStoreAction } from "../../store/actions/deviceDataAction";
+import { DeviceStoreAction, disconnectAction, resetDeviceDataStore } from "../../store/actions/deviceDataAction";
 import { closeModal } from "../../store/actions/modalAction";
+import { callSnackBar } from "../../store/actions/snackbarAction";
 
 const StepCard = ({ isChecked, checked, title, subtitle, action, checkBox }) => (
     <Card sx={{ width: "40vw", borderRadius: 2, boxShadow: 0, border: "1px solid #e6e6e6", mb: 2 }}>
@@ -132,6 +134,8 @@ const DeviceAudioMicCheckUi = () => {
         setIsPlaying(false);
         setStep((s) => Math.min(s + 1, 3));
     }, [dispatch]);
+    const deviceTitle = DEVICES_NAME[device?.device_type] ?? "Unknown device";
+    const sideLabel = findObjectKeyByValue(device?.device_side, LISTENING_SIDE) ?? "";
 
     const onComplete = useCallback(() => {
         dispatch(DeviceStoreAction(
@@ -151,6 +155,9 @@ const DeviceAudioMicCheckUi = () => {
             device?.mac,
         ));
         dispatch(closeModal("deviceAudioMicCheck"));
+        BLE_STORE.BTEdisconnect= true;
+        dispatch(resetDeviceDataStore());
+        dispatch(callSnackBar(`${sideLabel} Side Device QC Completed Successfully.`, SNACK_BAR_VARIETNS.suceess));
 
     }, [dispatch, device, deviceQc, fields]);
 
@@ -172,9 +179,6 @@ const DeviceAudioMicCheckUi = () => {
         }
         return true;
     })();
-
-    const deviceTitle = DEVICES_NAME[device?.device_type] ?? "Unknown device";
-    const sideLabel = findObjectKeyByValue(device?.device_side, LISTENING_SIDE) ?? "";
 
     return (
         <CustomDialog

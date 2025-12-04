@@ -68,3 +68,7 @@ export const onWriteFunctionChange = (value, side) => {
 export const DeviceStoreAction = (device_type, device_side, mode, volume, body, charging, audio, mac) => {
     return { type: actions.SET_DEVICE_STORAGE, device_type, device_side, mode, volume, body, charging, audio, mac }
 }
+
+export const resetDeviceDataStore = () => {
+    return { type: actions.RESET_DEVICE_DATA_STORE }
+}

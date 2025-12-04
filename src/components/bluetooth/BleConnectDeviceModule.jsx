@@ -12,6 +12,8 @@ import { callSnackBar } from "../../store/actions/snackbarAction";
 import { SNACK_BAR_VARIETNS } from "../../utils/constants";
 import { Bluetooth } from "@mui/icons-material";
 import { DeviceMACAction } from "../../store/actions/deviceDataAction";
+import { use } from "react";
+import { BLE_STORE } from "../../utils/bleStore";
 
 // Style for the modal
 const modalStyle = {
@@ -220,6 +222,7 @@ const BleConnectDeviceModule = ({
         // setCharacteristics(null);
         setData(null);
         setDeviceFunctions(null);
+        BLE_STORE.BTEdisconnect= false
     };
     // --- Handlers for Modal (from App.js) ---
     const handleDeviceSelected = (deviceId) => {
@@ -240,6 +243,11 @@ const BleConnectDeviceModule = ({
         }
     };
 
+    useEffect(() => {
+        if (BLE_STORE.BTEdisconnect) {
+          () =>  disconnect(true);
+        }
+    }, [BLE_STORE.BTEdisconnect]);
     return (
         <>
             <Component

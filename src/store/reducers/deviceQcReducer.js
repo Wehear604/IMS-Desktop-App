@@ -39,7 +39,10 @@ const deviceQcReducer = (state = initialState, action) => {
                 start: true,
                 device_side: action.device_side
             };
-
+        case actions.RESET_DEVICE_DATA_STORE:
+            return {
+                ...initialState
+            };
         default:
             return state;
     }
