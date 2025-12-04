@@ -21,11 +21,8 @@ import CameraAltOutlinedIcon from '@mui/icons-material/CameraAltOutlined';
 import BarcodeIcon from '@mui/icons-material/QrCode2';
 import CloseIcon from '@mui/icons-material/Close';
 import QrScannerPopup from '../../components/Scanner/QrScannerPopup';
+import qrScanLogo from '../../assets/images/qrScanLogo.svg';
 
-// ProductDetailsQcUi
-// Updated: the QR scanning happens inline — the dashed scan container is replaced
-// with the live camera view when the user clicks "Scan Box ID". No modal is used.
-// Uses native BarcodeDetector where available; otherwise shows a manual input fallback.
 
 const ProductDetailsQcUi = () => {
   const [qcExecutive, setQcExecutive] = useState('');
@@ -285,15 +282,27 @@ const ProductDetailsQcUi = () => {
                   sx={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: '45vh' }}>
                   {scannerActive ? <QrScannerPopup onClose={() => setScannerActive(false)} onScan={(data) => console.log(data)} /> : <Box sx={{ p: 4 }}>
                     <Typography
-                      variant="h6"
-                      sx={{ fontWeight: 600, mb: 3 }}
-                    
+                      variant="h4"
+                      sx={{ fontWeight: 700, mb: 3, cursor:"pointer", textDecoration:"underline", fontFamily:"League Spartan", display:"flex", alignItems:"center", gap:2 }}
                     >
-                      Box ID Scan
+                    <img src={qrScanLogo} alt="QR Scan Logo" />
+                      Scan Box ID
                     </Typography>
                   </Box>}
                 </Paper>
               </Stack>
+              <Box sx={{ display:"flex", justifyContent:"center" }}>
+                <Typography variant="h4" sx={{ mt: 2 }}>
+                  OR 
+                </Typography>
+              </Box>
+              <Box sx={{ display: "flex", gap: 2, alignItems: "center", justifyContent: "center", mt: 2 }}>
+                <Button variant="outlined" startIcon={<BarcodeIcon />} onClick={() => setScannerActive(true)} sx={{width:"50vw", height:"5vh"}}>
+                 <Typography variant="h4" sx={{ textTransform: "none" }}>
+                  Barcode Scanner
+                </Typography>
+                </Button>
+                </Box>
             </Grid>
           </Grid>
         </Grid>
