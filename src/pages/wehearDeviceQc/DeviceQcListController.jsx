@@ -3,6 +3,7 @@ import DeviceQcListUi from './DeviceQcListUi'
 import { useLocation } from 'react-router-dom';
 import { Box, Button, Paper, Typography } from '@mui/material';
 import DeviceConnectUi from './DeviceConnectUi';
+import ProductDetailsQcUi from './ProductDetailsQcUi';
 
 const DeviceQcListController = () => {
     const [fields, setFields] = useState();
@@ -11,7 +12,7 @@ const DeviceQcListController = () => {
     });
     const [step, setStep] = useState(0)
     return (
-        <Paper elevation={3} sx={{  display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+        <Paper elevation={3} sx={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
             {step === 0 && <> <Box>
                 <DeviceQcListUi
                     fields={fields}
@@ -31,6 +32,24 @@ const DeviceQcListController = () => {
             </>}
             {step === 1 && <>
                 <DeviceConnectUi />
+
+                <Box p={2} mt={4} m={2} sx={{ width: "100%", display: "flex", justifyContent: "flex-start" }}>
+                    <Button variant='contained' sx={{ width: "8vw" }} onClick={() => setStep(step - 1)}>
+                        <Typography variant="h5" sx={{ textTransform: "none" }}>
+                            Back
+                        </Typography>
+                    </Button>
+
+                    <Button p={2} mt={4} m={2} variant='contained' sx={{ width: "8vw", marginLeft: "auto" }} onClick={() => setStep(step + 1)}>
+                        <Typography variant="h5" sx={{ textTransform: "none" }}>
+                            Next
+                        </Typography>
+                    </Button>
+                </Box>
+            </>}
+
+            {step === 2 && <>
+                <ProductDetailsQcUi />
 
                 <Box p={2} mt={4} m={2} sx={{ width: "100%", display: "flex", justifyContent: "flex-start" }}>
                     <Button variant='contained' sx={{ width: "8vw" }} onClick={() => setStep(step - 1)}>

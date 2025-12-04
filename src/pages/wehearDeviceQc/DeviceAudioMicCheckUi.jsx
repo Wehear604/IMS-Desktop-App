@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-    Box, Button, Card, List, ListItem, ListItemText, Typography
+    Box, Button, Card, Checkbox, List, ListItem, ListItemText, Typography
 } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
@@ -16,13 +16,15 @@ import disabledChecked from "../../assets/images/checkIconDisabled.svg";
 import enabledChecked from "../../assets/images/checkIconEnabled.svg";
 import { BLE_STORE, sendPauseCommand, sendPlayCommand } from "../../utils/bleStore";
 import { BteDeviceCurrentVolume, BteDeviceMode, BteDeviceVolume } from "../../store/actions/deviceQcAction";
+import { DeviceStoreAction } from "../../store/actions/deviceDataAction";
+import { closeModal } from "../../store/actions/modalAction";
 
-const StepCard = ({ checked, title, subtitle, action }) => (
+const StepCard = ({ isChecked, checked, title, subtitle, action, checkBox }) => (
     <Card sx={{ width: "40vw", borderRadius: 2, boxShadow: 0, border: "1px solid #e6e6e6", mb: 2 }}>
         <List>
             <ListItem sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <Box display={"flex"} gap={4} alignItems="center">
-                    <img src={checked ? enabledChecked : disabledChecked} alt="check" />
+                    {isChecked ? <img src={checked ? enabledChecked : disabledChecked} alt="check" /> : checkBox && <Box>{checkBox}</Box>}
                     <ListItemText
                         primary={<Typography variant="h5">{title}</Typography>}
                         secondary={subtitle ? <Typography variant="h6">{subtitle}</Typography> : null}
@@ -35,7 +37,7 @@ const StepCard = ({ checked, title, subtitle, action }) => (
 );
 
 const DeviceAudioMicCheckUi = () => {
-    const { device = {}, deviceQc = {} } = useSelector((state) => state);
+    const { device, deviceQc, deviceDataStore } = useSelector((state) => state);
     const dispatch = useDispatch();
 
     const [step, setStep] = useState(0);
@@ -46,6 +48,14 @@ const DeviceAudioMicCheckUi = () => {
     const mounted = useRef(true);
     const stepRef = useRef(step);
     const deviceRef = useRef(device);
+    const [fields, setFields] = useState({
+        body1: false,
+        body2: false,
+        charging: false,
+    });
+    const toggle = (key) => () => {
+        setFields((prev) => ({ ...prev, [key]: !prev[key] }));
+    }
 
     useEffect(() => { stepRef.current = step; }, [step]);
     useEffect(() => { deviceRef.current = device; }, [device]);
@@ -120,8 +130,31 @@ const DeviceAudioMicCheckUi = () => {
     const handleNext = useCallback(() => {
         sendPauseCommand(dispatch);
         setIsPlaying(false);
-        setStep((s) => Math.min(s + 1, 2));
+        setStep((s) => Math.min(s + 1, 3));
     }, [dispatch]);
+
+    const onComplete = useCallback(() => {
+        dispatch(DeviceStoreAction(
+            device?.device_type,
+            device?.device_side,
+            deviceQc?.device_side === LISTENING_SIDE.LEFT ? deviceQc?.modeLeft : deviceQc?.modeRight,
+            {
+                volumeIncrease: deviceQc?.volumeIncrease,
+                volumeDecrease: deviceQc?.volumeDecrease,
+            },
+            {
+                body1: fields.body1,
+                body2: fields.body2,
+            },
+            fields.charging,
+            device?.is_Audio_play,
+            device?.mac,
+        ));
+        dispatch(closeModal("deviceAudioMicCheck"));
+
+    }, [dispatch, device, deviceQc, fields]);
+
+    console.log("object deviceDataStore", deviceDataStore);
 
     const handleBack = useCallback(() => {
         setStep((s) => Math.max(s - 1, 0));
@@ -134,6 +167,9 @@ const DeviceAudioMicCheckUi = () => {
             const modes = device?.device_side === LISTENING_SIDE.LEFT ? deviceQc?.modeLeft : deviceQc?.modeRight;
             return !(Array.isArray(modes) && modes.length === 4);
         }
+        if (step === 3) {
+            return !(fields.body1 && fields.body2 && fields.charging);
+        }
         return true;
     })();
 
@@ -144,14 +180,9 @@ const DeviceAudioMicCheckUi = () => {
         <CustomDialog
             id={step === 0 ? `deviceAudioMicCheck` : undefined}
             disabledSubmit={disabledSubmit}
-            onSubmit={handleNext}
-            onClose={() => {
-                if (step === 1) {
-                    handleBack();
-                }
-            }}
-            closeText={step === 0 ? "Close" : "Back"}
-            confirmText={"Next"}
+            onSubmit={step === 3 ? onComplete : handleNext}
+            // closeText={step === 0 ? "Close" : "Back"}
+            confirmText={step === 3 ? `Complete ${sideLabel} Side Qc` : "Next"}
         >
             <Box sx={{ height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "space-around", bgcolor: "background.default" }}>
                 <Box display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"}>
@@ -169,6 +200,7 @@ const DeviceAudioMicCheckUi = () => {
                 {step === 0 && (
                     <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center">
                         <StepCard
+                            isChecked={true}
                             checked={Boolean(device?.is_Audio_play)}
                             title="Audio Check"
                             subtitle="Test device audio output"
@@ -186,19 +218,39 @@ const DeviceAudioMicCheckUi = () => {
 
                 {step === 1 && (
                     <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center">
-                        <StepCard checked={deviceQc?.volumeIncrease} title={deviceQc?.volumeIncrease ? "Volume Level Increased" : "Increase Volume"} />
-                        <StepCard checked={deviceQc?.volumeDecrease} title={deviceQc?.volumeDecrease ? "Volume Level Decreased" : "Decrease Volume"} />
+                        <StepCard isChecked={true} checked={deviceQc?.volumeIncrease} title={deviceQc?.volumeIncrease ? "Volume Level Increased" : "Increase Volume"} />
+                        <StepCard isChecked={true} checked={deviceQc?.volumeDecrease} title={deviceQc?.volumeDecrease ? "Volume Level Decreased" : "Decrease Volume"} />
                     </Box>
                 )}
 
                 {step === 2 && (
                     <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center">
-                        <StepCard checked={modecheck(0)} title={modecheck(0) ? "First Mode Has Been tested." : "Test First Mode"} />
-                        <StepCard checked={modecheck(1)} title={modecheck(1) ? "Second Mode Has Been tested." : "Test Second Mode"} />
-                        <StepCard checked={modecheck(2)} title={modecheck(2) ? "Third Mode Has Been tested." : "Test Third Mode"} />
-                        <StepCard checked={modecheck(3)} title={modecheck(3) ? "Fourth Mode Has Been tested." : "Test Fourth Mode"} />
+                        <StepCard isChecked={true} checked={modecheck(0)} title={modecheck(0) ? "First Mode Has Been tested." : "Test First Mode"} />
+                        <StepCard isChecked={true} checked={modecheck(1)} title={modecheck(1) ? "Second Mode Has Been tested." : "Test Second Mode"} />
+                        <StepCard isChecked={true} checked={modecheck(2)} title={modecheck(2) ? "Third Mode Has Been tested." : "Test Third Mode"} />
+                        <StepCard isChecked={true} checked={modecheck(3)} title={modecheck(3) ? "Fourth Mode Has Been tested." : "Test Fourth Mode"} />
                     </Box>
                 )}
+
+                {step === 3 && (<>
+                    <Box display={"flex"} justifyContent={"flex-start"} width={"100%"}>
+                        <Typography variant="h3" sx={{ fontWeight: 700, mb: 2 }}>
+                            Body Check
+                        </Typography>
+                    </Box>
+                    <Box ml={2} display="flex" flexDirection="column" alignItems="center" justifyContent="center">
+                        <StepCard checkBox={<Checkbox checked={fields.body1} onChange={toggle("body1")} />} title={"Device checked for damage"} />
+                        <StepCard checkBox={<Checkbox checked={fields.body2} onChange={toggle("body2")} />} title={"Body checked for scratches"} />
+                    </Box>
+                    <Box display={"flex"} justifyContent={"flex-start"} width={"100%"}>
+                        <Typography variant="h3" sx={{ fontWeight: 700, mb: 2 }}>
+                            Charging
+                        </Typography>
+                    </Box>
+                    <Box ml={2} display="flex" flexDirection="column" alignItems="center" justifyContent="center">
+                        <StepCard checkBox={<Checkbox checked={fields.charging} onChange={toggle("charging")} />} title={"Charging function has been verified"} />
+                    </Box>
+                </>)}
             </Box>
         </CustomDialog>
     );

@@ -63,3 +63,8 @@ export const onWriteFunctionChange = (value, side) => {
     BLE_STORE.writeFun = value
     return { type: actions.CHANGE_WRITE_FUN, side }
 }
+
+
+export const DeviceStoreAction = (device_type, device_side, mode, volume, body, charging, audio, mac) => {
+    return { type: actions.SET_DEVICE_STORAGE, device_type, device_side, mode, volume, body, charging, audio, mac }
+}
