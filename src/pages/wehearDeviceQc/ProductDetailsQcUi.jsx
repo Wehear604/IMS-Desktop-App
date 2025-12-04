@@ -191,15 +191,15 @@ const ProductDetailsQcUi = () => {
   };
 
   return (
-    <Box sx={{ p: 8 }}>
-      <Grid container>
-        <Grid item xs={12} md={4} >
+    <Box sx={{ p: 4 }}>
           <Typography
-            variant="h6"
-            sx={{ fontWeight: 600, mb: 3, textAlign: { xs: "center", md: "left" } }}
+            variant="h4"
+            sx={{ fontWeight: 700, mb: 3, textAlign: { xs: "center", md: "left" } }}
           >
             Package Details
           </Typography>
+      <Grid container sx={{padding:4}}>
+        <Grid item xs={12} md={4} >
 
           <Grid container spacing={4}>
             {/* LEFT SECTION */}
