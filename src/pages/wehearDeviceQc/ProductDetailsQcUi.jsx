@@ -20,6 +20,7 @@ import {
 import CameraAltOutlinedIcon from '@mui/icons-material/CameraAltOutlined';
 import BarcodeIcon from '@mui/icons-material/QrCode2';
 import CloseIcon from '@mui/icons-material/Close';
+import QrScannerPopup from '../../components/Scanner/QrScannerPopup';
 
 // ProductDetailsQcUi
 // Updated: the QR scanning happens inline — the dashed scan container is replaced
@@ -190,173 +191,111 @@ const ProductDetailsQcUi = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
-        Package Details
-      </Typography>
+    <Box sx={{ p: 8 }}>
+      <Grid container>
+        <Grid item xs={12} md={4} >
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: 600, mb: 3, textAlign: { xs: "center", md: "left" } }}
+          >
+            Package Details
+          </Typography>
 
-      <Grid container spacing={4}>
-        <Grid item xs={12} md={6}>
-          <Stack spacing={3}>
-            {/* <Box>
-              <Typography variant="subtitle2" gutterBottom>
-                Select QC Executive
-              </Typography>
-              <FormControl fullWidth>
-                <Select
-                  displayEmpty
-                  value={qcExecutive}
-                  onChange={(e) => setQcExecutive(e.target.value)}
-                  renderValue={(selected) => (selected ? selected : 'Your name')}
+          <Grid container spacing={4}>
+            {/* LEFT SECTION */}
+            <Grid item xs={12} md={12}>
+              <Stack spacing={4}>
+
+                {/* BOX CONTAINS */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: { xs: "column", sm: "row" },
+                    gap: 2,
+                  }}
                 >
-                  <MenuItem value="">Your name</MenuItem>
-                  <MenuItem value={'Alice'}>Alice</MenuItem>
-                  <MenuItem value={'Bob'}>Bob</MenuItem>
-                  <MenuItem value={'Charlie'}>Charlie</MenuItem>
-                </Select>
-              </FormControl>
-            </Box> */}
-
-            <Box sx={{ display: "flex" }}>
-              <Box>
-                <Typography variant="h4" sx={{ mb: 1 }}>
-                  Box Contains
-                </Typography>
-              </Box>
-              <Box>
-                {Object.keys(boxContains).map((key) => (
-                  <FormControlLabel
-                    key={key}
-                    control={
-                      <Checkbox
-                        checked={boxContains[key]}
-                        onChange={() => toggleContains(key)}
-                        size="small"
-                      />
-                    }
-                    label={key}
-                    sx={{ display: 'block', ml: 0 }}
-                  />
-                ))}
-              </Box>
-            </Box>
-
-            <Box sx={{ display: "flex", justifyContent:"space-around" }}>
-
-              <Box>
-                <Typography variant="h4" sx={{ mb: 1 }}>
-                  Device Color
-                </Typography>
-              </Box>
-              <Box>
-                <RadioGroup
-                  value={deviceColor}
-                  onChange={(e) => setDeviceColor(e.target.value)}
-                >
-                  <FormControlLabel value="Black" control={<Radio />} label="Black" />
-                  <FormControlLabel value="Beige" control={<Radio />} label="Beige" />
-                  <FormControlLabel value="Silver" control={<Radio />} label="Silver" />
-                  <FormControlLabel value="White" control={<Radio />} label="White" />
-                </RadioGroup>
-              </Box>
-            </Box>
-
-            {scannedValue && (
-              <Paper variant="outlined" sx={{ p: 2, bgcolor: '#f7f7f7' }}>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  Scanned Box ID
-                </Typography>
-                <Typography variant="body2">{scannedValue}</Typography>
-              </Paper>
-            )}
-          </Stack>
-        </Grid>
-
-        <Grid item xs={12} md={6}>
-          <Box sx={{ textAlign: 'center' }}>
-            {/* Dashed box: if scannerActive -> show video + close button, else show placeholder */}
-            <Paper
-              variant="outlined"
-              sx={{
-                borderStyle: 'dashed',
-                borderColor: 'grey.400',
-                height: "50vh",
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: 2,
-                position: 'relative',
-                px: 2,
-                boxSizing: 'border-box',
-                overflow: 'hidden',
-              }}
-            >
-              {scannerActive ? (
-                <Box sx={{ width: '100%', height: '100%', position: 'relative' }}>
-                  <video ref={videoRef} style={{ width: '100%', height: '100%', objectFit: 'cover' }} playsInline muted />
-
-                  {/* small overlay: close button + optional scanned value */}
-                  <Box sx={{ position: 'absolute', left: 8, top: 8 }}>
-                    <IconButton onClick={() => {
-                      // stop camera and deactivate scanner
-                      if (streamRef.current) {
-                        streamRef.current.getTracks().forEach((t) => t.stop());
-                        streamRef.current = null;
-                      }
-                      setScannerActive(false);
-                      setScanError('');
-                    }} size="small" sx={{ bgcolor: 'rgba(255,255,255,0.7)' }}>
-                      <CloseIcon fontSize="small" />
-                    </IconButton>
-                  </Box>
-
-                  <canvas ref={canvasRef} style={{ display: 'none' }} />
-
-                  {/* {scanError && (
-                    <Box sx={{ position: 'absolute', left: 16, bottom: 16, right: 16, bgcolor: 'rgba(255,255,255,0.9)', p: 1, borderRadius: 1 }}>
-                      <Typography variant="body2" color="error">{scanError}</Typography>
-                      <Stack direction="row" spacing={1} sx={{ mt: 1, justifyContent: 'center' }}>
-                        <TextField size="small" placeholder="Enter box ID" value={manualInput} onChange={(e) => setManualInput(e.target.value)} />
-                        <Button variant="contained" size="small" onClick={handleManualSubmit}>Submit</Button>
-                      </Stack>
-                    </Box>
-                  )} */}
-                </Box>
-              ) : (
-                <Box sx={{ textAlign: 'center' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <CameraAltOutlinedIcon sx={{ mr: 1, color: 'text.secondary', fontSize: 32 }} />
-                  </Box>
-
                   <Typography
-                    variant="h6"
-                    component="div"
-                    sx={{ mt: 1, textDecoration: 'underline', cursor: 'pointer', color: 'primary.main' }}
-                    onClick={() => {
-                      setScanError('');
-                      setScannerActive(true);
+                    variant="h5"
+                    sx={{
+                      fontWeight: 600,
+                      minWidth: { sm: "150px" },
+                      mb: { xs: 1, sm: 0 },
                     }}
                   >
-                    Scan Box ID
+                    Box Contains
                   </Typography>
+
+                  <Box>
+                    {Object.keys(boxContains).map((key) => (
+                      <FormControlLabel
+                        key={key}
+                        control={
+                          <Checkbox
+                            checked={boxContains[key]}
+                            onChange={() => toggleContains(key)}
+                            size="small"
+                          />
+                        }
+                        label={key}
+                        sx={{ display: "block", ml: 0.5 }}
+                      />
+                    ))}
+                  </Box>
                 </Box>
-              )}
-            </Paper>
 
-            <Typography variant="h5" sx={{ mt: 2, mb: 1 }}>OR</Typography>
+                {/* DEVICE COLOR */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: { xs: "column", sm: "row" },
+                    gap: 2,
+                  }}
+                >
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontWeight: 600,
+                      minWidth: { sm: "150px" },
+                      mb: { xs: 1, sm: 0 },
+                    }}
+                  >
+                    Device Color
+                  </Typography>
 
-            <Button
-              variant="outlined"
-              startIcon={<BarcodeIcon />}
-              onClick={() => {
-                setScanError('');
-                setScannerActive(true);
-              }}
-              sx={{ width: 360, borderRadius: 1.5, textTransform: 'none', borderWidth: 1 }}
-            >
-              Barcode Scanner
-            </Button>
-          </Box>
+                  <RadioGroup
+                    value={deviceColor}
+                    onChange={(e) => setDeviceColor(e.target.value)}
+                  >
+                    <FormControlLabel value="Black" control={<Radio />} label="Black" />
+                    <FormControlLabel value="Beige" control={<Radio />} label="Beige" />
+                    <FormControlLabel value="Silver" control={<Radio />} label="Silver" />
+                    <FormControlLabel value="White" control={<Radio />} label="White" />
+                  </RadioGroup>
+                </Box>
+
+              </Stack>
+            </Grid>
+          </Grid>
+        </Grid>
+        <Grid item xs={12} md={8} >
+          <Grid container spacing={4}>
+            <Grid item xs={12} md={12}>
+              <Stack spacing={4} >
+                <Paper onClick={() => setScannerActive(true)}
+                  sx={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: '45vh' }}>
+                  {scannerActive ? <QrScannerPopup onClose={() => setScannerActive(false)} onScan={(data) => console.log(data)} /> : <Box sx={{ p: 4 }}>
+                    <Typography
+                      variant="h6"
+                      sx={{ fontWeight: 600, mb: 3 }}
+                    
+                    >
+                      Box ID Scan
+                    </Typography>
+                  </Box>}
+                </Paper>
+              </Stack>
+            </Grid>
+          </Grid>
         </Grid>
       </Grid>
     </Box>
