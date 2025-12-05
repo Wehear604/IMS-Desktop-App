@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import {
   Box,
   Grid,
@@ -16,176 +16,42 @@ import {
   Stack,
   Paper,
   TextField,
-} from '@mui/material';
-import CameraAltOutlinedIcon from '@mui/icons-material/CameraAltOutlined';
-import BarcodeIcon from '@mui/icons-material/QrCode2';
-import CloseIcon from '@mui/icons-material/Close';
-import QrScannerPopup from '../../components/Scanner/QrScannerPopup';
-import qrScanLogo from '../../assets/images/qrScanLogo.svg';
+} from "@mui/material";
+import CameraAltOutlinedIcon from "@mui/icons-material/CameraAltOutlined";
+import BarcodeIcon from "@mui/icons-material/QrCode2";
+import CloseIcon from "@mui/icons-material/Close";
+import QrScannerPopup from "../../components/Scanner/QrScannerPopup";
+import qrScanLogo from "../../assets/images/qrScanLogo.svg";
+import CustomInput from "../../components/inputs/CustomInputs";
 
-
-const ProductDetailsQcUi = () => {
-  const [qcExecutive, setQcExecutive] = useState('');
+const ProductDetailsQcUi = ({ setBox, box }) => {
   const [boxContains, setBoxContains] = useState({
     Cable: false,
     Doms: false,
     Manual: false,
-    'Charging Case': false,
-    'Cleaning Brush': false,
-    'Warranty Card': false,
+    "Charging Case": false,
+    "Cleaning Brush": false,
+    "Warranty Card": false,
   });
-  const [deviceColor, setDeviceColor] = useState('');
-  const [scannerActive, setScannerActive] = useState(false); // inline scanner flag
-  const [scannedValue, setScannedValue] = useState('');
-  const [scanError, setScanError] = useState('');
-  const [manualInput, setManualInput] = useState('');
-
-  // Refs for video and canvas used by the scanner
-  const videoRef = useRef(null);
-  const canvasRef = useRef(null);
-  const streamRef = useRef(null);
-  const scanningRef = useRef(false);
-  const detectorRef = useRef(null);
-
+  const [Barcode, setBarcode] = useState(false);
+  const [deviceColor, setDeviceColor] = useState("");
+  const [scannerActive, setScannerActive] = useState(false);
+  const [box_id, setBox_id] = useState("");
   const toggleContains = useCallback((key) => {
     setBoxContains((prev) => ({ ...prev, [key]: !prev[key] }));
   }, []);
 
-  // Start/stop camera when scannerActive changes
   useEffect(() => {
-    let rafId = null;
-    let intervalId = null;
-    let supportsDetector = false;
+    const formattedBoxContains = Object.entries(boxContains)
+      .filter(([key, value]) => value === true)
+      .map(([key]) => ({ [key]: true }));
 
-    async function startCameraAndScan() {
-      setScanError('');
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
-        streamRef.current = stream;
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          await videoRef.current.play();
-        }
-
-        // Try to instantiate BarcodeDetector if available
-        if (window.BarcodeDetector) {
-          try {
-            const formats = await window.BarcodeDetector.getSupportedFormats();
-            detectorRef.current = new window.BarcodeDetector({ formats: formats.includes('qr_code') ? ['qr_code'] : formats });
-            supportsDetector = true;
-          } catch (e) {
-            detectorRef.current = null;
-            supportsDetector = false;
-          }
-        }
-
-        scanningRef.current = true;
-
-        const scanFrame = async () => {
-          if (!scanningRef.current) return;
-          const video = videoRef.current;
-          const canvas = canvasRef.current;
-          if (!video || video.readyState !== HTMLMediaElement.HAVE_ENOUGH_DATA) {
-            rafId = requestAnimationFrame(scanFrame);
-            return;
-          }
-
-          const width = video.videoWidth;
-          const height = video.videoHeight;
-          if (width === 0 || height === 0) {
-            rafId = requestAnimationFrame(scanFrame);
-            return;
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(video, 0, 0, width, height);
-
-          try {
-            if (detectorRef.current) {
-              const barcodes = await detectorRef.current.detect(canvas);
-              if (barcodes && barcodes.length > 0) {
-                const rawValue = barcodes[0].rawValue || '';
-                if (rawValue) {
-                  setScannedValue(rawValue);
-                  stopScanning();
-                  return;
-                }
-              }
-            } else {
-              // No BarcodeDetector -> show helpful message and stop active scanning attempts
-              setScanError('BarcodeDetector API not available in this browser. Please use Chrome/Edge or enter ID manually.');
-              scanningRef.current = false;
-              return;
-            }
-          } catch (err) {
-            console.error('Scanning error', err);
-            setScanError('Error while scanning.');
-            scanningRef.current = false;
-            return;
-          }
-
-          rafId = requestAnimationFrame(scanFrame);
-        };
-
-        rafId = requestAnimationFrame(scanFrame);
-
-        if (!supportsDetector) {
-          intervalId = setTimeout(() => {
-            setScanError('BarcodeDetector API not supported in this browser. Please use Chrome/Edge or paste the ID manually.');
-          }, 1200);
-        }
-      } catch (err) {
-        console.error('Camera start failed', err);
-        setScanError('Could not access camera. Please allow camera access or use manual entry.');
-      }
-    }
-
-    function stopScanning() {
-      scanningRef.current = false;
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((t) => t.stop());
-        streamRef.current = null;
-      }
-      if (videoRef.current) {
-        try { videoRef.current.pause(); } catch (e) { }
-        videoRef.current.srcObject = null;
-      }
-      detectorRef.current = null;
-      setScannerActive(false);
-    }
-
-    if (scannerActive) {
-      startCameraAndScan();
-    }
-
-    return () => {
-      scanningRef.current = false;
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((t) => t.stop());
-        streamRef.current = null;
-      }
-      if (rafId) cancelAnimationFrame(rafId);
-      if (intervalId) clearTimeout(intervalId);
-    };
-  }, [scannerActive]);
-
-  const handleManualSubmit = () => {
-    if (manualInput.trim() !== '') {
-      setScannedValue(manualInput.trim());
-      setManualInput('');
-      setScanError('');
-      // If scanner was active, stop it
-      if (scannerActive) {
-        if (streamRef.current) {
-          streamRef.current.getTracks().forEach((t) => t.stop());
-          streamRef.current = null;
-        }
-        setScannerActive(false);
-      }
-    }
-  };
+    setBox({
+      box_Contains: formattedBoxContains ?? [],
+      boxId: box_id ?? "",
+      deviceColor: deviceColor ?? "",
+    });
+  }, [boxContains, box_id, deviceColor, setBox]);
 
   return (
     <Box sx={{ p: 4 }}>
@@ -196,13 +62,11 @@ const ProductDetailsQcUi = () => {
         Package Details
       </Typography>
       <Grid container sx={{ padding: 4 }}>
-        <Grid item xs={12} md={4} >
-
+        <Grid item xs={12} md={4}>
           <Grid container spacing={4}>
             {/* LEFT SECTION */}
             <Grid item xs={12} md={12}>
               <Stack spacing={4}>
-
                 {/* BOX CONTAINS */}
                 <Box
                   sx={{
@@ -263,32 +127,100 @@ const ProductDetailsQcUi = () => {
                     value={deviceColor}
                     onChange={(e) => setDeviceColor(e.target.value)}
                   >
-                    <FormControlLabel value="Black" control={<Radio />} label="Black" />
-                    <FormControlLabel value="Beige" control={<Radio />} label="Beige" />
-                    <FormControlLabel value="Silver" control={<Radio />} label="Silver" />
-                    <FormControlLabel value="White" control={<Radio />} label="White" />
+                    <FormControlLabel
+                      value="Black"
+                      control={<Radio />}
+                      label="Black"
+                    />
+                    <FormControlLabel
+                      value="Beige"
+                      control={<Radio />}
+                      label="Beige"
+                    />
+                    <FormControlLabel
+                      value="Silver"
+                      control={<Radio />}
+                      label="Silver"
+                    />
+                    <FormControlLabel
+                      value="White"
+                      control={<Radio />}
+                      label="White"
+                    />
                   </RadioGroup>
                 </Box>
-
               </Stack>
             </Grid>
           </Grid>
         </Grid>
-        <Grid item xs={12} md={8} >
+        <Grid item xs={12} md={8}>
           <Grid container spacing={4}>
             <Grid item xs={12} md={12}>
-              <Stack spacing={4} >
-                <Paper onClick={() => setScannerActive(true)}
-                  sx={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", height: '45vh' }}>
-                  {scannerActive ? <QrScannerPopup onClose={() => setScannerActive(false)} onScan={(data) => console.log(data)} /> : <Box sx={{ p: 4 }}>
-                    <Typography
-                      variant="h4"
-                      sx={{ fontWeight: 700, mb: 3, cursor: "pointer", textDecoration: "underline", fontFamily: "League Spartan", display: "flex", alignItems: "center", gap: 2 }}
+              <Stack spacing={4}>
+                <Paper
+                  onClick={() => setScannerActive(true)}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "100%",
+                    height: "45vh",
+                    backgroundColor: box_id ? "#515151" : "",
+                  }}
+                >
+                  {scannerActive ? (
+                    <QrScannerPopup
+                      isfull={true}
+                      onClose={() => setScannerActive(false)}
+                      onScan={(data) => setBox_id(data.text)}
+                    />
+                  ) : box_id ? (
+                    <Box
+                      sx={{
+                        p: 6,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: "#EDEDED",
+                        borderRadius: "8px",
+                      }}
                     >
-                      <img src={qrScanLogo} alt="QR Scan Logo" />
-                      Scan Box ID
-                    </Typography>
-                  </Box>}
+                      <Typography
+                        variant="h4"
+                        sx={{
+                          fontWeight: 700,
+                          // mb: 3,
+                          cursor: "pointer",
+                          // textDecoration: "underline",
+                          fontFamily: "League Spartan",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 2,
+                        }}
+                      >
+                        Box ID : {box_id}
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <Box sx={{ p: 4 }}>
+                      <Typography
+                        variant="h4"
+                        sx={{
+                          fontWeight: 700,
+                          mb: 3,
+                          cursor: "pointer",
+                          textDecoration: "underline",
+                          fontFamily: "League Spartan",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 2,
+                        }}
+                      >
+                        <img src={qrScanLogo} alt="QR Scan Logo" />
+                        Scan Box ID
+                      </Typography>
+                    </Box>
+                  )}
                 </Paper>
               </Stack>
               <Box sx={{ display: "flex", justifyContent: "center" }}>
@@ -296,12 +228,37 @@ const ProductDetailsQcUi = () => {
                   OR
                 </Typography>
               </Box>
-              <Box sx={{ display: "flex", gap: 2, alignItems: "center", justifyContent: "center", mt: 2 }}>
-                <Button variant="outlined" startIcon={<BarcodeIcon />} onClick={() => setScannerActive(true)} sx={{ width: "50vw", height: "5vh" }}>
-                  <Typography variant="h4" sx={{ textTransform: "none" }}>
-                    Barcode Scanner
-                  </Typography>
-                </Button>
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 2,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  mt: 2,
+                }}
+              >
+                {Barcode ? (
+                  <CustomInput
+                    autoFocus={true}
+                    value={box_id}
+                    onChange={(e) => {
+                      setBox_id(e.target.value);
+                      // setBarcode(false);
+                    }}
+                    type="text"
+                  />
+                ) : (
+                  <Button
+                    variant="outlined"
+                    startIcon={<BarcodeIcon />}
+                    onClick={() => setBarcode(true)}
+                    sx={{ width: "50vw", height: "5vh" }}
+                  >
+                    <Typography variant="h4" sx={{ textTransform: "none" }}>
+                      Barcode Scanner
+                    </Typography>
+                  </Button>
+                )}
               </Box>
             </Grid>
           </Grid>

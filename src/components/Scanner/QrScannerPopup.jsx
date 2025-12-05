@@ -1,14 +1,12 @@
-import React, { useState } from "react";
-import { Box, Typography, Button } from "@mui/material";
+import React from "react";
+import { Box, Typography } from "@mui/material";
 import QrScanner from "./QrCodeScanner";
 
-const QrScannerPopup = ({ onClose, onScan }) => {
-  const [qrData, setQrData] = useState("");
-
+const QrScannerPopup = ({ onClose, onScan, isfull = false }) => {
   const handleScan = (data) => {
     if (data) {
       onScan(data);
-      handleDone();
+      onClose?.("scanner");
     }
   };
 
@@ -16,10 +14,16 @@ const QrScannerPopup = ({ onClose, onScan }) => {
     console.error("QR Scanner Error:", err);
   };
 
-  const handleDone = () => {
-    setQrData("");
-    onClose && onClose("scanner");
+  // Corner styles for all 4 corners
+  const cornerStyle = {
+    width: "30px",
+    height: "30px",
+    borderWidth: "7px",
+    borderStyle: "solid",
+    position: "absolute",
   };
+
+  const leftPos = isfull ? 0 : 115;
 
   return (
     <Box sx={{ padding: 2, textAlign: "center" }}>
@@ -27,6 +31,7 @@ const QrScannerPopup = ({ onClose, onScan }) => {
         Scan QR Code
       </Typography>
 
+      {/* QR Scanner Container */}
       <Box
         sx={{
           position: "relative",
@@ -35,6 +40,7 @@ const QrScannerPopup = ({ onClose, onScan }) => {
           borderRadius: "8px",
           overflow: "hidden",
           marginBottom: 2,
+          backgroundColor: "black",
         }}
       >
         <QrScanner
@@ -43,77 +49,77 @@ const QrScannerPopup = ({ onClose, onScan }) => {
           onScan={handleScan}
           style={{ width: "100%", height: "100%" }}
         />
+
+        {/* QR Frame Corners */}
         <Box
           sx={{
-            position: "absolute",
+            ...cornerStyle,
+            borderLeftColor: "black",
+            borderTopColor: "black",
+            borderRightColor: "transparent",
+            borderBottomColor: "transparent",
             top: 0,
-            left: 115,
-            width: "30px",
-            height: "30px",
-            borderLeft: "7px solid black",
-            borderTop: "7px solid black",
+            left: leftPos,
           }}
         />
+
         <Box
           sx={{
-            position: "absolute",
+            ...cornerStyle,
+            borderRightColor: "black",
+            borderTopColor: "black",
+            borderLeftColor: "transparent",
+            borderBottomColor: "transparent",
             top: 0,
-            right: 115,
-            width: "30px",
-            height: "30px",
-            borderRight: "7px solid black",
-            borderTop: "7px solid black",
+            right: leftPos,
           }}
         />
+
         <Box
           sx={{
-            position: "absolute",
+            ...cornerStyle,
+            borderLeftColor: "black",
+            borderBottomColor: "black",
+            borderRightColor: "transparent",
+            borderTopColor: "transparent",
             bottom: 0,
-            left: 115,
-            width: "30px",
-            height: "30px",
-            borderLeft: "7px solid black",
-            borderBottom: "7px solid black",
+            left: leftPos,
           }}
         />
+
         <Box
           sx={{
-            position: "absolute",
+            ...cornerStyle,
+            borderRightColor: "black",
+            borderBottomColor: "black",
+            borderLeftColor: "transparent",
+            borderTopColor: "transparent",
             bottom: 0,
-            right: 115,
-            width: "30px",
-            height: "30px",
-            borderRight: "7px solid black",
-            borderBottom: "7px solid black",
+            right: leftPos,
           }}
         />
+
+        {/* Scanning Line */}
         <Box
           sx={{
             position: "absolute",
-            top: 0,
-            left: 118,
-            width: "63%",
+            left: "5%",
+            width: "90%",
             height: "4px",
-            background:
-              "linear-gradient(to right,rgb(0, 21, 128),rgb(0, 21, 128))",
-            boxShadow: "0 0 0pxrgb(4, 0, 255), 0 0 20pxrgb(0, 30, 128)",
-            animation: "scan-animation 2s infinite ease-in-out",
+            background: "rgb(0,21,128)",
+            boxShadow: "0 0 15px rgb(0,30,128)",
+            animation: "scanAnimation 2s infinite ease-in-out",
             zIndex: 2,
           }}
         />
       </Box>
 
-      <style jsx>{`
-        @keyframes scan-animation {
-          0% {
-            top: 0;
-          }
-          50% {
-            top: 50%;
-          }
-          100% {
-            top: 100%;
-          }
+      {/* Animation */}
+      <style>{`
+        @keyframes scanAnimation {
+          0% { top: 0; }
+          50% { top: 50%; }
+          100% { top: 100%; }
         }
       `}</style>
     </Box>
