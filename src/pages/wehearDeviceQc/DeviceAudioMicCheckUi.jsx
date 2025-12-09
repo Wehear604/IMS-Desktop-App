@@ -34,6 +34,9 @@ import {
   BteDeviceCurrentVolume,
   BteDeviceMode,
   BteDeviceVolume,
+  readRicMode,
+  readRicVolumeLevel,
+  RicDeviceCurrentVolume,
 } from "../../store/actions/deviceQcAction";
 import {
   DeviceStoreAction,
@@ -104,6 +107,7 @@ const DeviceAudioMicCheckUi = () => {
     body2: false,
     charging: false,
   });
+
   const toggle = (key) => () => {
     setFields((prev) => ({ ...prev, [key]: !prev[key] }));
   };
@@ -119,9 +123,10 @@ const DeviceAudioMicCheckUi = () => {
     (number) => {
       if (!deviceRef.current?.device_side) return false;
       return deviceRef.current?.device_side === LISTENING_SIDE.LEFT
-        ? Array.isArray(deviceQc.modeLeft) && deviceQc.modeLeft.includes(number)
+        ? Array.isArray(deviceQc.modeLeft) &&
+        deviceQc.modeLeft.includes(number)
         : Array.isArray(deviceQc.modeRight) &&
-            deviceQc.modeRight.includes(number);
+        deviceQc.modeRight.includes(number);
     },
     [deviceQc.modeLeft, deviceQc.modeRight]
   );
@@ -134,9 +139,26 @@ const DeviceAudioMicCheckUi = () => {
       currentDevice?.device_type === DEVICES.BTE_PRIME
     ) {
       if (currentStep === 1) {
-        dispatch(BteDeviceVolume());
+        dispatch(BteDeviceVolume(currentDevice.device_side));
       } else if (currentStep === 2) {
         dispatch(BteDeviceMode());
+      }
+    } else if (
+      currentDevice?.device_type === DEVICES.RIC_OPTIMA_8 ||
+      currentDevice?.device_type === DEVICES.RIC_OPTIMA ||
+      currentDevice?.device_type === DEVICES.RIC_32
+    ) {
+      if (currentStep === 1) {
+        dispatch(
+          readRicVolumeLevel(
+            currentDevice.device_side,
+            BLE_STORE.deviceObj
+          )
+        );
+      } else if (currentStep === 2) {
+        dispatch(
+          readRicMode(currentDevice.device_side, BLE_STORE.deviceObj)
+        );
       }
     }
   };
@@ -154,7 +176,7 @@ const DeviceAudioMicCheckUi = () => {
       if (!mounted.current) return;
       try {
         deviceQcFun();
-      } catch (err) {}
+      } catch (err) { }
     }, 1500);
   }, [dispatch]);
 
@@ -181,13 +203,25 @@ const DeviceAudioMicCheckUi = () => {
   useEffect(() => {
     mounted.current = true;
     if (device?.device_side) {
-      dispatch(BteDeviceCurrentVolume(device.device_side));
+      if (
+        device?.device_type === DEVICES.BTE_OPTIMA ||
+        device?.device_type === DEVICES.BTE_PRIME
+      ) {
+        dispatch(BteDeviceCurrentVolume(device.device_side));
+      } else if (
+        device?.device_type === DEVICES.RIC_OPTIMA_8 ||
+        device?.device_type === DEVICES.RIC_OPTIMA ||
+        device?.device_type === DEVICES.RIC_32
+      ) {
+        dispatch(RicDeviceCurrentVolume(device.device_side));
+      }
     }
     return () => {
       mounted.current = false;
       stopReading();
     };
-  }, [dispatch, device?.device_side, stopReading]);
+  }, [dispatch, device?.device_side, device?.device_type, stopReading]);
+
 
   const handleNext = useCallback(() => {
     sendPauseCommand(dispatch);
@@ -252,7 +286,7 @@ const DeviceAudioMicCheckUi = () => {
     }
   }, [dispatch, device, deviceQc, fields]);
 
-  console.log("object deviceDataStore", deviceDataStore);
+  // console.log("object deviceDataStore", deviceDataStore);
 
   const handleBack = useCallback(() => {
     setStep((s) => Math.max(s - 1, 0));

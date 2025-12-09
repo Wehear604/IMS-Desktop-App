@@ -16,7 +16,7 @@ const initialState = {
     charging: false,
     audio: null,
     mac: null,
-    allFilled: false,
+    result: false,
   },
   right: {
     device_type: null,
@@ -32,7 +32,7 @@ const initialState = {
     charging: false,
     audio: null,
     mac: null,
-    allFilled: false,
+    result: false,
   },
   box_Contains: [],
   deviceColor: null,
@@ -56,7 +56,7 @@ const deviceDataStorageReducer = (state = initialState, action) => {
             charging: action.charging || false,
             audio: action.audio,
             mac: action.mac,
-            allFilled: true,
+            result: true,
           },
         };
       } else if (action.device_side === LISTENING_SIDE.RIGHT) {
@@ -73,7 +73,7 @@ const deviceDataStorageReducer = (state = initialState, action) => {
             charging: action.charging || false,
             audio: action.audio,
             mac: action.mac,
-            allFilled: true,
+            result: true,
           },
         };
       }

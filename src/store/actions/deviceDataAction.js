@@ -20,11 +20,14 @@ export const DeviceIsAudioCheck = (is_Audio_play) => {
   return { type: actions.IS_AUDIO_CHECK, is_Audio_play };
 };
 
-export const connectDevice = (deviceInfo, side) => {
+export const connectDevice = (deviceInfo, side, deviceObj) => {
+  console.log("deviceInfo in action", deviceInfo);
+  console.log("deviceObj in action", deviceObj);
   return {
     type: actions.CONNECT_DEVICE,
     deviceInfo,
     side,
+    deviceObj
   };
 };
 

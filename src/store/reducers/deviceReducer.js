@@ -4,7 +4,7 @@ const initialState = {
     device_type: null,
     device_side: null,
     mac: null,
-    is_Audio_play:false,
+    is_Audio_play: false,
     connected: false,
     isConnecting: false,
     read_only: false,
@@ -31,12 +31,13 @@ const deviceReducer = (state = initialState, action) => {
                 ...state,
                 connected: true,
                 read_only: false,
-                deviceInfo: action.deviceInfo
+                deviceInfo: action.deviceInfo,
+                deviceObj: action.deviceObj,
             };
-        
+
         case actions.SET_DEVICE_MAC:
             return { ...state, mac: action.mac };
-        
+
         case actions.IS_AUDIO_CHECK:
             return { ...state, is_Audio_play: action.is_Audio_play };
 
