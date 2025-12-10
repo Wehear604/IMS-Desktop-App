@@ -285,6 +285,17 @@ const DeviceAudioMicCheckUi = () => {
         )
       );
     } else {
+      dispatch(closeModal("deviceAudioMicCheck"));
+      if (
+        device?.device_type === DEVICES.RIC_OPTIMA_8 ||
+        device?.device_type === DEVICES.RIC_OPTIMA ||
+        device?.device_type === DEVICES.RIC_32
+      ) {
+        BLE_STORE.disconnectFun();
+      } else {
+        BLE_STORE.BTEdisconnect = true;
+      }
+      dispatch(resetDeviceDataStore());
       dispatch(
         callSnackBar(
           `Please complete all steps ${sideLabel} before finishing the QC.`,
@@ -317,6 +328,7 @@ const DeviceAudioMicCheckUi = () => {
       disabledSubmit={disabledSubmit}
       onSubmit={step === 3 ? onComplete : handleNext}
       // closeText={step === 0 ? "Close" : "Back"}
+      onClose={() => onComplete()}
       confirmText={step === 3 ? `Complete ${sideLabel} Side Qc` : "Next"}
     >
       <Box
