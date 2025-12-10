@@ -1,4 +1,4 @@
-export const mode = "development";
+export const mode = "local";
 let domain = "";
 
 switch (mode) {
