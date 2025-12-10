@@ -13,8 +13,20 @@ import {
     Button,
 } from "@mui/material";
 import { styled } from "@mui/system";
+
+
 import leftDevice from "../../assets/images/bteLeft.svg";
 import rightDevice from "../../assets/images/bteRight.svg";
+import leftRic16 from "../../assets/images/RIC optima 16_Close Dome_left_Biege.png";
+import rightRic16 from "../../assets/images/RIC optima 16_Close Dome_right_Biege.png";
+import leftRic8 from "../../assets/images/R8 HA all open domes.left.svg";
+import rightRic8 from "../../assets/images/R8 HA all open domes.right.svg";
+import leftITEOptima from "../../assets/images/ITE_OPTIMA_LEFT_BLACK.svg";
+import rightITEOptima from "../../assets/images/ITE_OPTIMA_RIGHT_BLACK.svg";
+
+
+
+
 import leftSideLogo from "../../assets/images/leftSideSmall.svg";
 import rightSideLogo from "../../assets/images/rightSideSmall.svg";
 import { DEVICES, EQ_LEVEL, LISTENING_SIDE, MODES, VOLUME_COMMANDS_REVERSE } from "../../utils/constants";
@@ -387,6 +399,40 @@ const DeviceConnectUi = () => {
             setIsReading(false);
         }
     }, [device?.connected]);
+    console.log("first device", device?.device_type)
+
+    const getLeftDeviceImage = (deviceType) => {
+        switch (deviceType) {
+            case DEVICES.BTE_OPTIMA:
+                return <img src={leftDevice} alt="BTE" />;
+            case DEVICES.BTE_PRIME:
+                return <img src={leftDevice} alt="BTE" />;
+            case DEVICES.RIC_OPTIMA:
+                return <img style={{width:120, height:120}} src={leftRic16} alt="Ric 16" />;
+            case DEVICES.RIC_OPTIMA_8:
+                return <img src={leftRic8} alt="Ric 8" />;
+            case DEVICES.ITE_OPTIMA:
+                return <img src={leftITEOptima} alt="ITE Optima" />;
+            default:
+                return null;
+        }
+    };
+
+    const getRightDeviceImage = (deviceType) => {
+        switch (deviceType) {
+            case DEVICES.BTE_OPTIMA:
+                return <img src={rightDevice} alt="BTE" />;
+            case DEVICES.BTE_PRIME:
+                return <img src={rightDevice} alt="BTE" />;
+            case DEVICES.RIC_OPTIMA:
+                return <img style={{ width: 120, height: 120 }} src={rightRic16} alt="Ric 16" />;
+            case DEVICES.RIC_OPTIMA_8:
+                return <img src={rightRic8} alt="Ric 8" />;
+            
+            default:
+                return null;
+        }
+    };
 
     return (
         <>
@@ -411,7 +457,7 @@ const DeviceConnectUi = () => {
                                 {/* <CardActionArea sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}> */}
                                 <Box sx={{ display: "flex", height: "100%", flexDirection: "column", alignItems: "center", justifyContent: "space-evenly" }}>
                                     <Box sx={{ height: "10vh", justifyContent: "flex-start" }}>
-                                        <img src={item?.side === "L" ? leftDevice : rightDevice} alt={`device-${item.side}`} />
+                                       {item?.side === "L" ? getLeftDeviceImage(device?.device_type) : getRightDeviceImage(device?.device_type)}
                                     </Box>
                                     {/* <ChipRow> */}
                                     <Box gap={2} sx={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>

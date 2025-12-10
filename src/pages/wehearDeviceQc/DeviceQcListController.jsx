@@ -19,7 +19,7 @@ const DeviceQcListController = () => {
   const [filters, setFilters] = useState({
     search: "",
   });
-  const [step, setStep] = useState(2);
+  const [step, setStep] = useState(0);
   useEffect(() => {
     if (
       step === 1 &&
