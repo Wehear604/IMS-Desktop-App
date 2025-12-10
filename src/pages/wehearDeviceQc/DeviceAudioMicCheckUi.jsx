@@ -295,7 +295,7 @@ const DeviceAudioMicCheckUi = () => {
   const disabledSubmit = (() => {
     if (step === 0) return !Boolean(device?.is_Audio_play);
     if (step === 1)
-      return !(deviceQc?.volumeIncrease && deviceQc?.volumeDecrease);
+      return device?.device_type === DEVICES.BTE_OPTIMA || device?.device_type === DEVICES.BTE_PRIME ? !(deviceQc?.volumeIncrease && deviceQc?.volumeDecrease) : !(deviceQc?.volumeDecrease);
     if (step === 2) {
       const modes =
         device?.device_side === LISTENING_SIDE.LEFT
