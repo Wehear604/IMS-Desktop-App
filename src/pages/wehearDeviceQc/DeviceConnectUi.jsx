@@ -475,7 +475,7 @@ const DeviceConnectUi = () => {
                     ))}
                 </Grid>
 
-                {(device?.device_type === DEVICES.BTE_OPTIMA || device?.device_type === DEVICES.BTE_PRIME) ?
+                {/* {(device?.device_type === DEVICES.BTE_OPTIMA || device?.device_type === DEVICES.BTE_PRIME) ?
                     <BleConnectDeviceModule
                         side={device?.device_side === LISTENING_SIDE.RIGHT ? "Right" : "Left"}
                         isConnecting={device?.isConnecting}
@@ -506,7 +506,8 @@ const DeviceConnectUi = () => {
                             dispatch(connectDevice(
                                 deviceInfo,
                                 device?.device_side,
-                                device?.device_type
+                                device?.device_type,
+                                BLE_STORE.deviceObj
                             ));
                         }}
                         Component={ConnectButton}
@@ -520,9 +521,67 @@ const DeviceConnectUi = () => {
                         fitting={{
                             device_type: device?.device_type,
                             device_side: device?.device_side,
-                            connected: device.isConnecting
+                            connected: device.isConnecting,
+                            deviceObj: BLE_STORE.deviceObj,
                         }}
-                    />}
+                    />} */}
+
+                {device?.device_type === DEVICES.BTE_OPTIMA ||
+                    device?.device_type === DEVICES.BTE_PRIME ? (
+                    <BleConnectDeviceModule
+                        side={device?.device_side === LISTENING_SIDE.RIGHT ? "Right" : "Left"}
+                        isConnecting={device?.isConnecting}
+                        onConnectWithDevice={(data, deviceInfo) => {
+                            dispatch(
+                                connectDevice(
+                                    deviceInfo,
+                                    device?.device_side,
+                                    device?.device_type
+                                )
+                            );
+                        }}
+                        Component={ConnectButton}
+                        onLoadingChange={() => { }}
+                        onWriteFunctionEnabled={(fun) =>
+                            dispatch(onWriteFunctionChange(fun, device.device_side))
+                        }
+                        onDisconnect={() => {
+                            dispatch(disconnectAction(device.device_side));
+                        }}
+                        fitting={{
+                            device_type: device?.device_type,
+                            device_side: device?.device_side,
+                            connected: device.isConnecting,
+                        }}
+                    />
+                ) : (
+                    <RicConnectDevice
+                        side={device?.device_side === LISTENING_SIDE.RIGHT ? "Right" : "Left"}
+                        isConnecting={device?.isConnecting}
+                        onConnectWithDevice={(data, deviceInfo) => {
+                            dispatch(
+                                connectDevice(
+                                    deviceInfo,
+                                    device?.device_side,
+                                    device?.device_type
+                                )
+                            );
+                        }}
+                        Component={ConnectButton}
+                        onLoadingChange={() => { }}
+                        onWriteFunctionEnabled={(fun) =>
+                            dispatch(onWriteFunctionChange(fun, device.device_side))
+                        }
+                        onDisconnect={() => {
+                            dispatch(disconnectAction(device.device_side));
+                        }}
+                        fitting={{
+                            device_type: device?.device_type,
+                            device_side: device?.device_side,
+                            connected: device.isConnecting,
+                        }}
+                    />
+                )}
                 {/* </CenterArea> */}
 
                 {/* <Box sx={{ display: "flex", gap: 2, justifyContent: "center", mt: 3 }}>

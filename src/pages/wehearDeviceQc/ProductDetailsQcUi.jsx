@@ -16,6 +16,7 @@ import {
   Stack,
   Paper,
   TextField,
+  CircularProgress,
 } from "@mui/material";
 import CameraAltOutlinedIcon from "@mui/icons-material/CameraAltOutlined";
 import BarcodeIcon from "@mui/icons-material/QrCode2";
@@ -23,15 +24,19 @@ import CloseIcon from "@mui/icons-material/Close";
 import QrScannerPopup from "../../components/Scanner/QrScannerPopup";
 import qrScanLogo from "../../assets/images/qrScanLogo.svg";
 import CustomInput from "../../components/inputs/CustomInputs";
+import { fetchColorApi } from "../../apis/productColor.api";
+import { toTitleCase, toTitleSpaceCase } from "../../utils/main";
+import { useDispatch } from "react-redux";
+import { callApiAction } from "../../store/actions/commonAction";
 
 const ProductDetailsQcUi = ({ setBox, box }) => {
   const [boxContains, setBoxContains] = useState({
-    Cable: false,
-    Doms: false,
-    Manual: false,
-    "Charging Case": false,
-    "Cleaning Brush": false,
-    "Warranty Card": false,
+    cable: false,
+    doms: false,
+    manual: false,
+    "charging_Case": false,
+    "cleaning_Brush": false,
+    "warranty_Card": false,
   });
   const [Barcode, setBarcode] = useState(false);
   const [deviceColor, setDeviceColor] = useState("");
@@ -47,11 +52,45 @@ const ProductDetailsQcUi = ({ setBox, box }) => {
       .map(([key]) => ({ [key]: true }));
 
     setBox({
+      ...box,
       box_Contains: formattedBoxContains ?? [],
       boxId: box_id ?? "",
       deviceColor: deviceColor ?? "",
     });
   }, [boxContains, box_id, deviceColor, setBox]);
+
+
+  const [colors, setColors] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+
+  useEffect(() => {
+    let mounted = true;
+    const loadColors = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetchColorApi();
+        const result = res.data?.result || [];
+        
+        if (mounted) {
+          setColors(result);
+          if (!deviceColor && result.length) setDeviceColor(result[0]._id);
+        }
+      } catch (err) {
+        if (mounted) setError(err.message || "Failed to load colors");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    loadColors();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
 
   return (
     <Box sx={{ p: 4 }}>
@@ -60,6 +99,9 @@ const ProductDetailsQcUi = ({ setBox, box }) => {
         sx={{ fontWeight: 700, mb: 3, textAlign: { xs: "center", md: "left" } }}
       >
         Package Details
+      </Typography>
+      <Typography variant="h5" sx={{ fontWeight: 600, mb: 4, color: "red" }}>
+        {box?.err}
       </Typography>
       <Grid container sx={{ padding: 4 }}>
         <Grid item xs={12} md={4}>
@@ -97,7 +139,7 @@ const ProductDetailsQcUi = ({ setBox, box }) => {
                             size="small"
                           />
                         }
-                        label={key}
+                        label={toTitleSpaceCase(key)}
                         sx={{ display: "block", ml: 0.5 }}
                       />
                     ))}
@@ -123,31 +165,20 @@ const ProductDetailsQcUi = ({ setBox, box }) => {
                     Device Color
                   </Typography>
 
-                  <RadioGroup
-                    value={deviceColor}
-                    onChange={(e) => setDeviceColor(e.target.value)}
-                  >
-                    <FormControlLabel
-                      value="Black"
-                      control={<Radio />}
-                      label="Black"
-                    />
-                    <FormControlLabel
-                      value="Beige"
-                      control={<Radio />}
-                      label="Beige"
-                    />
-                    <FormControlLabel
-                      value="Silver"
-                      control={<Radio />}
-                      label="Silver"
-                    />
-                    <FormControlLabel
-                      value="White"
-                      control={<Radio />}
-                      label="White"
-                    />
-                  </RadioGroup>
+                  {colors.length === 0 ? (
+                    <Typography>No colors available</Typography>
+                  ) : (
+                    <RadioGroup value={deviceColor} onChange={(e) => setDeviceColor(e.target.value)}>
+                      {colors.map((item) => (
+                        <FormControlLabel
+                          key={item._id}
+                          value={item._id}
+                          control={<Radio />}
+                          label={toTitleCase(item.name)}
+                        />
+                      ))}
+                    </RadioGroup>
+                  )}
                 </Box>
               </Stack>
             </Grid>

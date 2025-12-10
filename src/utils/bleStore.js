@@ -1,6 +1,7 @@
+import WriteRicDataToDevice from "../components/bluetooth/WriteRicDataToDevice";
 import { DeviceIsAudioCheck } from "../store/actions/deviceDataAction";
 import { callSnackBar } from "../store/actions/snackbarAction";
-import { SNACK_BAR_VARIETNS } from "./constants";
+import { LISTENING_SIDE, SNACK_BAR_VARIETNS } from "./constants";
 
 export const BLE_STORE = {
     deviceObj: null,
@@ -11,20 +12,27 @@ export const BLE_STORE = {
     BTEdisconnect: false
 };
 
-export async function sendPlayCommand(dispatch) {
-    if (!BLE_STORE.writeFun || !BLE_STORE.writeFun.writeData) {
-        console.error("Write function not ready");
-        return;
-    }
-
+export async function sendPlayCommand(dispatch,device_type, side, value) {
+    // if (!BLE_STORE.writeFun || !BLE_STORE.writeFun.writeData) {
+    //     console.error("Write function not ready");
+    //     return;
+    // }
     const playPacket = [170, 171, 3, 0, 11, 184, 0];
-
+    const command =
+        side === LISTENING_SIDE.LEFT
+            ? `83 03 01 00 ${value.toString(16).padStart(2, "0")}`
+            : `83 03 02 00 ${value.toString(16).padStart(2, "0")}`;
     try {
-        await BLE_STORE.writeFun.writeData(playPacket);
+        // await BLE_STORE.writeFun.writeData(playPacket);
+        await WriteRicDataToDevice(
+            command,
+            side,
+            BLE_STORE.deviceObj
+        );
         dispatch(DeviceIsAudioCheck(true));
     } catch (err) {
         console.error("Play write failed:", err);
-        dispatch(DeviceIsAudioCheck(true));
+        dispatch(DeviceIsAudioCheck(false));
         dispatch(
             callSnackBar(
                 `Play write failed ${err}`,
