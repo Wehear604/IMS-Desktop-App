@@ -268,7 +268,15 @@ const DeviceAudioMicCheckUi = () => {
         )
       );
       dispatch(closeModal("deviceAudioMicCheck"));
-      BLE_STORE.BTEdisconnect = true;
+      if (
+        device?.device_type === DEVICES.RIC_OPTIMA_8 ||
+        device?.device_type === DEVICES.RIC_OPTIMA ||
+        device?.device_type === DEVICES.RIC_32
+      ) {
+        BLE_STORE.disconnectFun();
+      } else {
+        BLE_STORE.BTEdisconnect = true;
+      }
       dispatch(resetDeviceDataStore());
       dispatch(
         callSnackBar(
@@ -285,12 +293,6 @@ const DeviceAudioMicCheckUi = () => {
       );
     }
   }, [dispatch, device, deviceQc, fields]);
-
-  // console.log("object deviceDataStore", deviceDataStore);
-
-  const handleBack = useCallback(() => {
-    setStep((s) => Math.max(s - 1, 0));
-  }, []);
 
   const disabledSubmit = (() => {
     if (step === 0) return !Boolean(device?.is_Audio_play);
