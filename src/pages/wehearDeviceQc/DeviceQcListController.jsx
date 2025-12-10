@@ -24,7 +24,7 @@ const DeviceQcListController = () => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const validate = useValidate();
-  const { deviceDataStore } = useSelector((state) => state);
+  const { deviceDataStore, device } = useSelector((state) => state);
   console.log("deviceDataStore", deviceDataStore);
   const [filters, setFilters] = useState({
     search: "",
@@ -47,11 +47,11 @@ const DeviceQcListController = () => {
       fields.deviceColor
     ) {
       dispatch(
-        DeviceBoxDetailsAction(fields?.box_Contains, fields?.boxId, fields?.deviceColor)
+        DeviceBoxDetailsAction(fields?.box_Contains, fields?.boxId, fields?.deviceColor, device.device_type)
       );
     } else if (step === 2 && fields.boxId) {
       dispatch(
-        DeviceBoxDetailsAction(fields?.box_Contains, fields?.boxId, fields?.deviceColor)
+        DeviceBoxDetailsAction(fields?.box_Contains, fields?.boxId, fields?.deviceColor, device.device_type)
       );
     }
   }, [fields]);
