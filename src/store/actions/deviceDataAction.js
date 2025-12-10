@@ -87,8 +87,8 @@ export const DeviceStoreAction = (
   };
 };
 
-export const DeviceBoxDetailsAction = (box_Contains, boxId, deviceColor) => {
-  return { type: actions.SET_BOX_DETAILS, box_Contains, boxId, deviceColor };
+export const DeviceBoxDetailsAction = (box_Contains, boxId, deviceColor,device_type) => {
+  return { type: actions.SET_BOX_DETAILS, box_Contains, boxId, deviceColor, device_type };
 };
 
 export const resetDeviceDataStore = () => {

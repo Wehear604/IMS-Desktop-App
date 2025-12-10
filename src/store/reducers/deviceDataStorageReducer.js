@@ -37,6 +37,7 @@ const initialState = {
   box_Contains: [],
   deviceColor: null,
   boxId: null,
+  device_type:null
 };
 
 const deviceDataStorageReducer = (state = initialState, action) => {
@@ -84,7 +85,8 @@ const deviceDataStorageReducer = (state = initialState, action) => {
         ...state,
         box_Contains: action.box_Contains,
         boxId: action.boxId,
-        deviceColor: action.deviceColor,
+        deviceColor: action.deviceColor, 
+        device_type: action.device_type
       };
     default:
       return state;
