@@ -181,7 +181,7 @@ export const readRicMode = (side, deviceObj) => {
         console.error(`Unexpected mode value: ${d1}`);
         return;
       }
-
+      console.log("object modeeeeeeeeeeeeee", mode);
       dispatch({
         type:
           side === LISTENING_SIDE.RIGHT

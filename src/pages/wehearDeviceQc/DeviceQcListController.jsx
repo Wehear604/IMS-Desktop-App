@@ -14,6 +14,7 @@ import { callApiAction } from "../../store/actions/commonAction";
 import { createDeviceQcApi } from "../../apis/deviceQc.api";
 
 const DeviceQcListController = () => {
+  const [step, setStep] = useState(0);
   const [fields, setFields] = useState({
     err: "",
     box_Contains: [],
@@ -24,11 +25,11 @@ const DeviceQcListController = () => {
   const [loading, setLoading] = useState(false);
   const validate = useValidate();
   const { deviceDataStore } = useSelector((state) => state);
-  console.log("deviceDataStore",deviceDataStore);
+  console.log("deviceDataStore", deviceDataStore);
   const [filters, setFilters] = useState({
     search: "",
   });
-  const [step, setStep] = useState(2);
+
   useEffect(() => {
     if (
       step === 1 &&

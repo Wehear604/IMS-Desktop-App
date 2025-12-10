@@ -301,7 +301,7 @@ const DeviceAudioMicCheckUi = () => {
         device?.device_side === LISTENING_SIDE.LEFT
           ? deviceQc?.modeLeft
           : deviceQc?.modeRight;
-      return !(Array.isArray(modes) && modes.length === 4);
+      return !(Array.isArray(modes) && modes.length === (device?.device_type === DEVICES.BTE_OPTIMA || device?.device_type === DEVICES.BTE_PRIME ? 4 : 3));
     }
     if (step === 3) {
       return !(fields.body1 && fields.body2 && fields.charging);
@@ -367,7 +367,7 @@ const DeviceAudioMicCheckUi = () => {
                   onClick={() =>
                     isPlaying
                       ? (setIsPlaying(false), sendPauseCommand(dispatch))
-                      : (setIsPlaying(true), sendPlayCommand(dispatch))
+                      : (setIsPlaying(false), sendPlayCommand(dispatch, device?.device_type, findObjectKeyByValue(device?.device_side, LISTENING_SIDE), 100))
                   }
                   startIcon={
                     isPlaying ? (
@@ -398,7 +398,7 @@ const DeviceAudioMicCheckUi = () => {
             alignItems="center"
             justifyContent="center"
           >
-            <StepCard
+            {(device?.device_type === DEVICES.BTE_OPTIMA || device?.device_type === DEVICES.BTE_PRIME) && <StepCard
               isChecked={true}
               checked={deviceQc?.volumeIncrease}
               title={
@@ -406,14 +406,17 @@ const DeviceAudioMicCheckUi = () => {
                   ? "Volume Level Increased"
                   : "Increase Volume"
               }
-            />
+            />}
             <StepCard
               isChecked={true}
               checked={deviceQc?.volumeDecrease}
-              title={
+              title={(device?.device_type === DEVICES.BTE_OPTIMA || device?.device_type === DEVICES.BTE_PRIME) ?
                 deviceQc?.volumeDecrease
                   ? "Volume Level Decreased"
                   : "Decrease Volume"
+                : deviceQc?.volumeDecrease
+                  ? "Volume Level Set"
+                  : "Set Volume Level"
               }
             />
           </Box>
@@ -449,7 +452,7 @@ const DeviceAudioMicCheckUi = () => {
                 modecheck(2) ? "Third Mode Has Been tested." : "Test Third Mode"
               }
             />
-            <StepCard
+            {(device?.device_type === DEVICES.BTE_OPTIMA || device?.device_type === DEVICES.BTE_PRIME) && <StepCard
               isChecked={true}
               checked={modecheck(3)}
               title={
@@ -457,7 +460,7 @@ const DeviceAudioMicCheckUi = () => {
                   ? "Fourth Mode Has Been tested."
                   : "Test Fourth Mode"
               }
-            />
+            />}
           </Box>
         )}
 

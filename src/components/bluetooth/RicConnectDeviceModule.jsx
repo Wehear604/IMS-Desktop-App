@@ -26,7 +26,7 @@ import {
 import { BLE_STORE } from "../../utils/bleStore"; // <-- Make sure this file exports BLE_STORE
 import { useDispatch } from "react-redux";
 import { callSnackBar } from "../../store/actions/snackbarAction";
-import { DeviceIsConnectingAction, disconnectAction } from "../../store/actions/deviceDataAction";
+import { DeviceIsConnectingAction, DeviceMACAction, disconnectAction } from "../../store/actions/deviceDataAction";
 import WriteRicDataToDevice from "./WriteRicDataToDevice";
 
 const modalStyle = {
@@ -139,6 +139,7 @@ const RicConnectDevice = ({
         if (loading && isPickerOpen) {
             setIsPickerOpen(false);
             setSelectingDeviceId(null);
+            dispatch(DeviceMACAction(null));
         }
     }, [loading, isPickerOpen]);
 
@@ -347,6 +348,7 @@ const RicConnectDevice = ({
     // Electron modal handlers
     const handleDeviceSelected = (deviceId) => {
         setSelectingDeviceId(deviceId);
+           dispatch(DeviceMACAction(deviceId));
         if (window.electronAPI) {
             window.electronAPI.selectBluetoothDevice(deviceId);
         }
