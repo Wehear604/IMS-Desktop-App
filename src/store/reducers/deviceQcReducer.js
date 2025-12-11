@@ -67,21 +67,24 @@ const deviceQcReducer = (state = initialState, action) => {
                 currentVolume: action.volume,
             };
 
-        // ---------- RIC MODES ----------
-        case actions.CHANGE_RIC_MODE_LEFT:
-        case actions.CHANGE_RIC_MODE_RIGHT:
+        case actions.SET_RIC8_CURRENT_VOLUME:
             return {
                 ...state,
-                modeLeft:
-                    state.device_side === LISTENING_SIDE.LEFT
-                        ? [...new Set([...state.modeLeft, action.mode])]
-                        : state.modeLeft,
-                modeRight:
-                    state.device_side === LISTENING_SIDE.RIGHT
-                        ? [...new Set([...state.modeRight, action.mode])]
-                        : state.modeRight,
+                currentVolume: action.volume,
+                start: true,
+                device_side: action.device_side,
             };
-
+        case actions.SET_RIC8_VOLUME:
+            return {
+                ...state,
+                volumeLeft: action.device_side === LISTENING_SIDE.LEFT ? action.volume : state.volumeLeft,
+                volumeRight: action.device_side === LISTENING_SIDE.RIGHT ? action.volume : state.volumeRight,
+                volumeIncrease: state.currentVolume < action.volume ? true : state.volumeIncrease,
+                volumeDecrease: state.currentVolume > action.volume ? true : state.volumeDecrease,
+                currentVolume: action.volume,
+                modeLeft: state.device_side === LISTENING_SIDE.LEFT ? [...new Set([...state.modeLeft, action.mode])] : state.modeLeft,
+                modeRight: state.device_side === LISTENING_SIDE.RIGHT ? [...new Set([...state.modeRight, action.mode])] : state.modeRight,
+            }
         default:
             return state;
     }

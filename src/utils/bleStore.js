@@ -22,13 +22,22 @@ export async function sendPlayCommand(dispatch,device_type, side, value) {
         side === LISTENING_SIDE.LEFT
             ? `83 03 01 00 ${value.toString(16).padStart(2, "0")}`
             : `83 03 02 00 ${value.toString(16).padStart(2, "0")}`;
+    
+    const Ric8command =
+        side === LISTENING_SIDE.LEFT
+            ? `83 03 01 00 ${value.toString(16).padStart(2, "0")}`
+            : `83 03 02 00 ${value.toString(16).padStart(2, "0")}`;
+
+    console.log("Volume Command:", Ric8command);
+
     try {
         // await BLE_STORE.writeFun.writeData(playPacket);
-        await WriteRicDataToDevice(
-            command,
-            side,
-            BLE_STORE.deviceObj
-        );
+        // await WriteRicDataToDevice(
+        //     command,
+        //     side,
+        //     BLE_STORE.deviceObj
+        // );
+        await WriteRicDataToDevice(Ric8command, side, BLE_STORE.deviceObj);
         dispatch(DeviceIsAudioCheck(true));
     } catch (err) {
         console.error("Play write failed:", err);

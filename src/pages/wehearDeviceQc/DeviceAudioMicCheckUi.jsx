@@ -34,6 +34,8 @@ import {
   BteDeviceCurrentVolume,
   BteDeviceMode,
   BteDeviceVolume,
+  readRic8DeviceCurrentVolume,
+  readRic8Volume,
   readRicMode,
   readRicVolumeLevel,
   RicDeviceCurrentVolume,
@@ -134,6 +136,7 @@ const DeviceAudioMicCheckUi = () => {
   const deviceQcFun = async () => {
     const currentStep = stepRef.current;
     const currentDevice = deviceRef.current;
+    console.log("first currentDevice", currentDevice)
     if (
       currentDevice?.device_type === DEVICES.BTE_OPTIMA ||
       currentDevice?.device_type === DEVICES.BTE_PRIME
@@ -144,7 +147,6 @@ const DeviceAudioMicCheckUi = () => {
         dispatch(BteDeviceMode());
       }
     } else if (
-      currentDevice?.device_type === DEVICES.RIC_OPTIMA_8 ||
       currentDevice?.device_type === DEVICES.RIC_OPTIMA ||
       currentDevice?.device_type === DEVICES.RIC_32
     ) {
@@ -159,6 +161,13 @@ const DeviceAudioMicCheckUi = () => {
         dispatch(
           readRicMode(currentDevice.device_side, BLE_STORE.deviceObj)
         );
+      }
+    } else if (
+      currentDevice?.device_type === DEVICES.RIC_OPTIMA_8
+    ) {
+      if (currentStep === 1 || currentStep === 2) {
+        console.log("first continuosuly rendering", currentDevice)
+        dispatch(readRic8Volume(currentDevice.device_side));
       }
     }
   };
@@ -209,11 +218,14 @@ const DeviceAudioMicCheckUi = () => {
       ) {
         dispatch(BteDeviceCurrentVolume(device.device_side));
       } else if (
-        device?.device_type === DEVICES.RIC_OPTIMA_8 ||
         device?.device_type === DEVICES.RIC_OPTIMA ||
         device?.device_type === DEVICES.RIC_32
       ) {
         dispatch(RicDeviceCurrentVolume(device.device_side));
+      } else if (
+        device?.device_type === DEVICES.RIC_OPTIMA_8
+      ) {
+        dispatch(readRic8Volume(device.device_side,true));
       }
     }
     return () => {
@@ -297,13 +309,13 @@ const DeviceAudioMicCheckUi = () => {
   const disabledSubmit = (() => {
     if (step === 0) return !Boolean(device?.is_Audio_play);
     if (step === 1)
-      return device?.device_type === DEVICES.BTE_OPTIMA || device?.device_type === DEVICES.BTE_PRIME ? !(deviceQc?.volumeIncrease && deviceQc?.volumeDecrease) : !(deviceQc?.volumeDecrease);
+      return device?.device_type === DEVICES.BTE_OPTIMA || device?.device_type === DEVICES.BTE_PRIME || device?.device_type === DEVICES.RIC_OPTIMA_8 ? !(deviceQc?.volumeIncrease && deviceQc?.volumeDecrease) : !(deviceQc?.volumeDecrease);
     if (step === 2) {
       const modes =
         device?.device_side === LISTENING_SIDE.LEFT
           ? deviceQc?.modeLeft
           : deviceQc?.modeRight;
-      return !(Array.isArray(modes) && modes.length === (device?.device_type === DEVICES.BTE_OPTIMA || device?.device_type === DEVICES.BTE_PRIME ? 4 : 3));
+      return !(Array.isArray(modes) && modes.length === (device?.device_type === DEVICES.BTE_OPTIMA || device?.device_type === DEVICES.BTE_PRIME || device?.device_type === DEVICES.RIC_OPTIMA_8 ? 4 : 3));
     }
     if (step === 3) {
       return !(fields.body1 && fields.body2 && fields.charging);
@@ -388,7 +400,7 @@ const DeviceAudioMicCheckUi = () => {
                   onClick={() =>
                     isPlaying
                       ? (setIsPlaying(false), sendPauseCommand(dispatch))
-                      : (setIsPlaying(false), sendPlayCommand(dispatch, device?.device_type, findObjectKeyByValue(device?.device_side, LISTENING_SIDE), 100))
+                      : (setIsPlaying(false), sendPlayCommand(dispatch, device?.device_type, findObjectKeyByValue(device?.device_side, LISTENING_SIDE), 30))
                   }
                   startIcon={
                     isPlaying ? (
@@ -419,7 +431,7 @@ const DeviceAudioMicCheckUi = () => {
             alignItems="center"
             justifyContent="center"
           >
-            {(device?.device_type === DEVICES.BTE_OPTIMA || device?.device_type === DEVICES.BTE_PRIME) && <StepCard
+            {(device?.device_type === DEVICES.BTE_OPTIMA || device?.device_type === DEVICES.BTE_PRIME || device?.device_type === DEVICES.RIC_OPTIMA_8) && <StepCard
               isChecked={true}
               checked={deviceQc?.volumeIncrease}
               title={
@@ -431,7 +443,7 @@ const DeviceAudioMicCheckUi = () => {
             <StepCard
               isChecked={true}
               checked={deviceQc?.volumeDecrease}
-              title={(device?.device_type === DEVICES.BTE_OPTIMA || device?.device_type === DEVICES.BTE_PRIME) ?
+              title={(device?.device_type === DEVICES.BTE_OPTIMA || device?.device_type === DEVICES.BTE_PRIME || device?.device_type === DEVICES.RIC_OPTIMA_8) ?
                 deviceQc?.volumeDecrease
                   ? "Volume Level Decreased"
                   : "Decrease Volume"
@@ -473,7 +485,7 @@ const DeviceAudioMicCheckUi = () => {
                 modecheck(2) ? "Third Mode Has Been tested." : "Test Third Mode"
               }
             />
-            {(device?.device_type === DEVICES.BTE_OPTIMA || device?.device_type === DEVICES.BTE_PRIME) && <StepCard
+            {(device?.device_type === DEVICES.BTE_OPTIMA || device?.device_type === DEVICES.BTE_PRIME || device?.device_type === DEVICES.RIC_OPTIMA_8) && <StepCard
               isChecked={true}
               checked={modecheck(3)}
               title={
