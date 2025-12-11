@@ -1,6 +1,6 @@
 import ReadRicDataFromDevice from "../../pages/wehearDeviceQc/ric/ReadRicDataToDevice";
-import { BLE_STORE } from "../../utils/bleStore";
-import { actions, LISTENING_SIDE } from "../../utils/constants";
+import { BLE_STORE, interpolateValue } from "../../utils/bleStore";
+import { actions, EQ_LEVEL, LISTENING_SIDE, MODES, VOLUME_COMMANDS_REVERSE } from "../../utils/constants";
 
 const gattLock = (() => {
   let busy = false;
@@ -191,6 +191,60 @@ export const readRicMode = (side, deviceObj) => {
       });
     } catch (error) {
       console.error("Error reading mode:", error);
+    }
+  };
+};
+
+
+export const readRic8Volume = (side, currentVolume) => {
+
+  return async (dispatch) => {
+    try {
+      const command = "0x06";
+      const response = await ReadRicDataFromDevice(command, side, BLE_STORE.deviceObj);
+      const responseParts = response.trim().split(" ");
+      console.log("first response", response)
+      let eqData = [];
+      for (let i = 0; i < 5; i++) {
+        if (i == 0 || i == 2 || i == 3) {
+          let data =
+            parseInt(responseParts[i], 16) - parseInt(EQ_LEVEL[i], 16);
+          let data1 =
+            parseInt(responseParts[i + 1], 16) -
+            parseInt(EQ_LEVEL[i + 1], 16);
+
+          let twoDataObj = interpolateValue(data, data1);
+          eqData.push(data);
+          eqData.push(twoDataObj);
+        } else {
+          eqData.push(
+            parseInt(responseParts[i], 16) - parseInt(EQ_LEVEL[i], 16)
+          );
+        }
+      }
+
+      let volume = VOLUME_COMMANDS_REVERSE[responseParts[5]];
+
+      let mode = MODES[responseParts[6]];
+      if (currentVolume) {
+        dispatch({
+          type: actions.SET_RIC8_CURRENT_VOLUME,
+          volume,
+          device_side: side
+        });
+      } else {        
+        dispatch({
+          type: actions.SET_RIC8_VOLUME,
+          side,
+          volume,
+          mode,
+        });
+      }
+
+      console.log("{ volume, mode ", volume, mode)
+
+    } catch (err) {
+      console.error("RicDeviceCurrentVolume read failed", err);
     }
   };
 };
