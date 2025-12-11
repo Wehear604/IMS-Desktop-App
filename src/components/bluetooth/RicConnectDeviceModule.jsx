@@ -28,6 +28,7 @@ import { useDispatch } from "react-redux";
 import { callSnackBar } from "../../store/actions/snackbarAction";
 import { DeviceIsConnectingAction, DeviceMACAction, disconnectAction } from "../../store/actions/deviceDataAction";
 import WriteRicDataToDevice from "./WriteRicDataToDevice";
+import WriteSafeBudsDataToDevice from "./WriteSafeBudsDataToDevice";
 
 const modalStyle = {
     position: 'absolute',
@@ -276,6 +277,19 @@ const RicConnectDevice = ({
                 } else {
                     await WriteRicDataToDevice("0x0B", side, BLE_STORE.deviceObj || device);
                 }
+
+            }
+
+            if (fitting.device_type === DEVICES.NECKBAND) {
+                await WriteSafeBudsDataToDevice(
+                    side,
+                    BLE_STORE.deviceObj || device,
+                    {
+                        chunkSize: 100,
+                        interChunkDelayMs: 5,
+                        progressCallback: (pct) => console.log("progress", pct),
+                    }
+                );
             }
 
             device.ongattserverdisconnected = (err) => {
@@ -348,7 +362,7 @@ const RicConnectDevice = ({
     // Electron modal handlers
     const handleDeviceSelected = (deviceId) => {
         setSelectingDeviceId(deviceId);
-           dispatch(DeviceMACAction(deviceId));
+        dispatch(DeviceMACAction(deviceId));
         if (window.electronAPI) {
             window.electronAPI.selectBluetoothDevice(deviceId);
         }
