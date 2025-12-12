@@ -34,6 +34,7 @@ import {
   BteDeviceCurrentVolume,
   BteDeviceMode,
   BteDeviceVolume,
+  getITEOptimaData,
   readRic8DeviceCurrentVolume,
   readRic8Volume,
   readRicMode,
@@ -169,6 +170,14 @@ const DeviceAudioMicCheckUi = () => {
         console.log("first continuosuly rendering", currentDevice)
         dispatch(readRic8Volume(currentDevice.device_side));
       }
+    } else if (
+      currentDevice?.device_type === DEVICES.ITE_OPTIMA
+    ) {
+      if (currentStep === 1 || currentStep === 2) {
+        dispatch(
+          getITEOptimaData(currentDevice.device_side)
+        );
+      }
     }
   };
 
@@ -226,6 +235,10 @@ const DeviceAudioMicCheckUi = () => {
         device?.device_type === DEVICES.RIC_OPTIMA_8
       ) {
         dispatch(readRic8Volume(device.device_side,true));
+      } else if (
+        device?.device_type === DEVICES.ITE_OPTIMA
+      ) {
+        dispatch(getITEOptimaData(device.device_side, true));
       }
     }
     return () => {

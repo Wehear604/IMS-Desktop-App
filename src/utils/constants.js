@@ -134,6 +134,9 @@ export const actions = {
 
   SET_RIC8_VOLUME: "SET_RIC8_VOLUME",
   SET_RIC8_CURRENT_VOLUME: "SET_RIC8_CURRENT_VOLUME",
+
+  SET_ITE_OPTIMA_CURRENT_VOLUME: "SET_ITE_OPTIMA_CURRENT_VOLUME",
+  SET_ITE_OPTIMA_VOLUME: "SET_ITE_OPTIMA_VOLUME",
 };
 
 export const SERVICE_UUID = {
@@ -404,3 +407,11 @@ export const VOLUME_COMMANDS_REVERSE = {
 };
 
 export const EQ_LEVEL = [20, 30, 70, 50, 60];
+
+
+export const ITE_MODE = {
+  "01": 0,
+  "02": 1,
+  "03": 2,
+  "04": 3,
+};

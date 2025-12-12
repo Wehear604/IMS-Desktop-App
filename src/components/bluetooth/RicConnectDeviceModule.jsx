@@ -232,16 +232,17 @@ const RicConnectDevice = ({
                 characteristicReadNotify.addEventListener("characteristicvaluechanged", (event) => {
                     try {
                         const value = event.target.value; // DataView
-                        // example parse: convert to hex string
                         const arr = [];
                         for (let i = 0; i < value.byteLength; i++) {
                             arr.push(("0" + value.getUint8(i).toString(16)).slice(-2));
                         }
                         const hex = arr.join(" ");
+                        // console.log("hex notification", hex);
                         // Keep `data` serializable and small
                         setData(prev => {
                             const next = [...prev.slice(-49), { ts: Date.now(), hex }];
                             BLE_STORE.hardwareData = next;
+                            console.log("object next", next);
                             return next;
                         });
                     } catch (err) {

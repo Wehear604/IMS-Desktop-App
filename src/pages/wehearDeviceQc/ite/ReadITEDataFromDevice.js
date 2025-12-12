@@ -8,7 +8,7 @@ const processQueue = async () => {
   const { command, side, deviceObj, resolve, reject } = commandQueue.shift();
 
   try {
-    const device = deviceObj.device?.device || deviceObj.device || deviceObj;
+    const device = deviceObj?.device?.device || deviceObj?.device || deviceObj;
 
     if (!device || !device.gatt) {
       throw new Error("No valid Bluetooth device found!");

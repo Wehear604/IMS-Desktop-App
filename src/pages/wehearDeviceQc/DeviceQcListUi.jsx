@@ -136,7 +136,7 @@ const DeviceQcListUi = ({fields, setFields, filters, setFilters }) => {
     });
 
     return (
-        <Box mb={1} p={4} sx={{ display: "flex", flexDirection: "column", height: "75vh" }}>
+        <Box mb={1} p={4} sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
             <Box
                 sx={{
                     display: "flex",
@@ -172,7 +172,7 @@ const DeviceQcListUi = ({fields, setFields, filters, setFilters }) => {
                     {deviceEntries.map(([key, value], idx) => {
                         const data = SuggestedProductData(value);
                         return (
-                            <Grid item xs={12} sm={6} md={2} key={`${value}-${idx}`}>
+                            <Grid item xs={4} sm={3} md={2} key={`${value}-${idx}`}>
                                 <AccordionDetailsUi
                                     side={data?.IsOnlyBoth ? data?.IsOnlyBoth : data?.side}
                                     setDevice={setDevice}

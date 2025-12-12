@@ -1,6 +1,7 @@
+import ReadITEDataFromDevice from "../../pages/wehearDeviceQc/ite/ReadITEDataFromDevice";
 import ReadRicDataFromDevice from "../../pages/wehearDeviceQc/ric/ReadRicDataToDevice";
 import { BLE_STORE, interpolateValue } from "../../utils/bleStore";
-import { actions, EQ_LEVEL, LISTENING_SIDE, MODES, VOLUME_COMMANDS_REVERSE } from "../../utils/constants";
+import { actions, EQ_LEVEL, ITE_MODE, LISTENING_SIDE, MODES, VOLUME_COMMANDS_REVERSE } from "../../utils/constants";
 
 const gattLock = (() => {
   let busy = false;
@@ -232,7 +233,7 @@ export const readRic8Volume = (side, currentVolume) => {
           volume,
           device_side: side
         });
-      } else {        
+      } else {
         dispatch({
           type: actions.SET_RIC8_VOLUME,
           side,
@@ -245,6 +246,59 @@ export const readRic8Volume = (side, currentVolume) => {
 
     } catch (err) {
       console.error("RicDeviceCurrentVolume read failed", err);
+    }
+  };
+};
+
+// credit goes to dilip mali
+export const getITEOptimaData = (side, currentVolume) => {
+
+  return async (dispatch) => {
+    const command = "AA 00 03";
+    const response = await ReadITEDataFromDevice(command, side, BLE_STORE.deviceObj);
+    const responseParts = response.trim().split(" ");
+    console.log("object response", response);
+    let eqData = [];
+
+    for (let i = 10; i < 15; i++) {
+      if (i == 10 || i == 12 || i == 13) {
+        let data = parseInt(responseParts[i], 16);
+        let data1 = parseInt(responseParts[i + 1], 16);
+        let twoDataObj = interpolateValue(data, data1);
+        eqData.push(data);
+        eqData.push(twoDataObj);
+      } else {
+        eqData.push(parseInt(responseParts[i], 16));
+      }
+    }
+
+    let volume =
+      side == LISTENING_SIDE.LEFT ? responseParts[8] : responseParts[9];
+
+    let mode = ITE_MODE[responseParts[7]];
+
+    // let batteryLevel =
+    //   device?.device_side == LISTENING_SIDE.LEFT ? responseParts[5] : responseParts[6];
+
+    // dispatch({
+    //     type: actions.SET_ITE_OPTIMA_BATTERY,
+    //     batteryLevel: parseInt(batteryLevel, 16),
+    //     device_side: side
+    // });
+    console.log("object volume", volume, mode,responseParts);
+    if (currentVolume) {
+      dispatch({
+        type: actions.SET_ITE_OPTIMA_CURRENT_VOLUME,
+        volume,
+        device_side: side
+      });
+    } else {
+      dispatch({
+        type: actions.SET_ITE_OPTIMA_VOLUME,
+        side,
+        volume,
+        mode,
+      });
     }
   };
 };

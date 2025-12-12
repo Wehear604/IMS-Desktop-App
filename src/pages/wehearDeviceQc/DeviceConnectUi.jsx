@@ -407,7 +407,7 @@ const DeviceConnectUi = () => {
             setIsReading(false);
         }
     }, [device?.connected]);
-    console.log("first device", device?.device_type)
+    // console.log("first device", device?.device_type)
 
     const getLeftDeviceImage = (deviceType) => {
         switch (deviceType) {
