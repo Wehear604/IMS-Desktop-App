@@ -17,13 +17,19 @@ import { styled } from "@mui/system";
 
 import leftDevice from "../../assets/images/bteLeft.svg";
 import rightDevice from "../../assets/images/bteRight.svg";
-import leftRic16 from "../../assets/images/RIC optima 16_Close Dome_left_Biege.png";
-import rightRic16 from "../../assets/images/RIC optima 16_Close Dome_right_Biege.png";
+import rightRic16 from "../../assets/images/RIC optima 16_Close Dome_left_Biege.png";
+import leftRic16 from "../../assets/images/RIC optima 16_Close Dome_right_Biege.png";
 import leftRic8 from "../../assets/images/R8 HA all open domes.left.svg";
 import rightRic8 from "../../assets/images/R8 HA all open domes.right.svg";
-import leftITEOptima from "../../assets/images/ITE_OPTIMA_LEFT_BLACK.svg";
-import rightITEOptima from "../../assets/images/ITE_OPTIMA_RIGHT_BLACK.svg";
-
+import rightITEOptima from "../../assets/images/ITE_OPTIMA_LEFT_BLACK.svg";
+import leftITEOptima from "../../assets/images/ITE_OPTIMA_RIGHT_BLACK.svg";
+import leftItePrime from "../../assets/images/ITE_PRIME_LEFT.svg";
+import rightItePrime from "../../assets/images/ITE_PRIME_RIGHT.svg";
+import rightSideSafeBud from "../../assets/images/rightSideSafeBud.svg";
+import leftSideSafeBud from "../../assets/images/leftSideSafeBud.svg";
+import neckbandBlack from "../../assets/images/neckband.svg";
+import wehearox from "../../assets/images/wehearox.svg";
+import wehear_2_0 from "../../assets/images/wehear 2 0.svg";
 
 
 
@@ -48,6 +54,7 @@ import ReadITEPrimeDataFromDevice from "./ite/ReadITEPrimeDataFromDevice";
 import BleConnectDeviceModule from "../../components/bluetooth/BleConnectDeviceModule";
 import DeviceAudioMicCheckUi from "./DeviceAudioMicCheckUi";
 import { closeModal, openModal } from '../../store/actions/modalAction';
+import { findObjectKeyByValue } from "../../utils/main";
 
 
 const Header = styled(Typography)(({ theme }) => ({
@@ -192,6 +199,7 @@ const DeviceConnectUi = () => {
         { side: "L", label: "BTE", value: LISTENING_SIDE.LEFT },
         { side: "R", label: "BTE", value: LISTENING_SIDE.RIGHT },
     ];
+
 
     const [isReading, setIsReading] = useState(false);
     const readInterval = useRef(null);
@@ -408,11 +416,23 @@ const DeviceConnectUi = () => {
             case DEVICES.BTE_PRIME:
                 return <img src={leftDevice} alt="BTE" />;
             case DEVICES.RIC_OPTIMA:
-                return <img style={{width:120, height:120}} src={leftRic16} alt="Ric 16" />;
+                return <img style={{ width: 120, height: 120 }} src={leftRic16} alt="Ric 16" />;
             case DEVICES.RIC_OPTIMA_8:
                 return <img src={leftRic8} alt="Ric 8" />;
             case DEVICES.ITE_OPTIMA:
-                return <img src={leftITEOptima} alt="ITE Optima" />;
+                return <img style={{ width: 100, height: 100 }} src={leftITEOptima} alt="ITE Optima" />;
+            case DEVICES.RIC_32:
+                return <img style={{ width: 120, height: 120 }} src={leftRic16} alt="Ric 16" />;
+            case DEVICES.ITE_PRIME:
+                return <img style={{ width: 120, height: 120 }} src={leftItePrime} alt="ITE Prime" />;
+            case DEVICES.SAFE_BUDS:
+                return <img style={{ width: 120, height: 120 }} src={leftSideSafeBud} alt="Safe Buds" />;
+            case DEVICES.NECKBAND:
+                return <img style={{ width: 130, height: 130 }} src={neckbandBlack} alt="Safe Buds" />;
+            case DEVICES.WEHEAR_2_0:
+                return <img style={{ width: 150, height: 150 }} src={wehear_2_0} alt="Safe Buds" />;
+            case DEVICES.WEHEAR_OX:
+                return <img style={{ width: 150, height: 150 }} src={wehearox} alt="Safe Buds" />;
             default:
                 return null;
         }
@@ -428,11 +448,22 @@ const DeviceConnectUi = () => {
                 return <img style={{ width: 120, height: 120 }} src={rightRic16} alt="Ric 16" />;
             case DEVICES.RIC_OPTIMA_8:
                 return <img src={rightRic8} alt="Ric 8" />;
-            
+            case DEVICES.ITE_OPTIMA:
+                return <img style={{ width: 100, height: 100 }} src={rightITEOptima} alt="ITE Optima" />;
+            case DEVICES.RIC_32:
+                return <img style={{ width: 120, height: 120 }} src={rightRic16} alt="Ric 16" />;
+            case DEVICES.ITE_PRIME:
+                return <img style={{ width: 120, height: 120 }} src={rightItePrime} alt="ITE Prime" />;
+            case DEVICES.SAFE_BUDS:
+                return <img style={{ width: 120, height: 120 }} src={rightSideSafeBud} alt="Safe Buds" />;
+
             default:
                 return null;
         }
     };
+
+    const isSingleCardType = [DEVICES.NECKBAND, DEVICES.WEHEAR_2_0, DEVICES.WEHEAR_OX].includes(device.device_type);
+
 
     return (
         <>
@@ -443,37 +474,62 @@ const DeviceConnectUi = () => {
                 {/* <CenterArea> */}
                 <Instruction variant="h4">Select device to establish connection</Instruction>
 
-                <Grid container spacing={3} justifyContent="center">
-                    {devices.map((item) => (
-                        <Grid
-                            item
-                            key={item.side}
-                            onClick={() => {
-                                setSelected(item.side);
-                                dispatch(DeviceSideAction(item.value));
-                            }}
-                        >
-                            <DeviceCard selected={selected === item.side} sx={{ width: "14vw", height: "35vh" }}>
-                                {/* <CardActionArea sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}> */}
-                                <Box sx={{ display: "flex", height: "100%", flexDirection: "column", alignItems: "center", justifyContent: "space-evenly" }}>
-                                    <Box sx={{ height: "10vh", justifyContent: "flex-start" }}>
-                                       {item?.side === "L" ? getLeftDeviceImage(device?.device_type) : getRightDeviceImage(device?.device_type)}
+
+                {!isSingleCardType ? (
+                    <Grid container spacing={3} justifyContent="center">
+                        {devices.map((item) => (
+                            <Grid
+                                item
+                                key={item.side}
+                                onClick={() => {
+                                    setSelected(item.side);
+                                    dispatch(DeviceSideAction(item.value));
+                                }}
+                            >
+                                <DeviceCard selected={selected === item.side} sx={{ width: "14vw", height: "35vh" }}>
+                                    <Box sx={{ display: "flex", height: "100%", flexDirection: "column", alignItems: "center", justifyContent: "space-evenly" }}>
+                                        <Box sx={{ height: "10vh" }}>
+                                            {item.side === "L"
+                                                ? getLeftDeviceImage(device.device_type)
+                                                : getRightDeviceImage(device.device_type)}
+                                        </Box>
+
+                                        <Box gap={2} sx={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                            <Avatar sx={{ width: 22, height: 22, bgcolor: selected === item.side ? "primary.main" : "grey.200" }}>
+                                                {item.side === "L" ? <img src={leftSideLogo} /> : <img src={rightSideLogo} />}
+                                            </Avatar>
+                                            <Divider orientation="vertical" flexItem />
+                                            <Typography variant="h6" sx={{ fontWeight: "bold" }}>{findObjectKeyByValue(device.device_type, DEVICES)}</Typography>
+                                        </Box>
                                     </Box>
-                                    {/* <ChipRow> */}
-                                    <Box gap={2} sx={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                        <Avatar sx={{ width: 22, height: 22, bgcolor: selected === item.side ? "primary.main" : "grey.200", color: selected === item.side ? "white" : "text.primary", fontSize: 12 }}>
-                                            {item?.side === "L" ? <img src={leftSideLogo} alt="L" /> : <img src={rightSideLogo} alt="R" />}
-                                        </Avatar>
-                                        <Divider orientation="vertical" variant="middle" flexItem sx={{ color: "#DDD", height: "3vh", display: "flex", alignItems: "flex-end" }} />
-                                        <Typography variant="h6" sx={{ ml: 0.5, fontWeight: "bold" }}>{item.label}</Typography>
-                                    </Box>
-                                    {/* </ChipRow> */}
+                                </DeviceCard>
+                            </Grid>
+                        ))}
+                    </Grid>
+                ) : (
+                    <Grid
+                        onClick={() => {
+                            setSelected(true);
+                            dispatch(DeviceSideAction(true));
+                        }}
+                    >
+                        <DeviceCard selected={selected === true} sx={{ width: "14vw", height: "35vh" }}>
+                            <Box sx={{ display: "flex", height: "100%", flexDirection: "column", alignItems: "center", justifyContent: "space-evenly" }}>
+                                <Box sx={{ height: "10vh" }}>
+                                    {getLeftDeviceImage(device.device_type)}
                                 </Box>
-                                {/* </CardActionArea> */}
-                            </DeviceCard>
-                        </Grid>
-                    ))}
-                </Grid>
+
+                                <Box gap={2} sx={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                    {/* <Avatar sx={{ width: 22, height: 22, bgcolor: selected ? "primary.main" : "grey.200" }}>
+                                        <img src={leftSideLogo} alt="L" />
+                                    </Avatar>
+                                    <Divider orientation="vertical" flexItem /> */}
+                                    <Typography variant="h6" sx={{ fontWeight: "bold" }}>{findObjectKeyByValue(device.device_type, DEVICES)}</Typography>
+                                </Box>
+                            </Box>
+                        </DeviceCard>
+                    </Grid>
+                )}
 
                 {/* {(device?.device_type === DEVICES.BTE_OPTIMA || device?.device_type === DEVICES.BTE_PRIME) ?
                     <BleConnectDeviceModule
