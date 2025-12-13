@@ -144,7 +144,7 @@ export const SERVICE_UUID = {
   11: "0000fff0-0000-1000-8000-00805f9b34fb",
   12: "4157b00b-d129-aeb5-859b-d547e30ffcb1",
   // 13: "4157b00b-d129-aeb5-859b-d547e30ffcb1",
-  13: "f6898c59-8e5a-4dc4-a8b5-01dd76388822"
+  13: "0000ff12-0000-1000-8000-00805f9b34fb"
 };
 
 export const MANUFACTURER_IDENTIFIER = {
@@ -164,7 +164,7 @@ export const CHARACTERISTIC_UUID_READ_WRITE = {
   11: "0000fff2-0000-1000-8000-00805f9b34fb",
   12: "4157b611-d129-aeb5-859b-d547e30ffcb1",
   // 13: "4157b611-d129-aeb5-859b-d547e30ffcb1",
-  13: "866ca7ac-fae8-4753-a61b-8793a0ee26a0",
+  13: "0000ff14-0000-1000-8000-00805f9b34fb",
 };
 
 export const CHARACTERISTIC_UUID_READ_NOTIFY = {
@@ -175,7 +175,7 @@ export const CHARACTERISTIC_UUID_READ_NOTIFY = {
   11: "0000fff1-0000-1000-8000-00805f9b34fb",
   12: "4157b612-d129-aeb5-859b-d547e30ffcb1",
   // 13: "4157b612-d129-aeb5-859b-d547e30ffcb1",
-  13: "866ca7ac-fae8-4753-a61b-8793a0ee26a0",
+  13: "0000ff15-0000-1000-8000-00805f9b34fb",
 };
 
 export const NOTIFICATION_TYPE = {

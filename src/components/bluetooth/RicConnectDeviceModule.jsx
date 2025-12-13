@@ -23,12 +23,18 @@ import {
     SNACK_BAR_VARIETNS
 } from "../../utils/constants";
 
-import { BLE_STORE } from "../../utils/bleStore"; // <-- Make sure this file exports BLE_STORE
+import { BLE_STORE } from "../../utils/bleStore";
 import { useDispatch } from "react-redux";
 import { callSnackBar } from "../../store/actions/snackbarAction";
 import { DeviceIsConnectingAction, DeviceMACAction, disconnectAction } from "../../store/actions/deviceDataAction";
 import WriteRicDataToDevice from "./WriteRicDataToDevice";
 import WriteSafeBudsDataToDevice from "./WriteSafeBudsDataToDevice";
+
+// --- IMPORT STATIC FILE HERE ---
+import Safefile from "../../assets/blefiles/safe.fot";
+
+// --- DEFINE OTA UUID FOR PERMISSIONS ---
+const OTA_SERVICE_UUID = "0000ff12-0000-1000-8000-00805f9b34fb";
 
 const modalStyle = {
     position: 'absolute',
@@ -59,7 +65,6 @@ const RicConnectDevice = ({
     onDisconnect = () => { },
     fitting,
 }) => {
-    // UI / serializable state only
     const [leftVolume, setLeftVolume] = useState(40);
     const [rightVolume, setRightVolume] = useState(40);
     const [leftDeviceConnected, setLeftDeviceConnected] = useState(false);
@@ -67,18 +72,16 @@ const RicConnectDevice = ({
     const [loading, setLoading] = useState(false);
     const [loadingMessage, setLoadingMessage] = useState("Checking Browser Support");
     const [deviceInfo, setDeviceInfo] = useState({ name: "", id: "" });
-    const [data, setData] = useState([]); // serializable activity data (e.g., parsed notifications)
+    const [data, setData] = useState([]);
     const [connected, setConnected] = useState(false);
     const [enabled, setEnabled] = useState(false);
 
-    // Electron picker state
     const [deviceList, setDeviceList] = useState([]);
     const [isPickerOpen, setIsPickerOpen] = useState(false);
     const [selectingDeviceId, setSelectingDeviceId] = useState(null);
 
     const dispatch = useDispatch();
 
-    // Electron API listeners
     useEffect(() => {
         if (window.electronAPI) {
             const onList = (devices) => {
@@ -93,16 +96,10 @@ const RicConnectDevice = ({
             };
             window.electronAPI.onBluetoothPairingRequest(onPair);
 
-            return () => {
-                // if the electronAPI provides off/unsubscribe, use it — otherwise cleanup local handlers
-                // (no-op here)
-            };
-        } else {
-            console.warn('electronAPI is not available. Running in a standard browser.');
+            return () => { };
         }
     }, []);
 
-    // Bluetooth availability
     useEffect(() => {
         const checkBluetooth = async () => {
             if (window.navigator && window.navigator.bluetooth) {
@@ -113,18 +110,17 @@ const RicConnectDevice = ({
                         setEnabled(true);
                         onEnableChange(true);
                     } else {
-                        setLoadingMessage("Bluetooth is turned off. Please turn on Bluetooth in your system settings.");
+                        setLoadingMessage("Bluetooth is turned off.");
                         setEnabled(false);
                         onEnableChange(false);
                     }
                 } catch (error) {
                     console.error("Error checking Bluetooth availability:", error);
-                    setLoadingMessage("Could not check Bluetooth status. Ensure permissions are granted.");
                     setEnabled(false);
                     onEnableChange(false);
                 }
             } else {
-                setLoadingMessage("Web Bluetooth is not supported by this application.");
+                setLoadingMessage("Web Bluetooth is not supported.");
                 setEnabled(false);
                 onEnableChange(false);
             }
@@ -132,10 +128,8 @@ const RicConnectDevice = ({
             dispatch(DeviceIsConnectingAction(false));
         };
         checkBluetooth();
-        // cleanup not necessary
-    }, []); // run once
+    }, []);
 
-    // Close electron picker if main loading starts
     useEffect(() => {
         if (loading && isPickerOpen) {
             setIsPickerOpen(false);
@@ -144,17 +138,13 @@ const RicConnectDevice = ({
         }
     }, [loading, isPickerOpen]);
 
-    // Cleanup when component unmounts: disconnect any active BLE device
     useEffect(() => {
         return () => {
             try {
                 if (BLE_STORE.deviceObj?.gatt?.connected) {
                     BLE_STORE.deviceObj.gatt.disconnect();
                 }
-            } catch (err) {
-                // ignore
-            }
-            // clear BLE_STORE
+            } catch (err) { }
             BLE_STORE.deviceObj = null;
             BLE_STORE.writeFun = null;
             BLE_STORE.disconnectFun = null;
@@ -179,14 +169,20 @@ const RicConnectDevice = ({
             };
             if (fitting.device_type === DEVICES.ITE_PRIME) {
                 filterData.filters = [
-                    {
-                        namePrefix: "ITE"
-                    }
+                    { namePrefix: "ITE" }
                 ];
             } else if (filter.manufacturerData[0].companyIdentifier) {
                 filterData.filters = [filter];
             } else {
                 filterData.acceptAllDevices = true;
+            }
+
+            // ----------------------------------------------------
+            // FIXED: requestDevice with OTA Service included
+            // ----------------------------------------------------
+            const optionalServicesList = [serviceUuid];
+            if (fitting.device_type === DEVICES.NECKBAND) {
+                optionalServicesList.push(OTA_SERVICE_UUID);
             }
 
             const device = await navigator.bluetooth.requestDevice({
@@ -201,7 +197,6 @@ const RicConnectDevice = ({
                 return;
             }
 
-            // Device name check for R/L suffix (RIC_OPTIMA)
             if (
                 (fitting.device_type === DEVICES.RIC_OPTIMA) &&
                 (
@@ -221,9 +216,8 @@ const RicConnectDevice = ({
             const characteristicReadNotify = await service.getCharacteristic(characteristicUuidReadNotify);
             const characteristicReadWrite = await service.getCharacteristic(characteristicUuidReadWrite);
 
-            // store non-serializable bluetooth objects in BLE_STORE (not in React state)
             BLE_STORE.deviceObj = device;
-            BLE_STORE.writeFun = characteristicReadWrite; // use BLE_STORE.writeFun.writeValue(...) when writing
+            BLE_STORE.writeFun = characteristicReadWrite;
             BLE_STORE.disconnectFun = () => disconnect(side);
             BLE_STORE.hardwareData = data;
 
@@ -231,14 +225,12 @@ const RicConnectDevice = ({
                 await characteristicReadNotify.startNotifications();
                 characteristicReadNotify.addEventListener("characteristicvaluechanged", (event) => {
                     try {
-                        const value = event.target.value; // DataView
-                        // example parse: convert to hex string
+                        const value = event.target.value;
                         const arr = [];
                         for (let i = 0; i < value.byteLength; i++) {
                             arr.push(("0" + value.getUint8(i).toString(16)).slice(-2));
                         }
                         const hex = arr.join(" ");
-                        // Keep `data` serializable and small
                         setData(prev => {
                             const next = [...prev.slice(-49), { ts: Date.now(), hex }];
                             BLE_STORE.hardwareData = next;
@@ -252,7 +244,6 @@ const RicConnectDevice = ({
                 console.warn("Could not start notifications:", err);
             }
 
-            // Update UI-connected flags (serializable booleans)
             if (side === "Left") {
                 setLeftDeviceConnected(true);
             } else {
@@ -280,18 +271,6 @@ const RicConnectDevice = ({
 
             }
 
-            if (fitting.device_type === DEVICES.NECKBAND) {
-                await WriteSafeBudsDataToDevice(
-                    side,
-                    BLE_STORE.deviceObj || device,
-                    {
-                        chunkSize: 100,
-                        interChunkDelayMs: 5,
-                        progressCallback: (pct) => console.log("progress", pct),
-                    }
-                );
-            }
-
             device.ongattserverdisconnected = (err) => {
                 console.log("GATT disconnected:", err);
                 if (side === "Left") {
@@ -302,21 +281,34 @@ const RicConnectDevice = ({
                     dispatch(disconnectAction(LISTENING_SIDE.RIGHT, true));
                 }
                 setLoadingMessage("Device disconnected");
-                // clear BLE_STORE
                 BLE_STORE.deviceObj = null;
                 BLE_STORE.writeFun = null;
                 BLE_STORE.disconnectFun = null;
             };
-            console.log("BLE_STORE.deviceObj", BLE_STORE.deviceObj)
-            // Notify parent with serializable data and BLE_STORE device object reference if they want it
-            onConnectWithDevice(data, currentDeviceInfo);
 
-            // Optionally perform initial writes (example: volume/mode)
-            // Example: write leftVolume/rightVolume to device (uncomment & adapt if needed)
-            // if (BLE_STORE.writeFun && side === "Left") {
-            //     const payload = hexStringToUint8Array("01 02 ...");
-            //     await BLE_STORE.writeFun.writeValue(payload);
-            // }
+            // ----------------------------------------------------
+            // FIXED: OTA Call with correct file and options
+            // ----------------------------------------------------
+            if (fitting.device_type === DEVICES.NECKBAND) {
+                console.log("Starting OTA...");
+                await WriteSafeBudsDataToDevice(
+                    side,
+                    BLE_STORE.deviceObj || device,
+                    {
+                        otaFileSource: Safefile,
+                        maxPacketSize: 20,       // Web BLE Requirement
+                        payloadBlockSize: 4096,  // Device Firmware Requirement
+                        interChunkDelayMs: 6,    // Stable timing
+                        ackTimeoutMs: 40000,     // Generous timeout for stability
+                        maxRetries: 10,          // More retries
+                        progressCallback: (pct) => {
+                            // Only log every 5% for stability
+                            if (pct % 5 === 0) console.log("OTA Progress:", pct);
+                        },
+                    }
+                );
+            }
+            onConnectWithDevice(data, currentDeviceInfo);
 
         } catch (error) {
             console.error("Error:", error);
@@ -342,7 +334,6 @@ const RicConnectDevice = ({
             console.warn("Disconnect error:", err);
         }
 
-        // clear BLE_STORE
         BLE_STORE.deviceObj = null;
         BLE_STORE.writeFun = null;
         BLE_STORE.disconnectFun = null;
@@ -359,7 +350,6 @@ const RicConnectDevice = ({
         onDisconnect();
     };
 
-    // Electron modal handlers
     const handleDeviceSelected = (deviceId) => {
         setSelectingDeviceId(deviceId);
         dispatch(DeviceMACAction(deviceId));
@@ -406,11 +396,7 @@ const RicConnectDevice = ({
                                     disabled={!!selectingDeviceId}
                                 >
                                     <ListItemIcon>
-                                        {isLoading ? (
-                                            <CircularProgress size={24} />
-                                        ) : (
-                                            <BluetoothIcon />
-                                        )}
+                                        {isLoading ? <CircularProgress size={24} /> : <BluetoothIcon />}
                                     </ListItemIcon>
                                     <ListItemText
                                         primary={device.deviceName || "Unknown Device"}

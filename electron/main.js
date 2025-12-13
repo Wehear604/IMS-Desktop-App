@@ -15,7 +15,7 @@ if (process.env.NODE_ENV === "development") {
         console.log("Auto-reload failed:", e);
     }
 }
-
+   
 function createWindow() {
     const win = new BrowserWindow({
         width: 1024,
