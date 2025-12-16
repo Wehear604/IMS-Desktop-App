@@ -1,4 +1,5 @@
 import ReadITEDataFromDevice from "../../pages/wehearDeviceQc/ite/ReadITEDataFromDevice";
+import ReadITEPrimeDataFromDevice from "../../pages/wehearDeviceQc/ite/ReadITEPrimeDataFromDevice";
 import ReadRicDataFromDevice from "../../pages/wehearDeviceQc/ric/ReadRicDataToDevice";
 import { BLE_STORE, interpolateValue } from "../../utils/bleStore";
 import { actions, EQ_LEVEL, ITE_MODE, LISTENING_SIDE, MODES, VOLUME_COMMANDS_REVERSE } from "../../utils/constants";
@@ -285,7 +286,7 @@ export const getITEOptimaData = (side, currentVolume) => {
     //     batteryLevel: parseInt(batteryLevel, 16),
     //     device_side: side
     // });
-    console.log("object volume", volume, mode,responseParts);
+    console.log("object volume", volume, mode, responseParts);
     if (currentVolume) {
       dispatch({
         type: actions.SET_ITE_OPTIMA_CURRENT_VOLUME,
@@ -302,3 +303,61 @@ export const getITEOptimaData = (side, currentVolume) => {
     }
   };
 };
+
+
+export const getITEPrimeMode = (side, deviceObj) => {
+  return async (dispatch) => {
+    const command = [0x02, 0x05, 0x00];
+    const response = await ReadITEPrimeDataFromDevice(command, side, deviceObj);
+    console.log("object ITE prime response", response);
+    const mode = response[4];
+    console.log("mode", mode)
+    dispatch({
+      type: actions.SET_ITE_PRIME_MODE,
+      mode,
+      side,
+    })
+    console.log("object ite mode", mode );
+  }
+
+}
+
+
+export const getITEPrimeVolume = (side, currentVolume) => {
+  return async (dispatch) => {
+    const command = [0x02, 0x0d, 0x00]
+    console.log("object command", command);
+    const response = await ReadITEPrimeDataFromDevice(command, side, BLE_STORE.deviceObj);
+    const parts = response;
+    const payload = parts.slice(3);
+    let volume = 0;
+    console.log("payload", payload)
+    let finalVolume = 0
+    if (side === LISTENING_SIDE.LEFT) {
+      volume = payload[4];
+    } else {
+      volume = payload[22];
+    }
+    if (parseInt(volume) > 127) {
+      finalVolume = volume - 253;
+    } else {
+      finalVolume = volume;
+    }
+
+    if (currentVolume) {
+      dispatch({
+        type: actions.SET_ITE_PRIME_CURRENT_VOLUME,
+        volume,
+        finalVolume,
+        device_side: side
+      });
+    } else {
+      dispatch({
+        type: actions.SET_ITE_PRIME_VOLUME,
+        side,
+        volume,
+      });
+    }
+    console.log("object ite volume", volume);
+  }
+}

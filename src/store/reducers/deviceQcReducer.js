@@ -104,6 +104,33 @@ const deviceQcReducer = (state = initialState, action) => {
                 currentVolume: action.volume,
                 modeLeft: state.device_side === LISTENING_SIDE.LEFT ? [...new Set([...state.modeLeft, action.mode])] : state.modeLeft,
                 modeRight: state.device_side === LISTENING_SIDE.RIGHT ? [...new Set([...state.modeRight, action.mode])] : state.modeRight,
+            };
+
+        case actions.SET_ITE_PRIME_CURRENT_VOLUME:
+            return {
+                ...state,
+                currentVolume: action.volume,
+                start: true,
+                device_side: action.device_side,
+            };
+
+        case actions.SET_ITE_PRIME_VOLUME:
+            return {
+                ...state,
+                volumeLeft: action.device_side === LISTENING_SIDE.LEFT ? action.volume : state.volumeLeft,
+                volumeRight: action.device_side === LISTENING_SIDE.RIGHT ? action.volume : state.volumeRight,
+                volumeIncrease: state.currentVolume < action.volume ? true : state.volumeIncrease,
+                volumeDecrease: state.currentVolume > action.volume ? true : state.volumeDecrease,
+                currentVolume: action.volume,
+
+            };
+
+        case actions.SET_ITE_PRIME_MODE:
+            return {
+                ...state,
+                modeLeft: state.device_side === LISTENING_SIDE.LEFT ? [...new Set([...state.modeLeft, action.mode])] : state.modeLeft,
+                modeRight: state.device_side === LISTENING_SIDE.RIGHT ? [...new Set([...state.modeRight, action.mode])] : state.modeRight,
+
             }
         default:
             return state;

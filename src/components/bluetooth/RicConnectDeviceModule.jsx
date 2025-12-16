@@ -28,7 +28,7 @@ import { useDispatch } from "react-redux";
 import { callSnackBar } from "../../store/actions/snackbarAction";
 import { DeviceIsConnectingAction, DeviceMACAction, disconnectAction } from "../../store/actions/deviceDataAction";
 import WriteRicDataToDevice from "./WriteRicDataToDevice";
-import WriteSafeBudsDataToDevice from "./WriteSafeBudsDataToDevice";
+// import WriteSafeBudsDataToDevice from "./WriteSafeBudsDataToDevice";
 
 const modalStyle = {
     position: 'absolute',
@@ -281,17 +281,17 @@ const RicConnectDevice = ({
 
             }
 
-            if (fitting.device_type === DEVICES.NECKBAND) {
-                await WriteSafeBudsDataToDevice(
-                    side,
-                    BLE_STORE.deviceObj || device,
-                    {
-                        chunkSize: 100,
-                        interChunkDelayMs: 5,
-                        progressCallback: (pct) => console.log("progress", pct),
-                    }
-                );
-            }
+            // if (fitting.device_type === DEVICES.NECKBAND) {
+            //     await WriteSafeBudsDataToDevice(
+            //         side,
+            //         BLE_STORE.deviceObj || device,
+            //         {
+            //             chunkSize: 100,
+            //             interChunkDelayMs: 5,
+            //             progressCallback: (pct) => console.log("progress", pct),
+            //         }
+            //     );
+            // }
 
             device.ongattserverdisconnected = (err) => {
                 console.log("GATT disconnected:", err);
