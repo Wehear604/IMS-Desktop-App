@@ -12,468 +12,545 @@
 
 import React, { useEffect, useState } from "react";
 import {
-    Button,
-    Typography,
-    CircularProgress,
-    Alert,
-    Box,
-    List,
-    ListItem,
-    ListItemText,
-    Divider,
-    Modal,
-    IconButton,
-    Snackbar,
-    TextField,
-    FormControl,
-    FormHelperText
+  Button,
+  Typography,
+  CircularProgress,
+  Alert,
+  Box,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
+  Modal,
+  IconButton,
+  Snackbar,
+  TextField,
+  FormControl,
+  FormHelperText,
+  LinearProgress,
 } from "@mui/material";
-import SearchIcon from '@mui/icons-material/Search';
-import BluetoothConnectedIcon from '@mui/icons-material/BluetoothConnected';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import CloseIcon from '@mui/icons-material/Close';
+
+import SearchIcon from "@mui/icons-material/Search";
+import BluetoothConnectedIcon from "@mui/icons-material/BluetoothConnected";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import CloseIcon from "@mui/icons-material/Close";
 
 const { electronAPI } = window;
 
 // Modal style
 const modalStyle = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 400,
-    bgcolor: 'background.paper',
-    border: '2px solid #000',
-    boxShadow: 24,
-    p: 4,
-    borderRadius: 2,
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 400,
+  bgcolor: "background.paper",
+  border: "2px solid #000",
+  boxShadow: 24,
+  p: 4,
+  borderRadius: 2,
 };
 
 export default function DeviceQcListUi() {
-    const [connected, setConnected] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [statusMessage, setStatusMessage] = useState("Click 'Start BLE Scan' to begin.");
-    const [error, setError] = useState(null);
-    const [discoveredDevices, setDiscoveredDevices] = useState([]);
-    const [connectingId, setConnectingId] = useState(null);
-    const [modalOpen, setModalOpen] = useState(false);
-    const [scanStarted, setScanStarted] = useState(false);
-    const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [connected, setConnected] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState(
+    "Click 'Start BLE Scan' to begin."
+  );
+  const [error, setError] = useState(null);
+  const [discoveredDevices, setDiscoveredDevices] = useState([]);
+  const [connectingId, setConnectingId] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [scanStarted, setScanStarted] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
-    // Device type
-    const [deviceType, setDeviceType] = useState(1);
-    const [deviceTypeError, setDeviceTypeError] = useState("");
-    const allowedTypes = [1, 6, 8, 9, 11, 12, 13];
+  // Device type
+  const [deviceType, setDeviceType] = useState(1);
+  const [deviceTypeError, setDeviceTypeError] = useState("");
+  const allowedTypes = [1, 6, 8, 9, 11, 12, 13];
 
-    // Volume states
-    const [volume, setVolume] = useState(null);
+  // Volume states
+  const [volume, setVolume] = useState(null);
 
-    // --- IPC Listeners Setup ---
-    useEffect(() => {
-        if (!electronAPI) {
-            setError("Electron API not loaded. Check preload.js configuration.");
-            return;
-        }
+  // OTA states
+  const [otaFile, setOtaFile] = useState(null);
+  const [otaStatus, setOtaStatus] = useState("Idle");
+  const [otaProgress, setOtaProgress] = useState(0);
+  const [otaRunning, setOtaRunning] = useState(false);
 
-        const cleanups = [];
+  // --- IPC Listeners Setup ---
+  useEffect(() => {
+    if (!electronAPI) {
+      setError("Electron API not loaded. Check preload.js configuration.");
+      return;
+    }
 
-        // discovered devices
-        cleanups.push(electronAPI.onBleDevice((device) => {
-            setDiscoveredDevices(prevDevices => {
-                if (!prevDevices.some(d => d.id === device.id)) {
-                    setStatusMessage(`Scan active. ${prevDevices.length + 1} devices found.`);
-                    return [...prevDevices, device];
-                }
-                return prevDevices;
-            });
-        }));
+    const cleanups = [];
 
-        // connected
-        cleanups.push(electronAPI.onBleConnected((dev) => {
-            setModalOpen(false);
-            setConnected(dev);
-            setLoading(false);
-            setError(null);
-            setConnectingId(null);
-            setScanStarted(false);
-            setStatusMessage(`Successfully connected to ${dev.name}.`);
-            setDiscoveredDevices([]);
-            setSnackbarOpen(true);
-            setVolume(null);
-        }));
+    // discovered devices
+    cleanups.push(
+      electronAPI.onBleDevice((device) => {
+        setDiscoveredDevices((prevDevices) => {
+          if (!prevDevices.some((d) => d.id === device.id)) {
+            setStatusMessage(
+              `Scan active. ${prevDevices.length + 1} devices found.`
+            );
+            return [...prevDevices, device];
+          }
+          return prevDevices;
+        });
+      })
+    );
 
-        // errors
-        cleanups.push(electronAPI.onBleError((msg) => {
-            console.error("BLE Error:", msg);
-            setError(msg);
-            setLoading(false);
-            setConnectingId(null);
-            setModalOpen(false);
-            setScanStarted(false);
-        }));
-
-        // status
-        cleanups.push(electronAPI.onBleStatus((msg) => {
-            setStatusMessage(msg);
-            if (msg.includes("Scanning") || msg.includes("Attempting to connect")) {
-                setLoading(true);
-            } else if (msg.toLowerCase().includes("ready") ||
-                msg.toLowerCase().includes("disconnected") ||
-                msg.toLowerCase().includes("timeout") ||
-                msg.toLowerCase().includes("stopped")) {
-                setLoading(false);
-            }
-        }));
-
-        // push volume updates from notifications
-        cleanups.push(electronAPI.onVolumeUpdated((d) => {
-            // d: { id, volume }
-            if (connected && d.id === connected.id) {
-                setVolume(d.volume);
-                setStatusMessage(`Volume updated: ${d.volume}`);
-            }
-        }));
-
-        // read-volume (existing API)
-        cleanups.push(electronAPI.onReadVolumeResponse((resp) => {
-            if (!connected || resp.id !== connected.id) return;
-            try {
-                const hex = String(resp.hex || "");
-                const bytes = hex.match(/.{1,2}/g)?.map(h => parseInt(h, 16)) || [];
-                if (bytes.length === 1 && bytes[0] >= 0 && bytes[0] <= 100) {
-                    setVolume(bytes[0]);
-                    setStatusMessage(`Volume read: ${bytes[0]}`);
-                } else if (bytes.length >= 2 && bytes[1] >= 0 && bytes[1] <= 255) {
-                    setVolume(bytes[1]);
-                    setStatusMessage(`Volume read: ${bytes[1]}`);
-                } else {
-                    setStatusMessage(`Read char ${resp.uuid}: ${resp.hex}`);
-                }
-            } catch (e) {
-                console.error("Failed to parse read volume response:", e);
-            }
-        }));
-
-        // cleanup on unmount
-        return () => {
-            cleanups.forEach(fn => { try { fn(); } catch (e) { } });
-        };
-    }, [connected]);
-
-    // --- Helpers ---
-    const validateDeviceType = (value) => {
-        const num = Number(value);
-        if (!allowedTypes.includes(num)) {
-            setDeviceTypeError(`Device type must be one of: ${allowedTypes.join(", ")}`);
-            return false;
-        }
-        setDeviceTypeError("");
-        return true;
-    };
-
-    // --- Actions ---
-    const handleStartScan = () => {
-        if (!electronAPI || (loading && !connected)) {
-            console.warn("Scan in progress or Electron API not available.");
-            return;
-        }
-        const num = Number(deviceType);
-        if (!validateDeviceType(num)) return;
-
-        setError(null);
-        setConnected(null);
-        setDiscoveredDevices([]);
-        setLoading(true);
-        setScanStarted(true);
-        setModalOpen(true);
-        setStatusMessage("Initializing Bluetooth and starting scan...");
-
-        electronAPI.startBleScan(num);
-    };
-
-    const handleConnectDevice = (id) => {
-        if (!electronAPI || connected || connectingId) return;
-        const num = Number(deviceType);
-        if (!validateDeviceType(num)) return;
-
-        electronAPI.stopBleScan();
-        setScanStarted(false);
-
-        setConnectingId(id);
-        setLoading(true);
-        const deviceToConnect = discoveredDevices.find(d => d.id === id);
-        setStatusMessage(`Attempting to connect to ${deviceToConnect?.name || id}...`);
-        electronAPI.connectDevice({ id, type: num });
-    };
-
-    const handleDisconnect = () => {
-        const wasConnected = connected;
-        const connectedId = connected?.id;
-
-        if (wasConnected) {
-            electronAPI.disconnectDevice(connectedId);
-        } else if (scanStarted) {
-            electronAPI.stopBleScan();
-        }
-
-        setConnected(null);
-        setError(null);
-        setDiscoveredDevices([]);
+    // connected
+    cleanups.push(
+      electronAPI.onBleConnected((dev) => {
+        setModalOpen(false);
+        setConnected(dev);
         setLoading(false);
+        setError(null);
+        setConnectingId(null);
         setScanStarted(false);
+        setStatusMessage(`Successfully connected to ${dev.name}.`);
+        setDiscoveredDevices([]);
+        setSnackbarOpen(true);
+        setVolume(null);
+        setOtaStatus("Idle");
+        setOtaProgress(0);
+      })
+    );
+
+    // errors
+    cleanups.push(
+      electronAPI.onBleError((msg) => {
+        console.error("BLE Error:", msg);
+        setError(msg);
+        setLoading(false);
         setConnectingId(null);
         setModalOpen(false);
-        setVolume(null);
-        setStatusMessage("Device disconnected. Starting new scan...");
+        setScanStarted(false);
+      })
+    );
 
-        // restart scan
-        handleStartScan();
+    // status
+    cleanups.push(
+      electronAPI.onBleStatus((msg) => {
+        setStatusMessage(msg);
+        if (msg.includes("Scanning") || msg.includes("Attempting to connect")) {
+          setLoading(true);
+        } else if (
+          msg.toLowerCase().includes("ready") ||
+          msg.toLowerCase().includes("disconnected") ||
+          msg.toLowerCase().includes("timeout") ||
+          msg.toLowerCase().includes("stopped")
+        ) {
+          setLoading(false);
+        }
+      })
+    );
+
+    // notifications volume push
+    cleanups.push(
+      electronAPI.onVolumeUpdated((d) => {
+        if (connected && d.id === connected.id) {
+          setVolume(d.volume);
+          setStatusMessage(`Volume updated: ${d.volume}`);
+        }
+      })
+    );
+
+    // existing read response
+    cleanups.push(
+      electronAPI.onReadVolumeResponse((resp) => {
+        if (!connected || resp.id !== connected.id) return;
+
+        try {
+          const hex = String(resp.hex || "");
+          const bytes = hex.match(/.{1,2}/g)?.map((h) => parseInt(h, 16)) || [];
+
+          if (bytes.length === 1 && bytes[0] >= 0 && bytes[0] <= 100) {
+            setVolume(bytes[0]);
+            setStatusMessage(`Volume read: ${bytes[0]}`);
+          } else if (bytes.length >= 2) {
+            setVolume(bytes[1]);
+            setStatusMessage(`Volume read: ${bytes[1]}`);
+          }
+        } catch {}
+      })
+    );
+
+    return () => {
+      cleanups.forEach((fn) => {
+        try {
+          fn();
+        } catch {}
+      });
     };
+  }, [connected]);
 
-    const handleCloseModal = () => {
-        if (scanStarted) {
-            electronAPI.stopBleScan();
-            setScanStarted(false);
-        }
-        setDiscoveredDevices([]);
-        setLoading(false);
-        setModalOpen(false);
-        setStatusMessage("Scan stopped. Ready to scan.");
-    };
+  // --- Validate Type ---
+  const validateDeviceType = (value) => {
+    const num = Number(value);
+    if (!allowedTypes.includes(num)) {
+      setDeviceTypeError(
+        `Device type must be one of: ${allowedTypes.join(", ")}`
+      );
+      return false;
+    }
+    setDeviceTypeError("");
+    return true;
+  };
 
-    // --- One-shot readVolumeNow implementation (uses new IPC) ---
-    // This function sends the request and registers a one-time listener that auto-cleans.
-    const handleReadVolumeNow = () => {
-        if (!connected) {
-            setError("No device connected");
-            return;
-        }
-        setStatusMessage("Reading volume (one-shot)...");
-        // send request
-        electronAPI.readVolumeNow({ id: connected.id });
+  // --- Scan Start ---
+  const handleStartScan = () => {
+    if (!electronAPI || (loading && !connected)) return;
 
-        // register listener that will cleanup after first call
-        const remove = electronAPI.onReadVolumeNowResponse((resp) => {
-            try {
-                if (resp.error) {
-                    console.error("Read-now error:", resp.error);
-                    setStatusMessage(`Read error: ${resp.error}`);
-                    remove(); // cleanup
-                    return;
-                }
+    const num = Number(deviceType);
+    if (!validateDeviceType(num)) return;
 
-                // resp: { id, uuid, hex }
-                console.log("Read-now result:", resp);
-                const hexStr = String(resp.hex || "");
-                const bytes = hexStr.match(/.{1,2}/g)?.map(h => parseInt(h, 16)) || [];
+    setError(null);
+    setConnected(null);
+    setDiscoveredDevices([]);
+    setLoading(true);
+    setScanStarted(true);
+    setModalOpen(true);
+    setStatusMessage("Initializing Bluetooth and starting scan...");
 
-                console.log("bytes:", bytes);
+    electronAPI.startBleScan(num);
+  };
 
-                if (bytes.length === 1 && bytes[0] >= 0 && bytes[0] <= 100) {
-                    setVolume(bytes[0]);
-                    setStatusMessage(`Volume read: ${bytes[0]}`);
-                } else if (bytes.length >= 2 && typeof bytes[1] === 'number') {
-                    setVolume(bytes[1]);
-                    setStatusMessage(`Volume read: ${bytes[1]}`);
-                } else {
-                    setStatusMessage(`Read char ${resp.uuid}: ${resp.hex}`);
-                }
-            } catch (e) {
-                console.error("Error handling read-now response:", e);
-                setStatusMessage("Failed to parse read-now response.");
-            } finally {
-                // ALWAYS remove the listener to avoid leaking handlers
-                remove();
-            }
-        });
-    };
+  // --- Connect ---
+  const handleConnectDevice = (id) => {
+    if (!electronAPI || connected || connectingId) return;
 
-    // --- Render helpers ---
-    const renderDeviceList = () => {
-        if (discoveredDevices.length > 0) {
-            return (
-                <List dense>
-                    {discoveredDevices.map((device, index) => (
-                        <React.Fragment key={device.id}>
-                            <ListItem
-                                secondaryAction={
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        size="small"
-                                        startIcon={connectingId === device.id ? <CircularProgress size={16} color="inherit" /> : <BluetoothConnectedIcon />}
-                                        onClick={() => handleConnectDevice(device.id)}
-                                        disabled={connectingId !== null}
-                                    >
-                                        {connectingId === device.id ? 'Connecting' : 'Connect'}
-                                    </Button>
-                                }
-                            >
-                                <ListItemText
-                                    primary={device.name || `Unnamed Device (${device.id.substring(0, 8)}...)`}
-                                    secondary={`ID: ${device.id.substring(0, 10)}... | RSSI: ${device.rssi}`}
-                                />
-                            </ListItem>
-                            {index < discoveredDevices.length - 1 && <Divider component="li" />}
-                        </React.Fragment>
-                    ))}
-                </List>
-            );
-        }
+    const num = Number(deviceType);
+    if (!validateDeviceType(num)) return;
 
-        if (loading && discoveredDevices.length === 0) {
-            return (
-                <Box sx={{ mt: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <CircularProgress size={50} />
-                    <Typography variant="body1" sx={{ mt: 2 }}>
-                        {statusMessage}
-                    </Typography>
-                </Box>
-            );
-        }
+    electronAPI.stopBleScan();
+    setScanStarted(false);
 
-        if (scanStarted && !loading && discoveredDevices.length === 0) {
-            return (
-                <Alert severity="warning" sx={{ mt: 3 }}>
-                    No target devices found. Check if Bluetooth is enabled and the device is advertising.
-                </Alert>
-            );
+    setConnectingId(id);
+    setLoading(true);
+    const deviceToConnect = discoveredDevices.find((d) => d.id === id);
+    setStatusMessage(
+      `Attempting to connect to ${deviceToConnect?.name || id}...`
+    );
+
+    electronAPI.connectDevice({ id, type: num });
+  };
+
+  // --- Disconnect + Restart Scan ---
+  const handleDisconnect = () => {
+    const connectedId = connected?.id;
+
+    if (connectedId) electronAPI.disconnectDevice(connectedId);
+    else if (scanStarted) electronAPI.stopBleScan();
+
+    setConnected(null);
+    setError(null);
+    setDiscoveredDevices([]);
+    setLoading(false);
+    setScanStarted(false);
+    setConnectingId(null);
+    setModalOpen(false);
+    setVolume(null);
+    setStatusMessage("Device disconnected. Starting new scan...");
+    handleStartScan();
+  };
+
+  const handleCloseModal = () => {
+    if (scanStarted) {
+      electronAPI.stopBleScan();
+      setScanStarted(false);
+    }
+    setDiscoveredDevices([]);
+    setLoading(false);
+    setModalOpen(false);
+    setStatusMessage("Scan stopped. Ready to scan.");
+  };
+
+  // --- Read Volume (one-shot) ---
+  const handleReadVolumeNow = () => {
+    if (!connected) {
+      setError("No device connected");
+      return;
+    }
+
+    setStatusMessage("Reading volume...");
+
+    electronAPI.readVolumeNow({ id: connected.id });
+
+    const remove = electronAPI.onReadVolumeNowResponse((resp) => {
+      try {
+        if (resp.error) {
+          setStatusMessage(`Read error: ${resp.error}`);
+          remove();
+          return;
         }
 
-        return null;
-    };
+        const hexStr = String(resp.hex || "");
+        const bytes =
+          hexStr.match(/.{1,2}/g)?.map((h) => parseInt(h, 16)) || [];
 
-    // --- JSX ---
-    return (
-        <Box sx={{ padding: 3, maxWidth: 500, margin: 'auto', textAlign: 'center' }}>
-            <Typography variant="h4" gutterBottom>
-                BLE Device QC Connection
-            </Typography>
+        if (bytes.length === 1) {
+          setVolume(bytes[0]);
+        } else if (bytes.length >= 2) {
+          setVolume(bytes[1]);
+        }
 
-            {/* Device Type Input */}
-            <FormControl sx={{ mt: 2, mb: 1, width: '100%' }} error={Boolean(deviceTypeError)}>
-                <TextField
-                    label="Device Type"
-                    type="number"
-                    value={deviceType}
-                    onChange={(e) => {
-                        const value = e.target.value;
-                        setDeviceType(value);
-                        if (value !== "") validateDeviceType(value);
-                    }}
-                    helperText={deviceTypeError || `Allowed: ${allowedTypes.join(", ")}`}
+        setStatusMessage("Volume updated");
+      } finally {
+        remove();
+      }
+    });
+  };
+
+  // --- OTA Start ---
+  const handleStartOTA = async () => {
+    if (!connected) {
+      setOtaStatus("Device not connected");
+      return;
+    }
+
+    if (!otaFile) {
+      setOtaStatus("No OTA file selected");
+      return;
+    }
+
+    try {
+      setOtaRunning(true);
+      setOtaStatus("Starting OTA...");
+      setOtaProgress(0);
+
+      electronAPI.startOta({
+        id: connected.id,
+        buffer: otaFile.buffer,
+      });
+
+      const off1 = electronAPI.onOtaStatus((msg) => setOtaStatus(msg));
+      const off2 = electronAPI.onOtaProgress((pct) => setOtaProgress(pct));
+      const off3 = electronAPI.onOtaDone((resp) => {
+        setOtaStatus(resp?.success ? "OTA Completed" : "OTA Failed");
+        setOtaRunning(false);
+        off1();
+        off2();
+        off3();
+      });
+    } catch (err) {
+      console.error(err);
+      setOtaStatus("OTA failed to start");
+      setOtaRunning(false);
+    }
+  };
+
+  // --- Device List Render ---
+  const renderDeviceList = () => {
+    if (discoveredDevices.length > 0) {
+      return (
+        <List dense>
+          {discoveredDevices.map((device, index) => (
+            <React.Fragment key={device.id}>
+              <ListItem
+                secondaryAction={
+                  <Button
+                    variant="contained"
+                    color="primary"
                     size="small"
+                    startIcon={
+                      connectingId === device.id ? (
+                        <CircularProgress size={16} color="inherit" />
+                      ) : (
+                        <BluetoothConnectedIcon />
+                      )
+                    }
+                    onClick={() => handleConnectDevice(device.id)}
+                    disabled={connectingId !== null}
+                  >
+                    {connectingId === device.id ? "Connecting" : "Connect"}
+                  </Button>
+                }
+              >
+                <ListItemText
+                  primary={
+                    device.name ||
+                    `Unnamed Device (${device.id.substring(0, 8)}...)`
+                  }
+                  secondary={`ID: ${device.id.substring(0, 10)}... | RSSI: ${
+                    device.rssi
+                  }`}
                 />
-                {deviceTypeError && (
-                    <FormHelperText>{deviceTypeError}</FormHelperText>
-                )}
-            </FormControl>
+              </ListItem>
+              {index < discoveredDevices.length - 1 && (
+                <Divider component="li" />
+              )}
+            </React.Fragment>
+          ))}
+        </List>
+      );
+    }
 
-            {/* Error Alert */}
-            {error && (
-                <Alert severity="error" sx={{ mt: 1, mb: 2 }}>
-                    Error: {error}
-                </Alert>
-            )}
+    if (loading)
+      return (
+        <Box align="center">
+          <CircularProgress />
+          <Typography sx={{ mt: 2 }}>{statusMessage}</Typography>
+        </Box>
+      );
 
-            {/* Main Action Button */}
-            <Button
-                onClick={connected ? handleDisconnect : handleStartScan}
-                variant="contained"
-                color={connected ? "error" : "primary"}
-                startIcon={connected ? null : <SearchIcon />}
-                sx={{ mt: 2, mb: 3, borderRadius: 5, padding: '10px 30px' }}
-                disabled={loading && !connected}
-            >
-                {connected ? "Disconnect & Restart Scan" : "Start BLE Scan"}
+    return null;
+  };
+
+  return (
+    <Box
+      sx={{ padding: 3, maxWidth: 500, margin: "auto", textAlign: "center" }}
+    >
+      <Typography variant="h4" gutterBottom>
+        BLE Device QC Connection
+      </Typography>
+
+      {/* Device Type */}
+      <FormControl
+        sx={{ mt: 2, width: "100%" }}
+        error={Boolean(deviceTypeError)}
+      >
+        <TextField
+          label="Device Type"
+          type="number"
+          value={deviceType}
+          onChange={(e) => {
+            const value = e.target.value;
+            setDeviceType(value);
+            if (value !== "") validateDeviceType(value);
+          }}
+          helperText={deviceTypeError || `Allowed: ${allowedTypes.join(", ")}`}
+          size="small"
+        />
+        {deviceTypeError && <FormHelperText>{deviceTypeError}</FormHelperText>}
+      </FormControl>
+
+      {error && <Alert severity="error">Error: {error}</Alert>}
+
+      {/* Scan Button */}
+      <Button
+        onClick={connected ? handleDisconnect : handleStartScan}
+        variant="contained"
+        color={connected ? "error" : "primary"}
+        startIcon={connected ? null : <SearchIcon />}
+        sx={{ mt: 2, borderRadius: 5, px: 4 }}
+        disabled={loading && !connected}
+      >
+        {connected ? "Disconnect & Restart Scan" : "Start BLE Scan"}
+      </Button>
+
+      <Typography sx={{ mt: 1 }}>
+        Current Status: <b>{statusMessage}</b>
+      </Typography>
+
+      {/* Connected Section */}
+      {connected && (
+        <Box
+          sx={{
+            mt: 2,
+            p: 2,
+            border: "1px solid green",
+            borderRadius: 2,
+            background: "#E8F5E9",
+          }}
+        >
+          <Typography color="green">
+            <CheckCircleOutlineIcon /> Connected Successfully
+          </Typography>
+
+          <Typography>Device: {connected.name}</Typography>
+          <Typography>MAC: {connected.mac}</Typography>
+          <Typography>ID: {connected.id}</Typography>
+
+          <Box sx={{ mt: 2, display: "flex", gap: 2 }}>
+            <Button onClick={handleReadVolumeNow} variant="outlined">
+              Read Volume Now
             </Button>
 
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Current Status: <b>{statusMessage}</b>
-            </Typography>
-
-            {/* Connected UI */}
-            {connected && (
-                <Box sx={{ mt: 2, p: 3, border: '1px solid #4caf50', borderRadius: 2, backgroundColor: '#e8f5e9' }}>
-                    <Typography variant="h5" sx={{ color: "green", mb: 2 }} component="div">
-                        <CheckCircleOutlineIcon sx={{ verticalAlign: 'middle', mr: 1 }} />
-                        Connected Successfully!
-                    </Typography>
-                    <Typography variant="body1" align="left"><b>Device Name:</b> {connected.name}</Typography>
-                    <Typography variant="body1" align="left"><b>MAC Address:</b> {connected.mac}</Typography>
-                    <Typography variant="body1" align="left"><b>Device ID:</b> {connected.id}</Typography>
-                    <Typography variant="body1" align="left"><b>Device Type:</b> {deviceType}</Typography>
-
-                    <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
-                        <Button variant="outlined" onClick={handleReadVolumeNow} disabled={loading}>
-                            Read Volume Now
-                        </Button>
-                        <Button variant="outlined" onClick={() => electronAPI.readVolume({ id: connected.id })} disabled={loading}>
-                            Read (existing)
-                        </Button>
-                    </Box>
-
-                    {volume !== null && (
-                        <Typography variant="body1" sx={{ mt: 2 }}><b>Volume:</b> {volume}</Typography>
-                    )}
-                </Box>
-            )}
-
-            {/* Scan/Discovery Modal */}
-            <Modal
-                open={modalOpen}
-                onClose={handleCloseModal}
-                aria-labelledby="scan-modal-title"
-                aria-describedby="scan-modal-description"
+            <Button
+              variant="outlined"
+              onClick={() => electronAPI.readVolume({ id: connected.id })}
             >
-                <Box sx={modalStyle}>
-                    <IconButton
-                        aria-label="close"
-                        onClick={handleCloseModal}
-                        sx={{
-                            position: 'absolute',
-                            right: 8,
-                            top: 8,
-                            color: (theme) => theme.palette.grey[500],
-                        }}
-                    >
-                        <CloseIcon />
-                    </IconButton>
-                    <Typography id="scan-modal-title" variant="h6" component="h2" gutterBottom>
-                        Scanning for BLE Devices
-                    </Typography>
-                    <Divider sx={{ mb: 2 }} />
-                    <Typography id="scan-modal-description" sx={{ mt: 1, mb: 2 }} color="text.secondary">
-                        {statusMessage}
-                    </Typography>
-                    <Box sx={{ maxHeight: 300, overflowY: 'auto' }}>
-                        {renderDeviceList()}
-                    </Box>
-                    <Divider sx={{ mt: 2 }} />
-                    {loading && discoveredDevices.length > 0 && (
-                        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                            *Keep the modal open to continue scanning for new devices.
-                        </Typography>
-                    )}
-                    {!loading && discoveredDevices.length > 0 && (
-                        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                            *Scan finished. Select a device to connect.
-                        </Typography>
-                    )}
-                </Box>
-            </Modal>
+              Read Existing
+            </Button>
+          </Box>
 
-            <Snackbar
-                open={snackbarOpen}
-                autoHideDuration={4000}
-                onClose={() => setSnackbarOpen(false)}
-                message="Device Connected!"
-                action={
-                    <IconButton size="small" aria-label="close" color="inherit" onClick={() => setSnackbarOpen(false)}>
-                        <CloseIcon fontSize="small" />
-                    </IconButton>
-                }
-            />
+          {volume !== null && (
+            <Typography sx={{ mt: 1 }}>Volume: {volume}</Typography>
+          )}
+
+          {/* OTA Section */}
+          <Divider sx={{ my: 2 }} />
+
+          <Typography variant="h6">OTA Firmware Update</Typography>
+
+          <Box sx={{ mt: 2, display: "flex", gap: 2 }}>
+            <Button variant="contained" component="label" disabled={otaRunning}>
+              Upload .FOT
+              <input
+                hidden
+                type="file"
+                accept=".fot"
+                onChange={async (e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  const buffer = await file.arrayBuffer();
+                  setOtaFile({ name: file.name, buffer });
+                  setOtaStatus(
+                    `Loaded ${file.name} (${buffer.byteLength} bytes)`
+                  );
+                }}
+              />
+            </Button>
+
+            <Button
+              variant="outlined"
+              disabled={!otaFile || otaRunning}
+              onClick={handleStartOTA}
+            >
+              Start OTA
+            </Button>
+          </Box>
+
+          <Typography sx={{ mt: 1 }}>
+            <b>Status:</b> {otaStatus}
+          </Typography>
+
+          <LinearProgress
+            variant="determinate"
+            value={otaProgress}
+            sx={{ mt: 1 }}
+          />
+
+          <Typography>{otaProgress}%</Typography>
         </Box>
-    );
+      )}
+
+      {/* Modal */}
+      <Modal open={modalOpen} onClose={handleCloseModal}>
+        <Box sx={modalStyle}>
+          <IconButton
+            sx={{ position: "absolute", right: 8, top: 8 }}
+            onClick={handleCloseModal}
+          >
+            <CloseIcon />
+          </IconButton>
+
+          <Typography variant="h6">Scanning Devices...</Typography>
+          <Divider sx={{ my: 1 }} />
+          {renderDeviceList()}
+        </Box>
+      </Modal>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={() => setSnackbarOpen(false)}
+        message="Device Connected!"
+      />
+    </Box>
+  );
 }
