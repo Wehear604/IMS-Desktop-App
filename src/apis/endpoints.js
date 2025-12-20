@@ -1,4 +1,4 @@
-export const mode = "local";
+export const mode = "development";
 let domain = "";
 
 switch (mode) {
@@ -223,4 +223,4 @@ export default {
   purchaseRequestCreate: `${domain}api/v1/purchaseRequest/`,
 
   createDeviceQc: `${domain}api/qc-device/create`,
-}
+};

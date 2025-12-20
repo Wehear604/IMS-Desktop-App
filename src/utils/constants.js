@@ -139,7 +139,7 @@ export const actions = {
   SET_ITE_OPTIMA_VOLUME: "SET_ITE_OPTIMA_VOLUME",
 
   SET_ITE_PRIME_MODE: "SET_ITE_PRIME_MODE",
-  SET_ITE_PRIME_VOLUME:"SET_ITE_PRIME_VOLUME",
+  SET_ITE_PRIME_VOLUME: "SET_ITE_PRIME_VOLUME",
   SET_ITE_PRIME_CURRENT_VOLUME: "SET_ITE_PRIME_CURRENT_VOLUME",
 };
 
@@ -150,8 +150,8 @@ export const SERVICE_UUID = {
   9: "0000fdc2-0000-1000-8000-00805f9b34fb",
   11: "0000fff0-0000-1000-8000-00805f9b34fb",
   12: "4157b00b-d129-aeb5-859b-d547e30ffcb1",
-  // 13: "4157b00b-d129-aeb5-859b-d547e30ffcb1",
-  13: "f6898c59-8e5a-4dc4-a8b5-01dd76388822"
+  13: "4157b00b-d129-aeb5-859b-d547e30ffcb1",
+  15: "f6898c59-8e5a-4dc4-a8b5-01dd76388822",
 };
 
 export const MANUFACTURER_IDENTIFIER = {
@@ -160,7 +160,7 @@ export const MANUFACTURER_IDENTIFIER = {
   8: "0x0088",
   9: "0x3231",
   11: "0x6C42",
-  13: "0x0F4B"
+  15: "0x0F4B",
 };
 
 export const CHARACTERISTIC_UUID_READ_WRITE = {
@@ -170,8 +170,8 @@ export const CHARACTERISTIC_UUID_READ_WRITE = {
   9: "e49a25e0-f69a-11e8-8eb2-f2801f1b9fd1",
   11: "0000fff2-0000-1000-8000-00805f9b34fb",
   12: "4157b611-d129-aeb5-859b-d547e30ffcb1",
-  // 13: "4157b611-d129-aeb5-859b-d547e30ffcb1",
-  13: "866ca7ac-fae8-4753-a61b-8793a0ee26a0",
+  13: "4157b611-d129-aeb5-859b-d547e30ffcb1",
+  15: "866ca7ac-fae8-4753-a61b-8793a0ee26a0",
 };
 
 export const CHARACTERISTIC_UUID_READ_NOTIFY = {
@@ -181,8 +181,8 @@ export const CHARACTERISTIC_UUID_READ_NOTIFY = {
   9: "e49a28e1-f69a-11e8-8eb2-f2801f1b9fd1",
   11: "0000fff1-0000-1000-8000-00805f9b34fb",
   12: "4157b612-d129-aeb5-859b-d547e30ffcb1",
-  // 13: "4157b612-d129-aeb5-859b-d547e30ffcb1",
-  13: "866ca7ac-fae8-4753-a61b-8793a0ee26a0",
+  13: "4157b612-d129-aeb5-859b-d547e30ffcb1",
+  15: "866ca7ac-fae8-4753-a61b-8793a0ee26a0",
 };
 
 export const NOTIFICATION_TYPE = {
@@ -411,7 +411,6 @@ export const VOLUME_COMMANDS_REVERSE = {
 };
 
 export const EQ_LEVEL = [20, 30, 70, 50, 60];
-
 
 export const ITE_MODE = {
   "01": 0,

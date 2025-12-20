@@ -5,148 +5,153 @@ import { LISTENING_SIDE, SNACK_BAR_VARIETNS } from "./constants";
 import audioUrl from "../assets/images/AirplaneInterior.mp3"; // mp3 file
 
 export const BLE_STORE = {
-    deviceObj: null,
-    writeFun: null,
-    readFun: null,
-    disconnectFun: null,
-    hardwareData: null,
-    BTEdisconnect: false,
-
-    audio: null // MP3 instance stored here
+  deviceObj: null,
+  writeFun: null,
+  readFun: null,
+  disconnectFun: null,
+  hardwareData: null,
+  BTEdisconnect: false,
+  server: null,
+  device: null,
+  audio: null, // MP3 instance stored here
+};
+export const SAFE_BUDS_STORE = {
+  device: null,
+  server: null,
+  svc: null,
+  chIn: null,
+  chOut: null,
 };
 
 //------------------------------------------------------
 // LAZY INITIALIZE MP3 AUDIO
 //------------------------------------------------------
 const ensureAudio = () => {
-    if (!BLE_STORE.audio) {
-        BLE_STORE.audio = new Audio(audioUrl);
-    }
-    return BLE_STORE.audio;
+  if (!BLE_STORE.audio) {
+    BLE_STORE.audio = new Audio(audioUrl);
+  }
+  return BLE_STORE.audio;
 };
 
 //------------------------------------------------------
 // PLAY COMMAND (UPDATED LOGIC)
 //------------------------------------------------------
 export async function sendPlayCommand(dispatch, device_type, side, value) {
-    console.log("sendPlayCommand called with device_type:", device_type);
+  console.log("sendPlayCommand called with device_type:", device_type);
 
-    //--------------------------------------------------
-    // CASE 1 → device_type exists → PLAY MP3 LOCALLY
-    //--------------------------------------------------
-    if (device_type) {
-        console.log("Playing MP3 instead of BLE command...");
-
-        try {
-            const audio = ensureAudio();
-            await audio.play();
-
-            dispatch(DeviceIsAudioCheck(true));
-            return; // IMPORTANT: stop here, do NOT send BLE command
-        } catch (err) {
-            console.error("MP3 play failed:", err);
-            dispatch(
-                callSnackBar(`MP3 play failed: ${err}`, SNACK_BAR_VARIETNS.error)
-            );
-            return;
-        }
-    }
-
-    //--------------------------------------------------
-    // CASE 2 → device_type NOT EXISTS → USE BLE COMMAND
-    //--------------------------------------------------
-    const command =
-        side === LISTENING_SIDE.LEFT
-            ? `83 03 01 00 ${value.toString(16).padStart(2, "0")}`
-            : `83 03 02 00 ${value.toString(16).padStart(2, "0")}`;
-
-    console.log("Sending BLE play command:", command);
+  //--------------------------------------------------
+  // CASE 1 → device_type exists → PLAY MP3 LOCALLY
+  //--------------------------------------------------
+  if (device_type) {
+    console.log("Playing MP3 instead of BLE command...");
 
     try {
-        await WriteRicDataToDevice(command, side, BLE_STORE.deviceObj);
-        dispatch(DeviceIsAudioCheck(true));
+      const audio = ensureAudio();
+      await audio.play();
+
+      dispatch(DeviceIsAudioCheck(true));
+      return; // IMPORTANT: stop here, do NOT send BLE command
     } catch (err) {
-        console.error("BLE Play write failed:", err);
-        dispatch(DeviceIsAudioCheck(false));
-        dispatch(
-            callSnackBar(`BLE Play failed ${err}`, SNACK_BAR_VARIETNS.error)
-        );
+      console.error("MP3 play failed:", err);
+      dispatch(
+        callSnackBar(`MP3 play failed: ${err}`, SNACK_BAR_VARIETNS.error)
+      );
+      return;
     }
+  }
+
+  //--------------------------------------------------
+  // CASE 2 → device_type NOT EXISTS → USE BLE COMMAND
+  //--------------------------------------------------
+  const command =
+    side === LISTENING_SIDE.LEFT
+      ? `83 03 01 00 ${value.toString(16).padStart(2, "0")}`
+      : `83 03 02 00 ${value.toString(16).padStart(2, "0")}`;
+
+  console.log("Sending BLE play command:", command);
+
+  try {
+    await WriteRicDataToDevice(command, side, BLE_STORE.deviceObj);
+    dispatch(DeviceIsAudioCheck(true));
+  } catch (err) {
+    console.error("BLE Play write failed:", err);
+    dispatch(DeviceIsAudioCheck(false));
+    dispatch(callSnackBar(`BLE Play failed ${err}`, SNACK_BAR_VARIETNS.error));
+  }
 }
 
 //------------------------------------------------------
 // PAUSE COMMAND (UPDATED LOGIC)
 //------------------------------------------------------
 export async function sendPauseCommand() {
-    console.log("sendPauseCommand called");
+  console.log("sendPauseCommand called");
 
-    //--------------------------------------------------
-    // PAUSE MP3 FIRST IF PLAYING
-    //--------------------------------------------------
-    if (BLE_STORE.audio) {
-        try {
-            BLE_STORE.audio.pause();
-            BLE_STORE.audio.currentTime = 0;
-            console.log("MP3 paused successfully");
-        } catch (err) {
-            console.error("MP3 pause error:", err);
-        }
-    }
-
-    //--------------------------------------------------
-    // BLE PAUSE ONLY IF DEVICE CONNECTED & writeFun exists
-    //--------------------------------------------------
-    if (!BLE_STORE.writeFun || !BLE_STORE.writeFun.writeData) {
-        console.warn("BLE pause skipped: writeFun not available");
-        return;
-    }
-
-    const pausePacket = [170, 171, 3, 0, 0, 0, 0];
-
+  //--------------------------------------------------
+  // PAUSE MP3 FIRST IF PLAYING
+  //--------------------------------------------------
+  if (BLE_STORE.audio) {
     try {
-        await BLE_STORE.writeFun.writeData(pausePacket);
-        console.log("BLE pause sent");
+      BLE_STORE.audio.pause();
+      BLE_STORE.audio.currentTime = 0;
+      console.log("MP3 paused successfully");
     } catch (err) {
-        console.error("BLE pause write failed:", err);
+      console.error("MP3 pause error:", err);
     }
-}
+  }
 
+  //--------------------------------------------------
+  // BLE PAUSE ONLY IF DEVICE CONNECTED & writeFun exists
+  //--------------------------------------------------
+  if (!BLE_STORE.writeFun || !BLE_STORE.writeFun.writeData) {
+    console.warn("BLE pause skipped: writeFun not available");
+    return;
+  }
+
+  const pausePacket = [170, 171, 3, 0, 0, 0, 0];
+
+  try {
+    await BLE_STORE.writeFun.writeData(pausePacket);
+    console.log("BLE pause sent");
+  } catch (err) {
+    console.error("BLE pause write failed:", err);
+  }
+}
 
 //------------------------------------------------------
 // DATA PARSING UTILITIES (unchanged)
 //------------------------------------------------------
 export const dataViewToHex = (dataView) => {
-    if (!dataView) return "";
-    const arr = [];
-    for (let i = 0; i < dataView.byteLength; i++) {
-        arr.push(("0" + dataView.getUint8(i).toString(16)).slice(-2));
-    }
-    return arr.join(" ");
+  if (!dataView) return "";
+  const arr = [];
+  for (let i = 0; i < dataView.byteLength; i++) {
+    arr.push(("0" + dataView.getUint8(i).toString(16)).slice(-2));
+  }
+  return arr.join(" ");
 };
 
 export const readCharacteristic = async (characteristicOrWrapper) => {
-    if (!characteristicOrWrapper) {
-        throw new Error("No characteristic provided for read.");
-    }
+  if (!characteristicOrWrapper) {
+    throw new Error("No characteristic provided for read.");
+  }
 
-    if (typeof characteristicOrWrapper.readData === "function") {
-        const result = await characteristicOrWrapper.readData();
-        if (result instanceof DataView) {
-            return { hex: dataViewToHex(result), timestamp: Date.now(), raw: result };
-        }
-        return { hex: String(result), timestamp: Date.now(), raw: result };
+  if (typeof characteristicOrWrapper.readData === "function") {
+    const result = await characteristicOrWrapper.readData();
+    if (result instanceof DataView) {
+      return { hex: dataViewToHex(result), timestamp: Date.now(), raw: result };
     }
+    return { hex: String(result), timestamp: Date.now(), raw: result };
+  }
 
-    if (typeof characteristicOrWrapper.readValue === "function") {
-        const dataView = await characteristicOrWrapper.readValue();
-        const hex = dataViewToHex(dataView);
-        return { hex, timestamp: Date.now(), raw: dataView };
-    }
+  if (typeof characteristicOrWrapper.readValue === "function") {
+    const dataView = await characteristicOrWrapper.readValue();
+    const hex = dataViewToHex(dataView);
+    return { hex, timestamp: Date.now(), raw: dataView };
+  }
 
-    throw new Error("Provided characteristic does not support reading.");
+  throw new Error("Provided characteristic does not support reading.");
 };
 
 export const interpolateValue = (value1, value2, t = 0.5) => {
-    const interpolated = value1 + (value2 - value1) * t;
-    return Math.round(interpolated);
+  const interpolated = value1 + (value2 - value1) * t;
+  return Math.round(interpolated);
 };
