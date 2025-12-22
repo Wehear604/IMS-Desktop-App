@@ -18,9 +18,6 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-/**********************************************************
- * CONSTANTS
- **********************************************************/
 const CMD_OTA_INFO = 0xa0;
 const CMD_SEND_DATA = 0x20;
 const CMD_GET_INFO = 0x91;
@@ -534,6 +531,8 @@ export default function UploadButtonSafeBuds() {
   const [deviceInfo, setDeviceInfo] = useState("");
   const [logs, setLogs] = useState("");
 
+  const [isUploading, setIsUploading] = useState(false);
+
   const logRef = React.useRef(null);
   let session = null;
 
@@ -563,7 +562,7 @@ export default function UploadButtonSafeBuds() {
       setStatus("Device not connected");
       return;
     }
-
+    setIsUploading(true);
     const reader = new DataReader(buffer);
 
     session = new OtaSession({
