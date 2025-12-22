@@ -47,11 +47,11 @@ const IDENTIFICATION = Uint8Array.from([
   0xcc, 0xaa, 0x55, 0xee, 0x12, 0x19, 0xe4,
 ]);
 
-const DEFAULT_BLOCK_SIZE = 8 * 1024;
+const DEFAULT_BLOCK_SIZE = 5.5 * 1024;
 const DEFAULT_PACKET_SIZE = 400;
 const SAFE_PAYLOAD_LIMIT = 400;
 const TIMEOUT_MS = 15000;
-const DELAY_AFTER_IDENT_MS = 100;
+const DELAY_AFTER_IDENT_MS = 10;
 const LOG_DATA_FRAMES = false;
 
 /**********************************************************
