@@ -1,8 +1,17 @@
 import ReadITEDataFromDevice from "../../pages/wehearDeviceQc/ite/ReadITEDataFromDevice";
 import ReadITEPrimeDataFromDevice from "../../pages/wehearDeviceQc/ite/ReadITEPrimeDataFromDevice";
 import ReadRicDataFromDevice from "../../pages/wehearDeviceQc/ric/ReadRicDataToDevice";
+import Read from "../../pages/wehearDeviceQc/safebuds/Read";
+import Write from "../../pages/wehearDeviceQc/safebuds/Write";
 import { BLE_STORE, interpolateValue } from "../../utils/bleStore";
-import { actions, EQ_LEVEL, ITE_MODE, LISTENING_SIDE, MODES, VOLUME_COMMANDS_REVERSE } from "../../utils/constants";
+import {
+  actions,
+  EQ_LEVEL,
+  ITE_MODE,
+  LISTENING_SIDE,
+  MODES,
+  VOLUME_COMMANDS_REVERSE,
+} from "../../utils/constants";
 
 const gattLock = (() => {
   let busy = false;
@@ -58,7 +67,6 @@ export const BteDeviceCurrentVolume = (device_side) => {
   };
 };
 
-
 export const BteDeviceMode = () => {
   return async (dispatch) => {
     try {
@@ -68,8 +76,7 @@ export const BteDeviceMode = () => {
         type: actions.SET_BTE_MODE,
         mode: mode[0] ?? null,
       });
-    }
-    catch (err) {
+    } catch (err) {
       console.error("BteDeviceMode read failed", err);
       dispatch({
         type: actions.SET_BTE_MODE,
@@ -79,7 +86,6 @@ export const BteDeviceMode = () => {
     }
   };
 };
-
 
 export const RicDeviceCurrentVolume = (side) => {
   return async (dispatch) => {
@@ -119,7 +125,7 @@ export const RicDeviceCurrentVolume = (side) => {
   };
 };
 
-export const readRicVolumeLevel = (side, deviceObj, onSuccess = () => { }) => {
+export const readRicVolumeLevel = (side, deviceObj, onSuccess = () => {}) => {
   return async (dispatch) => {
     try {
       const command =
@@ -197,23 +203,23 @@ export const readRicMode = (side, deviceObj) => {
   };
 };
 
-
 export const readRic8Volume = (side, currentVolume) => {
-
   return async (dispatch) => {
     try {
       const command = "0x06";
-      const response = await ReadRicDataFromDevice(command, side, BLE_STORE.deviceObj);
+      const response = await ReadRicDataFromDevice(
+        command,
+        side,
+        BLE_STORE.deviceObj
+      );
       const responseParts = response.trim().split(" ");
-      console.log("first response", response)
+      console.log("first response", response);
       let eqData = [];
       for (let i = 0; i < 5; i++) {
         if (i == 0 || i == 2 || i == 3) {
-          let data =
-            parseInt(responseParts[i], 16) - parseInt(EQ_LEVEL[i], 16);
+          let data = parseInt(responseParts[i], 16) - parseInt(EQ_LEVEL[i], 16);
           let data1 =
-            parseInt(responseParts[i + 1], 16) -
-            parseInt(EQ_LEVEL[i + 1], 16);
+            parseInt(responseParts[i + 1], 16) - parseInt(EQ_LEVEL[i + 1], 16);
 
           let twoDataObj = interpolateValue(data, data1);
           eqData.push(data);
@@ -232,7 +238,7 @@ export const readRic8Volume = (side, currentVolume) => {
         dispatch({
           type: actions.SET_RIC8_CURRENT_VOLUME,
           volume,
-          device_side: side
+          device_side: side,
         });
       } else {
         dispatch({
@@ -243,8 +249,7 @@ export const readRic8Volume = (side, currentVolume) => {
         });
       }
 
-      console.log("{ volume, mode ", volume, mode)
-
+      console.log("{ volume, mode ", volume, mode);
     } catch (err) {
       console.error("RicDeviceCurrentVolume read failed", err);
     }
@@ -253,10 +258,13 @@ export const readRic8Volume = (side, currentVolume) => {
 
 // credit goes to dilip mali
 export const getITEOptimaData = (side, currentVolume) => {
-
   return async (dispatch) => {
     const command = "AA 00 03";
-    const response = await ReadITEDataFromDevice(command, side, BLE_STORE.deviceObj);
+    const response = await ReadITEDataFromDevice(
+      command,
+      side,
+      BLE_STORE.deviceObj
+    );
     const responseParts = response.trim().split(" ");
     console.log("object response", response);
     let eqData = [];
@@ -291,7 +299,7 @@ export const getITEOptimaData = (side, currentVolume) => {
       dispatch({
         type: actions.SET_ITE_OPTIMA_CURRENT_VOLUME,
         volume,
-        device_side: side
+        device_side: side,
       });
     } else {
       dispatch({
@@ -304,35 +312,36 @@ export const getITEOptimaData = (side, currentVolume) => {
   };
 };
 
-
 export const getITEPrimeMode = (side, deviceObj) => {
   return async (dispatch) => {
     const command = [0x02, 0x05, 0x00];
     const response = await ReadITEPrimeDataFromDevice(command, side, deviceObj);
     console.log("object ITE prime response", response);
     const mode = response[4];
-    console.log("mode", mode)
+    console.log("mode", mode);
     dispatch({
       type: actions.SET_ITE_PRIME_MODE,
       mode,
       side,
-    })
-    console.log("object ite mode", mode );
-  }
-
-}
-
+    });
+    console.log("object ite mode", mode);
+  };
+};
 
 export const getITEPrimeVolume = (side, currentVolume) => {
   return async (dispatch) => {
-    const command = [0x02, 0x0d, 0x00]
+    const command = [0x02, 0x0d, 0x00];
     console.log("object command", command);
-    const response = await ReadITEPrimeDataFromDevice(command, side, BLE_STORE.deviceObj);
+    const response = await ReadITEPrimeDataFromDevice(
+      command,
+      side,
+      BLE_STORE.deviceObj
+    );
     const parts = response;
     const payload = parts.slice(3);
     let volume = 0;
-    console.log("payload", payload)
-    let finalVolume = 0
+    console.log("payload", payload);
+    let finalVolume = 0;
     if (side === LISTENING_SIDE.LEFT) {
       volume = payload[4];
     } else {
@@ -349,7 +358,7 @@ export const getITEPrimeVolume = (side, currentVolume) => {
         type: actions.SET_ITE_PRIME_CURRENT_VOLUME,
         volume,
         finalVolume,
-        device_side: side
+        device_side: side,
       });
     } else {
       dispatch({
@@ -359,5 +368,35 @@ export const getITEPrimeVolume = (side, currentVolume) => {
       });
     }
     console.log("object ite volume", volume);
-  }
-}
+  };
+};
+
+// ---------------SAFE BUDS-------------------
+
+export const SafeBudsDeviceName = ({ type }) => {
+  return async (dispatch) => {
+    try {
+      const command = "0x20";
+
+      const response = await Write(command, "both", BLE_STORE.deviceObj, type);
+
+      console.log("response", response);
+    } catch (err) {
+      console.error("RicDeviceCurrentVolume read failed", err);
+    }
+  };
+};
+
+export const SafeBudsTap = ({ type }) => {
+  return async (dispatch) => {
+    try {
+      const command = null;
+
+      const response = await Read(command, "both", BLE_STORE.deviceObj, type);
+
+      console.log("response", response);
+    } catch (err) {
+      console.error("RicDeviceCurrentVolume read failed", err);
+    }
+  };
+};
