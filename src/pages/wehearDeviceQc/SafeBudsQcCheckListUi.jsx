@@ -28,7 +28,7 @@ const StepCard = ({
 }) => (
   <Card
     sx={{
-      width: "38vw",
+      width: "100%",
       borderRadius: 2,
       boxShadow: 0,
       border: "1px solid #e6e6e6",
