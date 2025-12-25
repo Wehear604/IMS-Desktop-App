@@ -1,10 +1,6 @@
 import {
   Box,
   Typography,
-  Stepper,
-  Step,
-  StepLabel,
-  Button,
   ListItem,
   List,
   ListItemText,
@@ -12,9 +8,6 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 import CustomDialog from "../../components/layouts/common/CustomDialog";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import PauseIcon from "@mui/icons-material/Pause";
 import disabledChecked from "../../assets/images/checkIconDisabled.svg";
 import enabledChecked from "../../assets/images/checkIconEnabled.svg";
 
@@ -123,7 +116,8 @@ const SafeBudsQcCheckListUi = () => {
             // checked={deviceQc.volumeDecrease}
             title={"Decrease Volume"}
           />
-        </Box>)}
+        </Box>
+      )}
     </CustomDialog>
   );
 };

@@ -29,7 +29,7 @@ import leftSideSafeBud from "../../assets/images/leftSideSafeBud.svg";
 import neckbandBlack from "../../assets/images/neckband.svg";
 import wehearox from "../../assets/images/wehearox.svg";
 import wehear_2_0 from "../../assets/images/wehear 2 0.svg";
-import safeBuds from "../../assets/images/safebuds.svg"
+import safeBuds from "../../assets/images/safebuds.svg";
 
 import leftSideLogo from "../../assets/images/leftSideSmall.svg";
 import rightSideLogo from "../../assets/images/rightSideSmall.svg";
@@ -128,8 +128,8 @@ const ConnectButton = ({
         openModal(<SafeBudsFotUpload />, "sm", true, "deviceAudioMicCheck")
       );
     } else {
-      // dispatch(openModal(<SafeBudsUi />, "sm", true, "deviceAudioMicCheck"));
-      dispatch(openModal(<SafeBudsQcCheckListUi />, "sm", true, "safebudsqc"));
+      dispatch(openModal(<SafeBudsUi />, "sm", true, "deviceAudioMicCheck"));
+      // dispatch(openModal(<SafeBudsQcCheckListUi />, "sm", true, "safebudsqc"));
     }
   };
 
