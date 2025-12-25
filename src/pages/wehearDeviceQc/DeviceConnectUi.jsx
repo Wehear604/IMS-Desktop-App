@@ -65,6 +65,7 @@ import { findObjectKeyByValue } from "../../utils/main";
 import SafeBudsFotUpload from "./SafeBudsFotUpload";
 import SafeBudsConnectDeviceModule from "../../components/bluetooth/SafeBudsConnectDeviceModule";
 import SafeBudsUi from "./safebuds/SafeBudsUi";
+import SafeBudsQcCheckListUi from "./SafeBudsQcCheckListUi";
 
 const Header = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
@@ -126,7 +127,8 @@ const ConnectButton = ({
         openModal(<SafeBudsFotUpload />, "sm", true, "deviceAudioMicCheck")
       );
     } else {
-      dispatch(openModal(<SafeBudsUi />, "sm", true, "deviceAudioMicCheck"));
+      // dispatch(openModal(<SafeBudsUi />, "sm", true, "deviceAudioMicCheck"));
+      dispatch(openModal(<SafeBudsQcCheckListUi />, "sm", true, "safebudsqc"));
     }
   };
 
