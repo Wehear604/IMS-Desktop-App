@@ -7,7 +7,6 @@
   "author": "Rudren Patel",
   "main": "electron/main.js",
   "dependencies": {
-    "@abandonware/noble": "^1.9.2-15",
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
     "@mui/icons-material": "^5.16.4",
@@ -64,9 +63,6 @@
       "package.json"
     ],
     "asar": true,
-    "asarUnpack": [
-      "**/node_modules/@abandonware/noble/**"
-    ],
     "npmRebuild": false,
     "nodeGypRebuild": false,
     "extraMetadata": {
