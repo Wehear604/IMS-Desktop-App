@@ -29,6 +29,7 @@ import leftSideSafeBud from "../../assets/images/leftSideSafeBud.svg";
 import neckbandBlack from "../../assets/images/neckband.svg";
 import wehearox from "../../assets/images/wehearox.svg";
 import wehear_2_0 from "../../assets/images/wehear 2 0.svg";
+import safeBuds from "../../assets/images/safebuds.svg"
 
 import leftSideLogo from "../../assets/images/leftSideSmall.svg";
 import rightSideLogo from "../../assets/images/rightSideSmall.svg";
@@ -515,19 +516,19 @@ const DeviceConnectUi = () => {
       case DEVICES.SAFE_BUDS:
         return (
           <img
-            style={{ width: 120, height: 120 }}
-            src={leftSideSafeBud}
+            style={{ width: 150, height: 150 }}
+            src={safeBuds}
             alt="Safe Buds"
           />
         );
-      case DEVICES.NECKBAND:
-        return (
-          <img
-            style={{ width: 130, height: 130 }}
-            src={neckbandBlack}
-            alt="Safe Buds"
-          />
-        );
+      // case DEVICES.NECKBAND:
+      //   return (
+      //     <img
+      //       style={{ width: 130, height: 130 }}
+      //       src={neckbandBlack}
+      //       alt="Safe Buds"
+      //     />
+      //   );
       case DEVICES.WEHEAR_2_0:
         return (
           <img
@@ -589,14 +590,6 @@ const DeviceConnectUi = () => {
             alt="ITE Prime"
           />
         );
-      case DEVICES.SAFE_BUDS:
-        return (
-          <img
-            style={{ width: 120, height: 120 }}
-            src={rightSideSafeBud}
-            alt="Safe Buds"
-          />
-        );
 
       default:
         return null;
@@ -604,7 +597,7 @@ const DeviceConnectUi = () => {
   };
 
   const isSingleCardType = [
-    DEVICES.NECKBAND,
+    DEVICES.SAFE_BUDS,
     DEVICES.WEHEAR_2_0,
     DEVICES.WEHEAR_OX,
   ].includes(device.device_type);
