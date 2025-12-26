@@ -7,6 +7,7 @@ import {
 
 const commandQueue = [];
 let isProcessing = false;
+const tap = []
 
 const processQueue = async () => {
   if (isProcessing || commandQueue.length === 0) return;
@@ -82,6 +83,7 @@ const processQueue = async () => {
         };
 
         console.log("Tap Notification:", decoded);
+        tap.push(decoded);
       };
 
       characteristicRead.addEventListener(
@@ -103,10 +105,15 @@ const processQueue = async () => {
 };
 
 const Read = (command, side, deviceObj, type) => {
-  return new Promise((resolve, reject) => {
+  const promise = new Promise((resolve, reject) => {
     commandQueue.push({ command, side, deviceObj, type, resolve, reject });
     processQueue();
   });
+
+  return {
+    promise,
+    tap,
+  };
 };
 
 export default Read;

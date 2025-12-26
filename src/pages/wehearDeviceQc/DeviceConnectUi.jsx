@@ -74,12 +74,6 @@ const Header = styled(Typography)(({ theme }) => ({
   marginBottom: theme.spacing(4),
 }));
 
-const CenterArea = styled(Box)(({ theme }) => ({
-  maxWidth: 760,
-  margin: "0 auto",
-  textAlign: "center",
-}));
-
 const Instruction = styled(Typography)(({ theme }) => ({
   marginBottom: theme.spacing(3),
   color: theme.palette.text.secondary,
@@ -128,7 +122,7 @@ const ConnectButton = ({
         openModal(<SafeBudsFotUpload />, "sm", true, "deviceAudioMicCheck")
       );
     } else {
-      dispatch(openModal(<SafeBudsUi />, "sm", true, "deviceAudioMicCheck"));
+      dispatch(openModal(<SafeBudsUi />, "sm", true, "safebudsqc"));
       // dispatch(openModal(<SafeBudsQcCheckListUi />, "sm", true, "safebudsqc"));
     }
   };
@@ -229,250 +223,6 @@ const DeviceConnectUi = () => {
     { side: "R", label: "BTE", value: LISTENING_SIDE.RIGHT },
   ];
 
-  const [isReading, setIsReading] = useState(false);
-  const readInterval = useRef(null);
-
-  const getVolume = async () => {
-    const command =
-      device?.device_side === LISTENING_SIDE.LEFT
-        ? `82 02 01 00`
-        : `82 02 02 00`;
-
-    const response = await ReadRicDataFromDevice(
-      command,
-      device?.device_side,
-      BLE_STORE.deviceObj
-    );
-    const responseParts = response.split(" ");
-    const volumeHex = parseInt(responseParts[4], 16);
-    const volumeLevel = Number(volumeHex);
-    console.log("first volumeLevel", volumeLevel);
-    return volumeLevel || 0;
-  };
-
-  const getMode = async () => {
-    const command =
-      device?.device_side === LISTENING_SIDE.LEFT
-        ? "84 02 02 00"
-        : "84 02 01 00";
-
-    const response = await ReadRicDataFromDevice(
-      command,
-      device?.device_side,
-      BLE_STORE.deviceObj
-    );
-    const data = response.split(" ");
-    const d1 = parseInt(data[4], 16);
-    console.log(" d1 ", d1);
-    let mode;
-    if (d1 === 1) mode = 0;
-    else if (d1 === 2) mode = 1;
-    else if (d1 === 3) mode = 2;
-    else {
-      console.error(`Unexpected mode value: ${d1}`);
-      return;
-    }
-    console.log("mode", mode);
-    return mode || 0;
-  };
-  const getBattery = async () => {
-    const command =
-      device?.device_side == LISTENING_SIDE.LEFT
-        ? device?.device_type == DEVICES.RIC_OPTIMA ||
-          device?.device_type == DEVICES.RIC_32
-          ? "3C 42 41 54 54 45 52 59 3E 0D 0A"
-          : "0x07"
-        : device?.device_type == DEVICES.RIC_OPTIMA ||
-          device?.device_type == DEVICES.RIC_32
-        ? "3C 42 41 54 54 45 52 59 3E 0D 0A"
-        : "0x07";
-
-    const response = await ReadRicDataFromDevice(
-      command,
-      device?.device_side,
-      BLE_STORE.deviceObj
-    );
-    const responseParts = response.trim().split(" ");
-    const batteryHex = responseParts[0];
-    const batteryPercentage = parseInt(batteryHex, 16);
-    console.log("batteryPercentage", batteryPercentage);
-    return batteryPercentage || 0;
-  };
-
-  const getRic8Data = async () => {
-    const command = "0x06";
-    const response = await ReadRicDataFromDevice(
-      command,
-      device?.device_side,
-      BLE_STORE.deviceObj
-    );
-    const responseParts = response.trim().split(" ");
-    console.log("first response", response);
-    let eqData = [];
-    for (let i = 0; i < 5; i++) {
-      if (i == 0 || i == 2 || i == 3) {
-        let data = parseInt(responseParts[i], 16) - parseInt(EQ_LEVEL[i], 16);
-        let data1 =
-          parseInt(responseParts[i + 1], 16) - parseInt(EQ_LEVEL[i + 1], 16);
-
-        let twoDataObj = interpolateValue(data, data1);
-        eqData.push(data);
-        eqData.push(twoDataObj);
-      } else {
-        eqData.push(parseInt(responseParts[i], 16) - parseInt(EQ_LEVEL[i], 16));
-      }
-    }
-
-    let volume = VOLUME_COMMANDS_REVERSE[responseParts[5]];
-
-    let mode = MODES[responseParts[6]];
-    console.log("{ volume, mode ", volume, mode);
-    return { volume, mode };
-  };
-
-  const getITEOptimaData = async () => {
-    const command = "AA 00 03";
-    const response = await ReadITEDataFromDevice(
-      command,
-      device?.device_side,
-      BLE_STORE.deviceObj
-    );
-    const responseParts = response.trim().split(" ");
-
-    let eqData = [];
-
-    for (let i = 10; i < 15; i++) {
-      if (i == 10 || i == 12 || i == 13) {
-        let data = parseInt(responseParts[i], 16);
-        let data1 = parseInt(responseParts[i + 1], 16);
-        let twoDataObj = interpolateValue(data, data1);
-        eqData.push(data);
-        eqData.push(twoDataObj);
-      } else {
-        eqData.push(parseInt(responseParts[i], 16));
-      }
-    }
-
-    let volume =
-      device?.device_side == LISTENING_SIDE.LEFT
-        ? responseParts[8]
-        : responseParts[9];
-
-    let mode = ITE_MODE[responseParts[7]];
-
-    let batteryLevel =
-      device?.device_side == LISTENING_SIDE.LEFT
-        ? responseParts[5]
-        : responseParts[6];
-
-    return { volume, mode, batteryLevel: parseInt(batteryLevel, 16) };
-  };
-
-  const getITEPrimeBattery = async () => {
-    const command = [0x00, 0x05, 0x00];
-    const response = await ReadITEPrimeDataFromDevice(
-      command,
-      device?.device_side,
-      BLE_STORE.deviceObj
-    );
-    const batteryPercentage =
-      device?.device_side == LISTENING_SIDE.LEFT
-        ? response[3]
-        : response[device?.device_type == DEVICES.NECKBAND ? 3 : 4];
-    console.log("batteryPercentage", batteryPercentage);
-    return { batteryLevel: batteryPercentage };
-  };
-
-  const getITEPrimeaMode = async () => {
-    const command = [0x02, 0x05, 0x00];
-    const response = await ReadITEPrimeDataFromDevice(
-      command,
-      device?.device_side,
-      BLE_STORE.deviceObj
-    );
-    const mode = response[4];
-    console.log("mode", mode);
-    return { mode: mode };
-  };
-  const getITEPrimeaVolume = async () => {
-    const command = [0x02, 0x0d, 0x00];
-    const response = await ReadITEPrimeDataFromDevice(
-      command,
-      device?.device_side,
-      BLE_STORE.deviceObj
-    );
-    const parts = response;
-    const payload = parts.slice(3);
-    let volume = 0;
-    console.log("payload", payload);
-    let finalVolume = 0;
-    if (device?.device_side === LISTENING_SIDE.LEFT) {
-      volume = payload[4];
-    } else {
-      volume = payload[22];
-    }
-    if (parseInt(volume) > 127) {
-      finalVolume = volume - 256;
-    } else {
-      finalVolume = volume;
-    }
-    return { Volume: finalVolume };
-  };
-
-  const startReading = () => {
-    if (isReading) return;
-    setIsReading(true);
-
-    // poll every 3s
-    readInterval.current = setInterval(async () => {
-      try {
-        if (
-          device?.device_type === DEVICES.BTE_OPTIMA ||
-          device?.device_type === DEVICES.BTE_PRIME
-        ) {
-          const data = await BLE_STORE.writeFun.readData();
-          console.log("Read Data:", data);
-        } else {
-          // await getRic8Data()
-          // await getMode()
-          // await getBattery()
-          // await getVolume()
-          // await getITEPrimeBattery()
-          // await getITEPrimeaMode()
-          // await getITEPrimeaVolume()
-        }
-      } catch (err) {
-        console.error("Read Error:", err);
-      }
-    }, 3000);
-  };
-
-  const stopReading = () => {
-    if (readInterval.current) {
-      clearInterval(readInterval.current);
-      readInterval.current = null;
-    }
-    setIsReading(false);
-  };
-
-  useEffect(() => {
-    return () => {
-      if (readInterval.current) {
-        clearInterval(readInterval.current);
-        readInterval.current = null;
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!device?.connected && readInterval.current) {
-      clearInterval(readInterval.current);
-      readInterval.current = null;
-      setIsReading(false);
-    }
-  }, [device?.connected]);
-  // console.log("first device", device?.device_type)
-
   const getLeftDeviceImage = (deviceType) => {
     switch (deviceType) {
       case DEVICES.BTE_OPTIMA:
@@ -521,14 +271,6 @@ const DeviceConnectUi = () => {
             alt="Safe Buds"
           />
         );
-      // case DEVICES.NECKBAND:
-      //   return (
-      //     <img
-      //       style={{ width: 130, height: 130 }}
-      //       src={neckbandBlack}
-      //       alt="Safe Buds"
-      //     />
-      //   );
       case DEVICES.WEHEAR_2_0:
         return (
           <img
@@ -617,7 +359,6 @@ const DeviceConnectUi = () => {
           alignItems: "center",
         }}
       >
-        {/* <CenterArea> */}
         <Instruction variant="h4">
           Select device to establish connection
         </Instruction>
@@ -720,10 +461,6 @@ const DeviceConnectUi = () => {
                     justifyContent: "center",
                   }}
                 >
-                  {/* <Avatar sx={{ width: 22, height: 22, bgcolor: selected ? "primary.main" : "grey.200" }}>
-                                        <img src={leftSideLogo} alt="L" />
-                                    </Avatar>
-                                    <Divider orientation="vertical" flexItem /> */}
                   <Typography variant="h6" sx={{ fontWeight: "bold" }}>
                     {findObjectKeyByValue(device.device_type, DEVICES)}
                   </Typography>
@@ -825,16 +562,6 @@ const DeviceConnectUi = () => {
             />
           )
         }
-        {/* </CenterArea> */}
-
-        {/* <Box sx={{ display: "flex", gap: 2, justifyContent: "center", mt: 3 }}>
-                <Button onClick={startReading} variant="contained" disabled={!BLE_STORE.readFun && !BLE_STORE.writeFun || isReading}>
-                    Start Reading
-                </Button>
-                <Button onClick={stopReading} variant="outlined" disabled={!isReading}>
-                    Stop Reading
-                </Button>
-            </Box> */}
       </Box>
     </>
   );

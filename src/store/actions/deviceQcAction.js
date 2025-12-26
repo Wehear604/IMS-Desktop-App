@@ -371,8 +371,6 @@ export const getITEPrimeVolume = (side, currentVolume) => {
   };
 };
 
-// ---------------SAFE BUDS-------------------
-
 export const SafeBudsDeviceName = ({ type }) => {
   return async (dispatch) => {
     try {
@@ -387,6 +385,16 @@ export const SafeBudsDeviceName = ({ type }) => {
   };
 };
 
+const tapChanges = (value) => {
+  switch (value) {
+    case "Single Tap": return 1;
+    case "Double Tap": return 2;
+    case "Triple Tap": return 3;
+    case "Long Press": return 4;
+    default: return null;
+  }
+};
+
 export const SafeBudsTap = ({ type }) => {
   return async (dispatch) => {
     try {
@@ -395,8 +403,13 @@ export const SafeBudsTap = ({ type }) => {
       const response = await Read(command, "both", BLE_STORE.deviceObj, type);
 
       console.log("response", response);
+         dispatch({
+          type: actions.SET_SAFE_BUDS_TAP,
+          mode: response,
+        });
     } catch (err) {
       console.error("RicDeviceCurrentVolume read failed", err);
+
     }
   };
 };
