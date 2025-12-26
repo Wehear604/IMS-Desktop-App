@@ -1,6 +1,6 @@
 const { app, BrowserWindow, ipcMain, session } = require("electron/main");
 const path = require("node:path");
-
+const loudness = require("loudness");
 let bluetoothPinCallback = null;
 let selectBluetoothCallback = null;
 
@@ -72,6 +72,21 @@ function createWindow() {
     if (selectBluetoothCallback) {
       selectBluetoothCallback(""); // cancel request
       selectBluetoothCallback = null;
+    }
+  });
+
+  ipcMain.handle("get-system-volume", async () => {
+    try {
+      const volume = await loudness.getVolume(); // 0 – 100
+      const isMuted = await loudness.getMuted();
+
+      return {
+        volume,
+        muted: isMuted,
+      };
+    } catch (err) {
+      console.error("Volume fetch failed:", err);
+      return null;
     }
   });
 

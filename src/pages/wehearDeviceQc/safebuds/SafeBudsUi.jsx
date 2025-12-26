@@ -1,5 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
+  ChangeButtonSide,
+  FetchVolumeSafebudsDevice,
+  SafebudsDeviceCurrentVolume,
   SafeBudsDeviceName,
   SafeBudsTap,
 } from "../../../store/actions/deviceQcAction";
@@ -13,18 +16,27 @@ import {
   Card,
   ButtonGroup,
   Button,
+  Checkbox,
 } from "@mui/material";
 import CustomDialog from "../../../components/layouts/common/CustomDialog";
 import disabledChecked from "../../../assets/images/checkIconDisabled.svg";
 import enabledChecked from "../../../assets/images/checkIconEnabled.svg";
 import MicCheckUi from "./MicCheckUi";
-import { DeviceSideAction } from "../../../store/actions/deviceDataAction";
-import { LISTENING_SIDE } from "../../../utils/constants";
+import {
+  DeviceIsAudioCheck,
+  DeviceSideAction,
+  DeviceStoreAction,
+  resetDeviceDataStore,
+} from "../../../store/actions/deviceDataAction";
+import { LISTENING_SIDE, SNACK_BAR_VARIETNS } from "../../../utils/constants";
 import ButtonComponentsUi from "../../../components/button/ButtonComponentsUi";
 import { use } from "react";
 import audioUrl from "../../../assets/images/AirplaneInterior.mp3";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
+import { closeModal } from "../../../store/actions/modalAction";
+import { callSnackBar } from "../../../store/actions/snackbarAction";
+import { BLE_STORE } from "../../../utils/bleStore";
 
 const StepCard = ({
   isChecked,
@@ -74,29 +86,44 @@ const SafeBudsUi = () => {
   const [step, setStep] = useState(0);
   const dispatch = useDispatch();
   const { device, deviceQc } = useSelector((state) => state);
+  const [fields, setFields] = useState({
+    body1: false,
+    body2: false,
+    charging: false,
+  });
+
+  const toggle = (key) => () =>
+    setFields((prev) => ({ ...prev, [key]: !prev[key] }));
 
   const handleNext = () => {
     setStep((prev) => prev + 1);
   };
-  const tapcheck = useCallback(
-    (number) => {
-      if (!device?.device_side) return false;
 
-      return device?.device_side === LISTENING_SIDE.LEFT
-        ? deviceQc.modeLeft?.includes(number)
-        : deviceQc.modeRight?.includes(number);
-    },
-    [deviceQc.modeLeft, deviceQc.modeRight]
-  );
+  const tapcheck = (number) => {
+    if (!device?.device_side) return false;
 
-  console.log("deviceQc.modeLeft", deviceQc.modeLeft);
-  console.log("deviceQc.modeRight", deviceQc.modeRight);
+    return device?.device_side === LISTENING_SIDE.LEFT
+      ? deviceQc.modeLeft?.includes(number)
+      : deviceQc.modeRight?.includes(number);
+  };
 
   useEffect(() => {
     dispatch(SafeBudsDeviceName({ type: "NameChange" }));
     dispatch(SafeBudsTap({ type: "Tap" }));
-    dispatch(DeviceSideAction(LISTENING_SIDE.LEFT));
+    dispatch(ChangeButtonSide(LISTENING_SIDE.LEFT));
+    dispatch(SafebudsDeviceCurrentVolume());
   }, []);
+
+  useEffect(() => {
+    if (deviceQc.volumeIncrease) return;
+    if (step === 1) {
+      const interval = setInterval(async () => {
+        dispatch(FetchVolumeSafebudsDevice());
+      }, 1500);
+
+      return () => clearInterval(interval);
+    }
+  }, [step, deviceQc.volumeIncrease]);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = React.useRef(null);
@@ -122,26 +149,104 @@ const SafeBudsUi = () => {
         console.error("Audio play failed:", err);
       });
     }
-
+    dispatch(DeviceIsAudioCheck(true));
     setIsPlaying((prev) => !prev);
   };
+
+  const onComplete = () => {
+    if (
+      device?.device_type &&
+      device?.device_side &&
+      deviceQc.modeLeft &&
+      deviceQc.modeRight &&
+      deviceQc.volumeIncrease &&
+      fields.body1 &&
+      fields.body2 &&
+      fields.charging &&
+      device?.is_Audio_play &&
+      device?.isMic &&
+      device?.mac
+    ) {
+      dispatch(
+        DeviceStoreAction(
+          device?.device_type,
+          LISTENING_SIDE.LEFT,
+          deviceQc.modeLeft,
+          {
+            volumeIncrease: deviceQc.volumeIncrease,
+            volumeDecrease: true,
+          },
+          { body1: fields.body1, body2: fields.body2 },
+          fields.charging,
+          device?.is_Audio_play,
+          device?.mac,
+          device?.isMic
+        )
+      );
+      dispatch(
+        DeviceStoreAction(
+          device?.device_type,
+          LISTENING_SIDE.RIGHT,
+          deviceQc.modeRight,
+          {
+            volumeIncrease: deviceQc.volumeIncrease,
+            volumeDecrease: true,
+          },
+          { body1: fields.body1, body2: fields.body2 },
+          fields.charging,
+          device?.is_Audio_play,
+          device?.mac,
+          device?.isMic
+        )
+      );
+
+      dispatch(closeModal("deviceAudioMicCheck"));
+
+      BLE_STORE.BTEdisconnect = true;
+
+      dispatch(resetDeviceDataStore());
+
+      dispatch(
+        callSnackBar(
+          `SafeBuds Side Device QC Completed Successfully.`,
+          SNACK_BAR_VARIETNS.suceess
+        )
+      );
+    } else {
+      dispatch(
+        callSnackBar(
+          `Please complete all steps before finishing the QC.`,
+          SNACK_BAR_VARIETNS.error
+        )
+      );
+    }
+  };
+
   return (
     <CustomDialog
       title="SafeBuds QC Checklist"
-      id="safebudsqc"
+      id="deviceAudioMicCheck"
       onSubmit={step === 3 ? onComplete : handleNext}
+      onClose={() => {
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+        }
+        dispatch(closeModal("deviceAudioMicCheck"));
+        dispatch(resetDeviceDataStore());
+      }}
       closeText="Close"
       confirmText={step === 3 ? `Finish` : "Next"}
     >
       <ButtonGroup>
         <ButtonComponentsUi
-          onSubmit={() => dispatch(DeviceSideAction(LISTENING_SIDE.LEFT))}
+          onSubmit={() => dispatch(ChangeButtonSide(LISTENING_SIDE.LEFT))}
           ButtonGroup
           STATUSWiseData={device?.device_side === LISTENING_SIDE.LEFT}
           Title={"LEFT SIDE"}
         />
         <ButtonComponentsUi
-          onSubmit={() => dispatch(DeviceSideAction(LISTENING_SIDE.RIGHT))}
+          onSubmit={() => dispatch(ChangeButtonSide(LISTENING_SIDE.RIGHT))}
           ButtonGroup
           STATUSWiseData={device?.device_side === LISTENING_SIDE.RIGHT}
           Title={"RIGHT SIDE"}
@@ -185,6 +290,7 @@ const SafeBudsUi = () => {
             isChecked={true}
             title="Audio Check"
             subtitle="Test device audio output"
+            checked={device.is_Audio_play}
             action={
               <Button
                 variant="contained"
@@ -200,12 +306,56 @@ const SafeBudsUi = () => {
           />
           <StepCard
             isChecked={true}
-            // checked={deviceQc.volumeIncrease}
+            checked={deviceQc.volumeIncrease}
             title={"Volume Level check"}
           />
         </Box>
       )}
       {step === 2 && <MicCheckUi />}
+      {step === 3 && (
+        <>
+          <Box width="100%">
+            <Typography variant="h3" fontWeight={700} mb={2}>
+              Body Check
+            </Typography>
+          </Box>
+
+          <Box ml={2}>
+            <StepCard
+              checkBox={
+                <Checkbox checked={fields.body1} onChange={toggle("body1")} />
+              }
+              title="Device checked for damage"
+            />
+
+            <StepCard
+              checkBox={
+                <Checkbox checked={fields.body2} onChange={toggle("body2")} />
+              }
+              title="Body checked for scratches"
+            />
+          </Box>
+
+          {/* CHARGING CHECK */}
+          <Box width="100%">
+            <Typography variant="h3" fontWeight={700} mb={2}>
+              Charging
+            </Typography>
+          </Box>
+
+          <Box ml={2}>
+            <StepCard
+              checkBox={
+                <Checkbox
+                  checked={fields.charging}
+                  onChange={toggle("charging")}
+                />
+              }
+              title="Charging function verified"
+            />
+          </Box>
+        </>
+      )}
     </CustomDialog>
   );
 };
