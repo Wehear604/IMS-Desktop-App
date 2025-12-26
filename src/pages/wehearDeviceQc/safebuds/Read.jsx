@@ -1,19 +1,35 @@
 import {
+  actions,
   CHARACTERISTIC_UUID_READ_NOTIFY,
   CHARACTERISTIC_UUID_READ_WRITE,
   DEVICES,
   SERVICE_UUID,
 } from "../../../utils/constants";
 
+const tapChanges = (value) => {
+  switch (value) {
+    case "Single Tap":
+      return 1;
+    case "Double Tap":
+      return 2;
+    case "Triple Tap":
+      return 3;
+    case "Long Press":
+      return 4;
+    default:
+      return null;
+  }
+};
+
 const commandQueue = [];
 let isProcessing = false;
-const tap = []
+const tap = [];
 
 const processQueue = async () => {
   if (isProcessing || commandQueue.length === 0) return;
 
   isProcessing = true;
-  const { command, side, deviceObj, type, resolve, reject } =
+  const { command, side, deviceObj, type, dispatch, resolve, reject } =
     commandQueue.shift();
 
   try {
@@ -83,7 +99,10 @@ const processQueue = async () => {
         };
 
         console.log("Tap Notification:", decoded);
-        tap.push(decoded);
+        dispatch({
+          type: actions.SET_SAFE_BUDS_TAP,
+          mode: tapChanges(decoded?.event),
+        });
       };
 
       characteristicRead.addEventListener(
@@ -104,16 +123,19 @@ const processQueue = async () => {
   }
 };
 
-const Read = (command, side, deviceObj, type) => {
-  const promise = new Promise((resolve, reject) => {
-    commandQueue.push({ command, side, deviceObj, type, resolve, reject });
+const Read = (command, side, deviceObj, type, dispatch) => {
+  return new Promise((resolve, reject) => {
+    commandQueue.push({
+      command,
+      side,
+      deviceObj,
+      type,
+      dispatch,
+      resolve,
+      reject,
+    });
     processQueue();
   });
-
-  return {
-    promise,
-    tap,
-  };
 };
 
 export default Read;

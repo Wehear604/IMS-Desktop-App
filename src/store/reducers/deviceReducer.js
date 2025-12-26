@@ -5,6 +5,7 @@ const initialState = {
   device_side: null,
   mac: null,
   is_Audio_play: false,
+  isMic: false,
   connected: false,
   isConnecting: false,
   read_only: false,
@@ -12,7 +13,7 @@ const initialState = {
     name: "",
     id: "",
   },
-  fotfile: false,
+  fotfile: true,
 };
 
 const deviceReducer = (state = initialState, action) => {
@@ -40,6 +41,9 @@ const deviceReducer = (state = initialState, action) => {
 
     case actions.IS_AUDIO_CHECK:
       return { ...state, is_Audio_play: action.is_Audio_play };
+
+    case actions.FETCH_ISMIC_SAFE_BUDS:
+      return { ...state, isMic: action.isMic };
 
     case actions.DISCONNECT_DEVICE:
       return {

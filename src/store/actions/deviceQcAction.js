@@ -385,31 +385,66 @@ export const SafeBudsDeviceName = ({ type }) => {
   };
 };
 
-const tapChanges = (value) => {
-  switch (value) {
-    case "Single Tap": return 1;
-    case "Double Tap": return 2;
-    case "Triple Tap": return 3;
-    case "Long Press": return 4;
-    default: return null;
-  }
-};
-
 export const SafeBudsTap = ({ type }) => {
   return async (dispatch) => {
     try {
       const command = null;
-
-      const response = await Read(command, "both", BLE_STORE.deviceObj, type);
+      const response = await Read(
+        command,
+        "both",
+        BLE_STORE.deviceObj,
+        type,
+        dispatch
+      );
 
       console.log("response", response);
-         dispatch({
-          type: actions.SET_SAFE_BUDS_TAP,
-          mode: response,
-        });
     } catch (err) {
       console.error("RicDeviceCurrentVolume read failed", err);
+    }
+  };
+};
 
+export const ChangeButtonSide = (device_side) => {
+  return { type: actions.SET_DEVICE_SIDE, device_side };
+};
+
+export const SafebudsDeviceCurrentVolume = () => {
+  return async (dispatch) => {
+    const data = await window.electronAPI.getVolume();
+    try {
+      dispatch({
+        type: actions.SET_SAFE_BUDS_CURRENT_VOLUME,
+        currentVolume: data.volume,
+      });
+    } catch (err) {
+      console.error("BteDeviceCurrentVolume read failed", err);
+    }
+  };
+};
+export const FetchVolumeSafebudsDevice = () => {
+  return async (dispatch) => {
+    const data = await window.electronAPI.getVolume();
+    console.log("System volume data:", data);
+    try {
+      dispatch({
+        type: actions.FETCH_VOLUME_SAFE_BUDS,
+        volume: data.volume,
+      });
+    } catch (err) {
+      console.error("BteDeviceCurrentVolume read failed", err);
+    }
+  };
+};
+
+export const SafebudsDeviceAudioCheck = () => {
+  return async (dispatch) => {
+    try {
+      dispatch({
+        type: actions.FETCH_ISMIC_SAFE_BUDS,
+        isMic: true,
+      });
+    } catch (err) {
+      console.error("BteDeviceCurrentVolume read failed", err);
     }
   };
 };

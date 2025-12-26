@@ -17,6 +17,7 @@ const initialState = {
     audio: null,
     mac: null,
     result: false,
+    mic: null,
   },
   right: {
     device_type: null,
@@ -33,11 +34,12 @@ const initialState = {
     audio: null,
     mac: null,
     result: false,
+    mic: null,
   },
   box_Contains: [],
   deviceColor: null,
   boxId: null,
-  device:null
+  device: null,
 };
 
 const deviceDataStorageReducer = (state = initialState, action) => {
@@ -58,6 +60,7 @@ const deviceDataStorageReducer = (state = initialState, action) => {
             audio: action.audio,
             mac: action.mac,
             result: true,
+            mic: action.isMic,
           },
         };
       } else if (action.device_side === LISTENING_SIDE.RIGHT) {
@@ -75,6 +78,7 @@ const deviceDataStorageReducer = (state = initialState, action) => {
             audio: action.audio,
             mac: action.mac,
             result: true,
+            mic: action.isMic,
           },
         };
       }
@@ -85,8 +89,8 @@ const deviceDataStorageReducer = (state = initialState, action) => {
         ...state,
         box_Contains: action.box_Contains,
         boxId: action.boxId,
-        deviceColor: action.deviceColor, 
-        device: action.device_type
+        deviceColor: action.deviceColor,
+        device: action.device_type,
       };
     default:
       return state;

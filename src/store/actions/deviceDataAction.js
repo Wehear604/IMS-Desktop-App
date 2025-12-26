@@ -72,7 +72,8 @@ export const DeviceStoreAction = (
   body,
   charging,
   audio,
-  mac
+  mac,
+  isMic
 ) => {
   return {
     type: actions.SET_DEVICE_STORAGE,
@@ -84,6 +85,7 @@ export const DeviceStoreAction = (
     charging,
     audio,
     mac,
+    isMic,
   };
 };
 
