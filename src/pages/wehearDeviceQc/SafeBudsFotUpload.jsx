@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import UploadButtonSafeBuds from "../../components/inputs/UploadButtonSafeBuds";
 import Button from "@mui/material/Button";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
@@ -9,7 +9,9 @@ import CustomDialog from "../../components/layouts/common/CustomDialog";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import FOT from "../../assets/images/fotFile.svg";
-
+import { SetDeviceFOT } from "../../store/actions/deviceDataAction";
+import { useDispatch } from "react-redux";
+import fotfile from "../../assets/blefiles/newfot.fot";
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
   clipPath: "inset(50%)",
@@ -48,11 +50,11 @@ const IDENTIFICATION = Uint8Array.from([
   0xcc, 0xaa, 0x55, 0xee, 0x12, 0x19, 0xe4,
 ]);
 
-const DEFAULT_BLOCK_SIZE = 8 * 1024;
+const DEFAULT_BLOCK_SIZE = 5.5 * 1024;
 const DEFAULT_PACKET_SIZE = 400;
 const SAFE_PAYLOAD_LIMIT = 400;
 const TIMEOUT_MS = 15000;
-const DELAY_AFTER_IDENT_MS = 100;
+const DELAY_AFTER_IDENT_MS = 10;
 const LOG_DATA_FRAMES = false;
 
 /**********************************************************
@@ -534,7 +536,7 @@ const SafeBudsFotUpload = () => {
   const [progress, setProgress] = useState(0);
   const [deviceInfo, setDeviceInfo] = useState("");
   const [logs, setLogs] = useState("");
-
+  const dispatch = useDispatch();
   const [isUploading, setIsUploading] = useState(false);
 
   const logRef = React.useRef(null);
@@ -589,12 +591,53 @@ const SafeBudsFotUpload = () => {
     setBuffer(null);
   };
 
+  useEffect(() => {
+    if (progress === 100) {
+      const timer = setTimeout(() => {
+        dispatch(SetDeviceFOT());
+      }, 7000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [progress, dispatch]);
+
+  useEffect(() => {
+    if (progress === 100) {
+      setIsUploading(false);
+    }
+  }, [progress]);
+
+  useEffect(() => {
+    const loadDefaultFile = async () => {
+      try {
+        const response = await fetch(fotfile);
+        const buf = await response.arrayBuffer();
+
+        // Create a File object so rest of logic remains unchanged
+        const defaultFile = new File([buf], "newfot.fot", {
+          type: "application/octet-stream",
+        });
+
+        setFile(defaultFile);
+        setBuffer(buf);
+        log(`Default firmware loaded: ${defaultFile.name}`);
+      } catch (err) {
+        console.error(err);
+        log("Failed to load default firmware file");
+      }
+    };
+
+    loadDefaultFile();
+  }, []);
+
   return (
     <CustomDialog
       id={"deviceAudioMicCheck"}
       title={"Safe Buds FOT Upload"}
       onSubmit={Start}
-      confirmText={"Start OTA"}
+      confirmText={isUploading ? "Uploading..." : "Start OTA"}
+      disabledSubmit={isUploading}
+      disableDirectClose={isUploading}
     >
       <>
         {isUploading ? (

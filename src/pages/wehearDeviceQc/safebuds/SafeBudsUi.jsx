@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   SafeBudsDeviceName,
   SafeBudsTap,
 } from "../../../store/actions/deviceQcAction";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   Box,
   Typography,
@@ -11,11 +11,20 @@ import {
   List,
   ListItemText,
   Card,
+  ButtonGroup,
+  Button,
 } from "@mui/material";
 import CustomDialog from "../../../components/layouts/common/CustomDialog";
 import disabledChecked from "../../../assets/images/checkIconDisabled.svg";
 import enabledChecked from "../../../assets/images/checkIconEnabled.svg";
 import MicCheckUi from "./MicCheckUi";
+import { DeviceSideAction } from "../../../store/actions/deviceDataAction";
+import { LISTENING_SIDE } from "../../../utils/constants";
+import ButtonComponentsUi from "../../../components/button/ButtonComponentsUi";
+import { use } from "react";
+import audioUrl from "../../../assets/images/AirplaneInterior.mp3";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import PauseIcon from "@mui/icons-material/Pause";
 
 const StepCard = ({
   isChecked,
@@ -64,15 +73,58 @@ const StepCard = ({
 const SafeBudsUi = () => {
   const [step, setStep] = useState(0);
   const dispatch = useDispatch();
+  const { device, deviceQc } = useSelector((state) => state);
 
   const handleNext = () => {
     setStep((prev) => prev + 1);
   };
+  const tapcheck = useCallback(
+    (number) => {
+      if (!device?.device_side) return false;
+
+      return device?.device_side === LISTENING_SIDE.LEFT
+        ? deviceQc.modeLeft?.includes(number)
+        : deviceQc.modeRight?.includes(number);
+    },
+    [deviceQc.modeLeft, deviceQc.modeRight]
+  );
+
+  console.log("deviceQc.modeLeft", deviceQc.modeLeft);
+  console.log("deviceQc.modeRight", deviceQc.modeRight);
 
   useEffect(() => {
     dispatch(SafeBudsDeviceName({ type: "NameChange" }));
     dispatch(SafeBudsTap({ type: "Tap" }));
+    dispatch(DeviceSideAction(LISTENING_SIDE.LEFT));
   }, []);
+
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = React.useRef(null);
+
+  useEffect(() => {
+    audioRef.current = new Audio(audioUrl);
+    audioRef.current.loop = true; // optional
+    audioRef.current.volume = 1;
+
+    return () => {
+      audioRef.current.pause();
+      audioRef.current = null;
+    };
+  }, []);
+
+  const handlePlayPause = () => {
+    if (!audioRef.current) return;
+
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch((err) => {
+        console.error("Audio play failed:", err);
+      });
+    }
+
+    setIsPlaying((prev) => !prev);
+  };
   return (
     <CustomDialog
       title="SafeBuds QC Checklist"
@@ -81,32 +133,46 @@ const SafeBudsUi = () => {
       closeText="Close"
       confirmText={step === 3 ? `Finish` : "Next"}
     >
+      <ButtonGroup>
+        <ButtonComponentsUi
+          onSubmit={() => dispatch(DeviceSideAction(LISTENING_SIDE.LEFT))}
+          ButtonGroup
+          STATUSWiseData={device?.device_side === LISTENING_SIDE.LEFT}
+          Title={"LEFT SIDE"}
+        />
+        <ButtonComponentsUi
+          onSubmit={() => dispatch(DeviceSideAction(LISTENING_SIDE.RIGHT))}
+          ButtonGroup
+          STATUSWiseData={device?.device_side === LISTENING_SIDE.RIGHT}
+          Title={"RIGHT SIDE"}
+        />
+      </ButtonGroup>
       {step === 0 && (
         <>
           <StepCard
             isChecked={true}
-            //   checked={Boolean(device?.is_Audio_play)}
+            checked={tapcheck(1)}
             title="Single Touch"
             //   subtitle="Test device audio output"
           />
 
           <StepCard
             isChecked={true}
-            //   checked={Boolean(device?.is_Audio_play)}
+            checked={tapcheck(2)}
             title="Double Touch"
             //   subtitle="Test device audio output"
           />
 
           <StepCard
             isChecked={true}
-            //   checked={Boolean(device?.is_Audio_play)}
+            checked={tapcheck(3)}
             title="Triple Touch"
             //   subtitle="Test device audio output"
           />
 
           <StepCard
             isChecked={true}
-            //   checked={Boolean(device?.is_Audio_play)}
+            checked={tapcheck(4)}
             title="Long Press"
             //   subtitle="Test device audio output"
           />
@@ -117,7 +183,24 @@ const SafeBudsUi = () => {
         <Box>
           <StepCard
             isChecked={true}
-            //   checked={deviceQc.volumeIncrease}
+            title="Audio Check"
+            subtitle="Test device audio output"
+            action={
+              <Button
+                variant="contained"
+                onClick={handlePlayPause}
+                startIcon={isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
+                sx={{
+                  bgcolor: "#0d5966",
+                  borderRadius: "25%",
+                  height: "6vh",
+                }}
+              />
+            }
+          />
+          <StepCard
+            isChecked={true}
+            // checked={deviceQc.volumeIncrease}
             title={"Volume Level check"}
           />
         </Box>

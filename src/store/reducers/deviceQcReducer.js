@@ -13,6 +13,7 @@ const initialState = {
 };
 
 const deviceQcReducer = (state = initialState, action) => {
+    console.log("state",state.mode);
     switch (action.type) {
 
         case actions.SET_BTE_VOLUME:
@@ -132,7 +133,15 @@ const deviceQcReducer = (state = initialState, action) => {
                 modeRight: state.device_side === LISTENING_SIDE.RIGHT ? [...new Set([...state.modeRight, action.mode])] : state.modeRight,
 
             }
-        default:
+        case actions.SET_SAFE_BUDS_TAP:
+            return {
+                ...state,
+                modeLeft: state.device_side === LISTENING_SIDE.LEFT ? [...new Set([...state.modeLeft, action.mode])] : state.modeLeft,
+                modeRight: state.device_side === LISTENING_SIDE.RIGHT ? [...new Set([...state.modeRight, action.mode])] : state.modeRight,
+
+            }
+
+            default:
             return state;
     }
 };

@@ -27,7 +27,7 @@ export const connectDevice = (deviceInfo, side, deviceObj) => {
     type: actions.CONNECT_DEVICE,
     deviceInfo,
     side,
-    deviceObj
+    deviceObj,
   };
 };
 
@@ -87,10 +87,24 @@ export const DeviceStoreAction = (
   };
 };
 
-export const DeviceBoxDetailsAction = (box_Contains, boxId, deviceColor,device_type) => {
-  return { type: actions.SET_BOX_DETAILS, box_Contains, boxId, deviceColor, device_type };
+export const DeviceBoxDetailsAction = (
+  box_Contains,
+  boxId,
+  deviceColor,
+  device_type
+) => {
+  return {
+    type: actions.SET_BOX_DETAILS,
+    box_Contains,
+    boxId,
+    deviceColor,
+    device_type,
+  };
 };
 
 export const resetDeviceDataStore = () => {
   return { type: actions.RESET_DEVICE_DATA_STORE };
+};
+export const SetDeviceFOT = () => {
+  return { type: actions.SET_FOT_FILES };
 };

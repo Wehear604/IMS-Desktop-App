@@ -5,7 +5,7 @@ import { Box, Button, Paper, Typography } from "@mui/material";
 import DeviceConnectUi from "./DeviceConnectUi";
 import ProductDetailsQcUi from "./ProductDetailsQcUi";
 import { useDispatch, useSelector } from "react-redux";
-import { DeviceBoxDetailsAction } from "../../store/actions/deviceDataAction";
+import { DeviceBoxDetailsAction, DeviceSideAction } from "../../store/actions/deviceDataAction";
 import { create } from "@mui/material/styles/createTransitions";
 import { callSnackBar } from "../../store/actions/snackbarAction";
 import { SNACK_BAR_VARIETNS } from "../../utils/constants";
@@ -47,60 +47,77 @@ const DeviceQcListController = () => {
       fields.deviceColor
     ) {
       dispatch(
-        DeviceBoxDetailsAction(fields?.box_Contains, fields?.boxId, fields?.deviceColor, device.device_type)
+        DeviceBoxDetailsAction(
+          fields?.box_Contains,
+          fields?.boxId,
+          fields?.deviceColor,
+          device.device_type
+        )
       );
     } else if (step === 2 && fields.boxId) {
       dispatch(
-        DeviceBoxDetailsAction(fields?.box_Contains, fields?.boxId, fields?.deviceColor, device.device_type)
+        DeviceBoxDetailsAction(
+          fields?.box_Contains,
+          fields?.boxId,
+          fields?.deviceColor,
+          device.device_type
+        )
       );
     }
   }, [fields]);
   // console.log("deviceDataStore", deviceDataStore);
 
-  const validationSchemaForCreate = useMemo(() => ([
-    {
-      required: true,
-      value: fields.box_Contains.length !== 0,
-      field: 'Box Contains',
-    },
-    {
-      required: true,
-      value: fields.boxId,
-      field: 'Box ID',
-    },
-    {
-      required: true,
-      value: fields.deviceColor,
-      field: 'Device Color',
-    }
-  ]), [fields])
-
+  const validationSchemaForCreate = useMemo(
+    () => [
+      {
+        required: true,
+        value: fields.box_Contains.length !== 0,
+        field: "Box Contains",
+      },
+      {
+        required: true,
+        value: fields.boxId,
+        field: "Box ID",
+      },
+      {
+        required: true,
+        value: fields.deviceColor,
+        field: "Device Color",
+      },
+    ],
+    [fields]
+  );
 
   const onSubmit = async () => {
-    const validationResponse = validate(validationSchemaForCreate)
+    const validationResponse = validate(validationSchemaForCreate);
 
     if (validationResponse === true) {
-      setLoading(true)
+      setLoading(true);
       dispatch(
         callApiAction(
           async () => await createDeviceQcApi(deviceDataStore),
           async (response) => {
-            setLoading(false)
-            setStep(0)
-            dispatch(callSnackBar("Device QC Created Successfully", SNACK_BAR_VARIETNS.suceess))
+            setLoading(false);
+            setStep(0);
+            dispatch(
+              callSnackBar(
+                "Device QC Created Successfully",
+                SNACK_BAR_VARIETNS.suceess
+              )
+            );
             // dispatch(fetchDeviceQcAction(settings.deviceQc_filters))
             // dispatch(closeModal("device-qc"))
           },
           (err) => {
-            setFields({ ...fields, err })
-            dispatch(callSnackBar(err, SNACK_BAR_VARIETNS.error))
+            setFields({ ...fields, err });
+            dispatch(callSnackBar(err, SNACK_BAR_VARIETNS.error));
           }
         )
-      )
+      );
     } else {
-      setFields({ ...fields, 'err': validationResponse })
+      setFields({ ...fields, err: validationResponse });
     }
-  }
+  };
 
   return (
     <Paper
@@ -131,6 +148,7 @@ const DeviceQcListController = () => {
               variant="contained"
               sx={{ width: "8vw" }}
               onClick={() => setStep(step + 1)}
+              disabled={device.device_type === null}
             >
               <Typography variant="h5" sx={{ textTransform: "none" }}>
                 Next
@@ -156,7 +174,10 @@ const DeviceQcListController = () => {
             <Button
               variant="contained"
               sx={{ width: "8vw" }}
-              onClick={() => setStep(step - 1)}
+              onClick={() => {
+                dispatch(DeviceSideAction(null));
+                setStep(step - 1);
+              }}
             >
               <Typography variant="h5" sx={{ textTransform: "none" }}>
                 Back
@@ -170,12 +191,14 @@ const DeviceQcListController = () => {
         <>
           <ProductDetailsQcUi setBox={setFields} box={fields} />
 
-          <Box sx={{
-            p: 4,
-            width: "100%",
-            display: "flex",
-            justifyContent: "space-between",
-          }}>
+          <Box
+            sx={{
+              p: 4,
+              width: "100%",
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
             <Box>
               <Button
                 variant="contained"
