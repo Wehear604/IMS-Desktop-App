@@ -519,16 +519,6 @@ const DeviceConnectUi = () => {
             }
             isConnecting={device?.isConnecting}
             onConnectWithDevice={(data, deviceInfo) => {
-              if (device?.device_type === DEVICES.SAFE_BUDS) {
-                runClassicCheck({
-                  mac:
-                    deviceInfo?.mac ||
-                    deviceInfo?.address ||
-                    deviceInfo?.id ||
-                    deviceInfo?.deviceId,
-                  name: deviceInfo?.name || "SafeBuds",
-                });
-              }
               dispatch(
                 connectDevice(
                   deviceInfo,
@@ -558,16 +548,6 @@ const DeviceConnectUi = () => {
             }
             isConnecting={device?.isConnecting}
             onConnectWithDevice={(data, deviceInfo) => {
-              if (device?.device_type === DEVICES.SAFE_BUDS) {
-                runClassicCheck({
-                  mac:
-                    deviceInfo?.mac ||
-                    deviceInfo?.address ||
-                    deviceInfo?.id ||
-                    deviceInfo?.deviceId,
-                  name: deviceInfo?.name || "SafeBuds",
-                });
-              }
               dispatch(
                 connectDevice(
                   deviceInfo,
