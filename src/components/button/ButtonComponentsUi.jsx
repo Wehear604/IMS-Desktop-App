@@ -44,7 +44,7 @@ const ButtonComponentsUi = ({
             sx={{
               display: "flex",
               height: "15vh",
-              justifyContent: "space-between",
+              justifyContent: "center",
               alignItems: "center",
               padding: "16px",
               flexDirection: "column"

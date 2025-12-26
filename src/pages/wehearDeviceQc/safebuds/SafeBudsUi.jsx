@@ -21,6 +21,8 @@ import { DeviceSideAction } from "../../../store/actions/deviceDataAction";
 import { LISTENING_SIDE } from "../../../utils/constants";
 import ButtonComponentsUi from "../../../components/button/ButtonComponentsUi";
 import { use } from "react";
+import audioUrl from "../../../assets/images/AirplaneInterior.mp3";
+
 
 const StepCard = ({
   isChecked,
@@ -87,7 +89,7 @@ const SafeBudsUi = () => {
 
   console.log("deviceQc.modeLeft", deviceQc.modeLeft);
   console.log("deviceQc.modeRight", deviceQc.modeRight);
-  
+
   useEffect(() => {
     dispatch(SafeBudsDeviceName({ type: "NameChange" }));
     dispatch(SafeBudsTap({ type: "Tap" }));
@@ -150,6 +152,24 @@ const SafeBudsUi = () => {
 
       {step === 1 && (
         <Box>
+          <StepCard
+            isChecked={true}
+            // checked={Boolean(device?.is_Audio_play)}
+            title="Audio Check"
+            subtitle="Test device audio output"
+            action={
+              <Button
+                variant="contained"
+                onClick={handlePlayPause}
+                startIcon={isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
+                sx={{
+                  bgcolor: "#0d5966",
+                  borderRadius: "25%",
+                  height: "6vh",
+                }}
+              />
+            }
+          />
           <StepCard
             isChecked={true}
             // checked={deviceQc.volumeIncrease}

@@ -138,12 +138,17 @@ const ConnectButton = ({
       dispatch(closeModal("deviceAudioMicCheck"));
     }
   }, [!isConnected]);
+  const isSideSelected =
+  deviceSide === LISTENING_SIDE.LEFT ||
+  deviceSide === LISTENING_SIDE.RIGHT ||
+  deviceSide === true;
+
 
   if (!isConnected) {
     return (
       <Button
         onClick={onClick}
-        disabled={fetchingData || device?.isConnecting}
+        disabled={fetchingData || device?.isConnecting || !isSideSelected}
         sx={{
           height: "60px",
           display: "flex",
@@ -160,7 +165,7 @@ const ConnectButton = ({
       >
         {!loading ? (
           <>
-            <img src={connectIcon1} alt="ConnectIcon(1)" />
+            {isSideSelected && <img src={connectIcon1} alt="ConnectIcon(1)" />}
             <Typography
               variant="h5"
               sx={{ fontFamily: "League spartan", padding: "5px" }}
