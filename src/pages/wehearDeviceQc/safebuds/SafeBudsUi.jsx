@@ -12,6 +12,7 @@ import {
   ListItemText,
   Card,
   ButtonGroup,
+  Button,
 } from "@mui/material";
 import CustomDialog from "../../../components/layouts/common/CustomDialog";
 import disabledChecked from "../../../assets/images/checkIconDisabled.svg";
@@ -22,7 +23,8 @@ import { LISTENING_SIDE } from "../../../utils/constants";
 import ButtonComponentsUi from "../../../components/button/ButtonComponentsUi";
 import { use } from "react";
 import audioUrl from "../../../assets/images/AirplaneInterior.mp3";
-
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import PauseIcon from "@mui/icons-material/Pause";
 
 const StepCard = ({
   isChecked,
@@ -96,6 +98,33 @@ const SafeBudsUi = () => {
     dispatch(DeviceSideAction(LISTENING_SIDE.LEFT));
   }, []);
 
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = React.useRef(null);
+
+  useEffect(() => {
+    audioRef.current = new Audio(audioUrl);
+    audioRef.current.loop = true; // optional
+    audioRef.current.volume = 1;
+
+    return () => {
+      audioRef.current.pause();
+      audioRef.current = null;
+    };
+  }, []);
+
+  const handlePlayPause = () => {
+    if (!audioRef.current) return;
+
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch((err) => {
+        console.error("Audio play failed:", err);
+      });
+    }
+
+    setIsPlaying((prev) => !prev);
+  };
   return (
     <CustomDialog
       title="SafeBuds QC Checklist"
@@ -154,7 +183,6 @@ const SafeBudsUi = () => {
         <Box>
           <StepCard
             isChecked={true}
-            // checked={Boolean(device?.is_Audio_play)}
             title="Audio Check"
             subtitle="Test device audio output"
             action={

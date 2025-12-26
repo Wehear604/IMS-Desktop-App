@@ -602,6 +602,12 @@ const SafeBudsFotUpload = () => {
   }, [progress, dispatch]);
 
   useEffect(() => {
+    if (progress === 100) {
+      setIsUploading(false);
+    }
+  }, [progress]);
+
+  useEffect(() => {
     const loadDefaultFile = async () => {
       try {
         const response = await fetch(fotfile);
@@ -629,7 +635,9 @@ const SafeBudsFotUpload = () => {
       id={"deviceAudioMicCheck"}
       title={"Safe Buds FOT Upload"}
       onSubmit={Start}
-      confirmText={"Start OTA"}
+      confirmText={isUploading ? "Uploading..." : "Start OTA"}
+      disabledSubmit={isUploading}
+      disableDirectClose={isUploading}
     >
       <>
         {isUploading ? (
