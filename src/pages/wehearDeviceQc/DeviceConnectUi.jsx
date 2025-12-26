@@ -108,22 +108,26 @@ const ConnectButton = ({
   fetchingData,
   loading,
   disconnect = () => {},
+  fotfile,
 }) => {
   const { device } = useSelector((state) => state);
   const isConnected = device.connected;
   const dispatch = useDispatch();
-
   //Need to check
   let b = false;
 
   const AudioAndMicCheck = () => {
-    if (device.device_type == DEVICES.SAFE_BUDS && b) {
+    if (device.device_type == DEVICES.SAFE_BUDS && !device?.fotfile) {
       dispatch(
-        openModal(<SafeBudsFotUpload />, "sm", true, "deviceAudioMicCheck")
+        openModal(
+          <SafeBudsFotUpload fotfile={fotfile} />,
+          "sm",
+          true,
+          "deviceAudioMicCheck"
+        )
       );
     } else {
-      dispatch(openModal(<SafeBudsUi />, "sm", true, "safebudsqc"));
-      // dispatch(openModal(<SafeBudsQcCheckListUi />, "sm", true, "safebudsqc"));
+      dispatch(openModal(<SafeBudsUi />, "sm", true, "deviceAudioMicCheck"));
     }
   };
 
@@ -222,7 +226,10 @@ const DeviceConnectUi = () => {
   const [selected, setSelected] = useState("");
   const { device } = useSelector((state) => state);
   const dispatch = useDispatch();
-
+  console.log(
+    "device?.device_type === DEVICES.SAFE_BUDS && !device?.fotfile",
+    device?.fotfile
+  );
   const devices = [
     { side: "L", label: "BTE", value: LISTENING_SIDE.LEFT },
     { side: "R", label: "BTE", value: LISTENING_SIDE.RIGHT },
@@ -475,98 +482,105 @@ const DeviceConnectUi = () => {
           </Grid>
         )}
 
-        {
-          //   device?.device_type === DEVICES.SAFE_BUDS ? (
-          //   <SafeBudsConnectDeviceModule
-          //     side={
-          //       device?.device_side === LISTENING_SIDE.RIGHT ? "Right" : "Left"
-          //     }
-          //     isConnecting={device?.isConnecting}
-          //     onConnectWithDevice={(data, deviceInfo) => {
-          //       dispatch(
-          //         connectDevice(
-          //           deviceInfo,
-          //           device?.device_side,
-          //           device?.device_type
-          //         )
-          //       );
-          //     }}
-          //     Component={ConnectButton}
-          //     onLoadingChange={() => {}}
-          //     onWriteFunctionEnabled={(fun) =>
-          //       dispatch(onWriteFunctionChange(fun, device.device_side))
-          //     }
-          //     onDisconnect={() => {
-          //       dispatch(disconnectAction(device.device_side));
-          //     }}
-          //     fitting={{
-          //       device_type: device?.device_type,
-          //       device_side: device?.device_side,
-          //       connected: device.isConnecting,
-          //     }}
-          //   />
-          // ) :
-          device?.device_type === DEVICES.BTE_OPTIMA ||
+        {device?.device_type === DEVICES.SAFE_BUDS && !device?.fotfile ? (
+          <SafeBudsConnectDeviceModule
+            side={
+              device?.device_side === LISTENING_SIDE.RIGHT ? "Right" : "Left"
+            }
+            isConnecting={device?.isConnecting}
+            onConnectWithDevice={(data, deviceInfo) => {
+              dispatch(
+                connectDevice(
+                  deviceInfo,
+                  device?.device_side,
+                  device?.device_type
+                )
+              );
+            }}
+            Component={ConnectButton}
+            onLoadingChange={() => {}}
+            onWriteFunctionEnabled={(fun) =>
+              dispatch(onWriteFunctionChange(fun, device.device_side))
+            }
+            onDisconnect={() => {
+              dispatch(disconnectAction(device.device_side));
+            }}
+            fitting={{
+              device_type: device?.device_type,
+              device_side: device?.device_side,
+              connected: device.isConnecting,
+            }}
+          />
+        ) : device?.device_type === DEVICES.BTE_OPTIMA ||
           device?.device_type === DEVICES.BTE_PRIME ? (
-            <BleConnectDeviceModule
-              side={
-                device?.device_side === LISTENING_SIDE.RIGHT ? "Right" : "Left"
-              }
-              isConnecting={device?.isConnecting}
-              onConnectWithDevice={(data, deviceInfo) => {
-                dispatch(
-                  connectDevice(
-                    deviceInfo,
-                    device?.device_side,
-                    device?.device_type
-                  )
-                );
-              }}
-              Component={ConnectButton}
-              onLoadingChange={() => {}}
-              onWriteFunctionEnabled={(fun) =>
-                dispatch(onWriteFunctionChange(fun, device.device_side))
-              }
-              onDisconnect={() => {
-                dispatch(disconnectAction(device.device_side));
-              }}
-              fitting={{
-                device_type: device?.device_type,
-                device_side: device?.device_side,
-                connected: device.isConnecting,
-              }}
-            />
-          ) : (
-            <RicConnectDevice
-              side={
-                device?.device_side === LISTENING_SIDE.RIGHT ? "Right" : "Left"
-              }
-              isConnecting={device?.isConnecting}
-              onConnectWithDevice={(data, deviceInfo) => {
-                dispatch(
-                  connectDevice(
-                    deviceInfo,
-                    device?.device_side,
-                    device?.device_type
-                  )
-                );
-              }}
-              Component={ConnectButton}
-              onLoadingChange={() => {}}
-              onWriteFunctionEnabled={(fun) =>
-                dispatch(onWriteFunctionChange(fun, device.device_side))
-              }
-              onDisconnect={() => {
-                dispatch(disconnectAction(device.device_side));
-              }}
-              fitting={{
-                device_type: device?.device_type,
-                device_side: device?.device_side,
-                connected: device.isConnecting,
-              }}
-            />
-          )
-        }
+          <BleConnectDeviceModule
+            side={
+              device?.device_side === LISTENING_SIDE.RIGHT ? "Right" : "Left"
+            }
+            isConnecting={device?.isConnecting}
+            onConnectWithDevice={(data, deviceInfo) => {
+              dispatch(
+                connectDevice(
+                  deviceInfo,
+                  device?.device_side,
+                  device?.device_type
+                )
+              );
+            }}
+            Component={ConnectButton}
+            onLoadingChange={() => {}}
+            onWriteFunctionEnabled={(fun) =>
+              dispatch(onWriteFunctionChange(fun, device.device_side))
+            }
+            onDisconnect={() => {
+              dispatch(disconnectAction(device.device_side));
+            }}
+            fitting={{
+              device_type: device?.device_type,
+              device_side: device?.device_side,
+              connected: device.isConnecting,
+            }}
+          />
+        ) : (
+          <RicConnectDevice
+            side={
+              device?.device_side === LISTENING_SIDE.RIGHT ? "Right" : "Left"
+            }
+            isConnecting={device?.isConnecting}
+            onConnectWithDevice={(data, deviceInfo) => {
+              dispatch(
+                connectDevice(
+                  deviceInfo,
+                  device?.device_side,
+                  device?.device_type
+                )
+              );
+            }}
+            Component={ConnectButton}
+            onLoadingChange={() => {}}
+            onWriteFunctionEnabled={(fun) =>
+              dispatch(onWriteFunctionChange(fun, device.device_side))
+            }
+            onDisconnect={() => {
+              dispatch(disconnectAction(device.device_side));
+            }}
+            fitting={{
+              device_type: device?.device_type,
+              device_side: device?.device_side,
+              connected: device.isConnecting,
+            }}
+          />
+        )}
+        {/* </CenterArea> */}
+
+        {/* <Box sx={{ display: "flex", gap: 2, justifyContent: "center", mt: 3 }}>
+                <Button onClick={startReading} variant="contained" disabled={!BLE_STORE.readFun && !BLE_STORE.writeFun || isReading}>
+                    Start Reading
+                </Button>
+                <Button onClick={stopReading} variant="outlined" disabled={!isReading}>
+                    Stop Reading
+                </Button>
+            </Box> */}
       </Box>
     </>
   );
