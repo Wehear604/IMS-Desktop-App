@@ -83,6 +83,22 @@ const deviceDataStorageReducer = (state = initialState, action) => {
         };
       }
       return state;
+    case actions.SET_QC_TEST_RESULT:
+      if (action.device_side === LISTENING_SIDE.LEFT) {
+        return {
+          ...state,
+          left: {
+            result: actions.result,
+          },
+        };
+      } else {
+        return {
+          ...state,
+          right: {
+            result: actions.result,
+          },
+        };
+      }
 
     case actions.SET_BOX_DETAILS:
       return {

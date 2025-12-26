@@ -448,3 +448,17 @@ export const SafebudsDeviceAudioCheck = () => {
     }
   };
 };
+
+export const SafebudsDeviceQCResultCheck = (result, device_side) => {
+  return async (dispatch) => {
+    try {
+      dispatch({
+        type: actions.SET_QC_TEST_RESULT,
+        result,
+        device_side,
+      });
+    } catch (err) {
+      console.error("BteDeviceCurrentVolume read failed", err);
+    }
+  };
+};
