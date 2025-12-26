@@ -223,4 +223,6 @@ export default {
   purchaseRequestCreate: `${domain}api/v1/purchaseRequest/`,
 
   createDeviceQc: `${domain}api/qc-device/create`,
+  fetchDeviceQc: `${domain}api/qc-device/fetch`,
+  fetchByIdDeviceQc: `${domain}api/qc-device/fetch-by-id`,
 };

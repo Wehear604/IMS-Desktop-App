@@ -57,6 +57,7 @@ import PurchaseRequestListController from './pages/purchaseRequest/PurchaseReque
 import LocationMasterListController from "./pages/LocationMaster/LocationMasterListController"
 import DeviceQcListController from "./pages/wehearDeviceQc/DeviceQcListController"
 import ListControllerPurchaseRequest from "./pages/purchaseRequestNew/ListControllerPurchaseRequest"
+import DeviceQcDashboardController from "./pages/Device-qc/DeviceQcDashboardController"
 // import locationMasterListController from "./pages/LocationMaster/locationMasterListController";
 
 const loggedInPathElementRender = (login, allowed = [], permittedModule = [], Component, defaultRedirect, hideInPannel = false) => {
@@ -133,6 +134,13 @@ const defineRoutes = (user) => {
       icon: <FactoryIcon />,
       title: "Device QC",
       ...loggedInPathElementRender(user.isLoggedIn, [MODULES.DEVICE_QC], allowedModules, <AppContainer ><DeviceQcListController /> </AppContainer>, defaultRedirect),
+    },
+
+    {
+      path:"device-qc-dashboard",
+      icon:<ShowChart/>,
+      title:"Device Qc Dashboard",
+      ...loggedInPathElementRender(user.isLoggedIn, [MODULES.DEVICE_QC_DASHBOARD], allowedModules, <AppContainer ><DeviceQcDashboardController /></AppContainer>, defaultRedirect),
     },
 
     // {
