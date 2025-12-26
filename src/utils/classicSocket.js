@@ -14,20 +14,13 @@ const getSocket = () => {
   return socketInstance;
 };
 
-export const runClassicCheck = ({
-  mac = "41:42:E9:F9:BB:DD",
-  name = "safe",
-  listen = 30,
-  mic = 5,
-}) => {
+export const runClassicCheck = ({ mac, name }) => {
   const socket = getSocket();
-  socket.emit(
-    "classic:run",
-    { mac: "41:42:E9:F9:BB:DD", listen: 10, mic: 2 },
-    (ack) => {
-      console.log("ack from server", ack);
-    }
-  );
+  console.log("my mac", mac);
+
+  socket.emit("classic:run", { mac: mac, name: name }, (ack) => {
+    console.log("ack from server", ack);
+  });
 };
 
 export const setupClassicListeners = ({ onDone, onError } = {}) => {
