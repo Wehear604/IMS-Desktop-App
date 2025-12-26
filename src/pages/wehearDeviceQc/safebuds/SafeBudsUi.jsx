@@ -222,6 +222,26 @@ const SafeBudsUi = () => {
     }
   };
 
+  const isStepValid = () => {
+    if (step === 0) {
+      return tapcheck(1) && tapcheck(2) && tapcheck(3) && tapcheck(4);
+    }
+
+    if (step === 1) {
+      return device.is_Audio_play && deviceQc.volumeIncrease;
+    }
+
+    if (step === 2) {
+      return device?.isMic; // adjust if MicCheckUi updates something else
+    }
+
+    if (step === 3) {
+      return fields.body1 && fields.body2 && fields.charging;
+    }
+
+    return true;
+  };
+
   return (
     <CustomDialog
       title="SafeBuds QC Checklist"
@@ -237,21 +257,24 @@ const SafeBudsUi = () => {
       }}
       closeText="Close"
       confirmText={step === 3 ? `Finish` : "Next"}
+      disabledSubmit={isStepValid() === false}
     >
-      <ButtonGroup>
-        <ButtonComponentsUi
-          onSubmit={() => dispatch(ChangeButtonSide(LISTENING_SIDE.LEFT))}
-          ButtonGroup
-          STATUSWiseData={device?.device_side === LISTENING_SIDE.LEFT}
-          Title={"LEFT SIDE"}
-        />
-        <ButtonComponentsUi
-          onSubmit={() => dispatch(ChangeButtonSide(LISTENING_SIDE.RIGHT))}
-          ButtonGroup
-          STATUSWiseData={device?.device_side === LISTENING_SIDE.RIGHT}
-          Title={"RIGHT SIDE"}
-        />
-      </ButtonGroup>
+      {step === 0 && (
+        <ButtonGroup sx={{ width: "100%", mb: 2 }}>
+          <ButtonComponentsUi
+            onSubmit={() => dispatch(ChangeButtonSide(LISTENING_SIDE.LEFT))}
+            ButtonGroup
+            STATUSWiseData={device?.device_side === LISTENING_SIDE.LEFT}
+            Title={"LEFT SIDE"}
+          />
+          <ButtonComponentsUi
+            onSubmit={() => dispatch(ChangeButtonSide(LISTENING_SIDE.RIGHT))}
+            ButtonGroup
+            STATUSWiseData={device?.device_side === LISTENING_SIDE.RIGHT}
+            Title={"RIGHT SIDE"}
+          />
+        </ButtonGroup>
+      )}
       {step === 0 && (
         <>
           <StepCard

@@ -19,6 +19,7 @@
     "axios": "^1.7.2",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.13",
+    "engine.io-client": "^6.6.4",
     "file-saver": "^2.0.5",
     "html2canvas": "^1.4.1",
     "js-file-download": "^0.4.12",
@@ -38,6 +39,7 @@
     "react-scripts": "5.0.1",
     "recharts": "^3.1.2",
     "redux-thunk": "^3.1.0",
+    "socket.io-client": "^4.8.3",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
