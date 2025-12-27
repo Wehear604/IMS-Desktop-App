@@ -396,6 +396,7 @@ const SafeBudsUi = () => {
       onReject={() => {
         onSubmit();
       }}
+      isReject={true}
       closeText="Reject Qc"
       confirmText={step === 3 ? `Finish` : "Next"}
       disabledSubmit={isStepValid() === false}

@@ -72,7 +72,7 @@ const DeviceQcDashboardController = () => {
         sort: true,
         renderValue: (params, setParams) => (
           <Typography textTransform="capitalize">
-            {toTitleSpaceCase(params?.deviceName)  || "NA"}
+            {toTitleSpaceCase(params?.deviceName) || "NA"}
           </Typography>
         ),
       },
@@ -83,7 +83,9 @@ const DeviceQcDashboardController = () => {
         align: "left",
         sort: true,
         renderValue: (params, setParams) => (
-          <Typography textTransform="capitalize">{params?.boxId  || "NA"}</Typography>
+          <Typography textTransform="capitalize">
+            {params?.boxId || "NA"}
+          </Typography>
         ),
       },
       {
@@ -155,7 +157,7 @@ const DeviceQcDashboardController = () => {
         sort: true,
         renderValue: (params, setParams) => (
           <Typography textTransform="capitalize">
-            {toTitleSpaceCase(params?.qcExcecutive?.name)  || "NA"}
+            {toTitleSpaceCase(params?.qcExcecutive?.name) || "NA"}
           </Typography>
         ),
       },

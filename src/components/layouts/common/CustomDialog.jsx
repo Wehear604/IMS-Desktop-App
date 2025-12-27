@@ -12,6 +12,7 @@ import { closeModal } from "../../../store/actions/modalAction";
 import { Close } from "@mui/icons-material";
 
 const CustomDialog = ({
+  isReject,
   loading,
   id,
   title,
@@ -29,7 +30,7 @@ const CustomDialog = ({
   const dispatch = useDispatch();
 
   const handleClose = () => {
-    if (onReject) {
+    if (isReject) {
       onReject();
     } else {
       onClose();
@@ -71,7 +72,7 @@ const CustomDialog = ({
           {!disableDirectClose && (
             <IconButton
               onClick={() => {
-                if (onReject) {
+                if (isReject) {
                   onClose();
                 } else {
                   handleClose();

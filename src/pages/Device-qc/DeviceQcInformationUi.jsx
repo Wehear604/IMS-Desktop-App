@@ -64,7 +64,7 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                 value: fields?.box_Contains?.length
                   ? fields.box_Contains
                       .flatMap((item) => Object.keys(item))
-                      .map(key => key.replace(/_/g, " "))
+                      .map((key) => key.replace(/_/g, " "))
                       .join(", ")
                   : ["NA"],
               },
@@ -84,12 +84,17 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                 label: "Overall Device QC Result :",
                 value: (
                   <Chip
-                    label={fields?.left?.result && fields?.right?.result ? "Passed" : "Failed"}
+                    label={
+                      fields?.left?.result && fields?.right?.result
+                        ? "Passed"
+                        : "Failed"
+                    }
                     size="small"
                     sx={{
-                      backgroundColor: fields?.left?.result && fields?.right?.result
-                        ? "success.main"
-                        : "error.main",
+                      backgroundColor:
+                        fields?.left?.result && fields?.right?.result
+                          ? "success.main"
+                          : "error.main",
                       color: "#fff",
                       fontWeight: 500,
                       textTransform: "capitalize",
