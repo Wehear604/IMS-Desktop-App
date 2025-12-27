@@ -28,3 +28,16 @@ export const createDeviceQcApi = async (data) => {
 
     return callResponse;
 };
+
+  export const getDeviceByIdApi = async params => {
+    const callResponse = await axios({
+      url: endpoints.fetchByIdDeviceQc,
+      method: "get",
+      headers: getHeaders(),
+      params,
+    })
+      .then(response => response.data)
+      .catch(err => err.response.data);
+  
+    return callResponse;
+  };
