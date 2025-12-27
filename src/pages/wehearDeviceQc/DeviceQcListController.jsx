@@ -5,7 +5,10 @@ import { Box, Button, Paper, Typography } from "@mui/material";
 import DeviceConnectUi from "./DeviceConnectUi";
 import ProductDetailsQcUi from "./ProductDetailsQcUi";
 import { useDispatch, useSelector } from "react-redux";
-import { DeviceBoxDetailsAction, DeviceSideAction } from "../../store/actions/deviceDataAction";
+import {
+  DeviceBoxDetailsAction,
+  DeviceSideAction,
+} from "../../store/actions/deviceDataAction";
 import { create } from "@mui/material/styles/createTransitions";
 import { callSnackBar } from "../../store/actions/snackbarAction";
 import { SNACK_BAR_VARIETNS } from "../../utils/constants";
@@ -91,32 +94,32 @@ const DeviceQcListController = () => {
   const onSubmit = async () => {
     const validationResponse = validate(validationSchemaForCreate);
 
-    if (validationResponse === true) {
-      setLoading(true);
-      dispatch(
-        callApiAction(
-          async () => await createDeviceQcApi(deviceDataStore),
-          async (response) => {
-            setLoading(false);
-            setStep(0);
-            dispatch(
-              callSnackBar(
-                "Device QC Created Successfully",
-                SNACK_BAR_VARIETNS.suceess
-              )
-            );
-            // dispatch(fetchDeviceQcAction(settings.deviceQc_filters))
-            // dispatch(closeModal("device-qc"))
-          },
-          (err) => {
-            setFields({ ...fields, err });
-            dispatch(callSnackBar(err, SNACK_BAR_VARIETNS.error));
-          }
-        )
-      );
-    } else {
-      setFields({ ...fields, err: validationResponse });
-    }
+    // if (validationResponse === true) {
+    setLoading(true);
+    dispatch(
+      callApiAction(
+        async () => await createDeviceQcApi(deviceDataStore),
+        async (response) => {
+          setLoading(false);
+          setStep(0);
+          dispatch(
+            callSnackBar(
+              "Device QC Created Successfully",
+              SNACK_BAR_VARIETNS.suceess
+            )
+          );
+          // dispatch(fetchDeviceQcAction(settings.deviceQc_filters))
+          // dispatch(closeModal("device-qc"))
+        },
+        (err) => {
+          setFields({ ...fields, err });
+          dispatch(callSnackBar(err, SNACK_BAR_VARIETNS.error));
+        }
+      )
+    );
+    // } else {
+    //   setFields({ ...fields, err: validationResponse });
+    // }
   };
 
   return (

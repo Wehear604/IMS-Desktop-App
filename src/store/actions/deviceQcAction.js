@@ -451,6 +451,7 @@ export const SafebudsDeviceAudioCheck = () => {
 
 export const SafebudsDeviceQCResultCheck = (result, device_side) => {
   return async (dispatch) => {
+    console.log("firstresult", result);
     try {
       dispatch({
         type: actions.SET_QC_TEST_RESULT,

@@ -18,6 +18,7 @@ const initialState = {
     mac: null,
     result: false,
     mic: null,
+    test: false,
   },
   right: {
     device_type: null,
@@ -35,6 +36,7 @@ const initialState = {
     mac: null,
     result: false,
     mic: null,
+    test: false,
   },
   box_Contains: [],
   deviceColor: null,
@@ -84,18 +86,21 @@ const deviceDataStorageReducer = (state = initialState, action) => {
       }
       return state;
     case actions.SET_QC_TEST_RESULT:
+      console.log("actiondevice_side", action);
       if (action.device_side === LISTENING_SIDE.LEFT) {
         return {
           ...state,
           left: {
-            result: actions.result,
+            result: action.result,
+            test: true,
           },
         };
       } else {
         return {
           ...state,
           right: {
-            result: actions.result,
+            result: action.result,
+            test: true,
           },
         };
       }

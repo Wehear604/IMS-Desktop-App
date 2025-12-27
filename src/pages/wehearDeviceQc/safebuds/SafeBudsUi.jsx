@@ -155,7 +155,7 @@ const SafeBudsUi = () => {
   };
 
   const onComplete = () => {
-    if (deviceDataStore.left.result || deviceDataStore.right.result) {
+    if (!deviceDataStore.left.result || !deviceDataStore.right.result) {
       dispatch(
         DeviceStoreAction(
           device?.device_type,
@@ -188,6 +188,10 @@ const SafeBudsUi = () => {
           device?.isMic
         )
       );
+      dispatch(closeModal("deviceAudioMicCheck"));
+      BLE_STORE.BTEdisconnect = true;
+
+      dispatch(resetDeviceDataStore());
     } else if (
       device?.device_type &&
       device?.device_side &&
@@ -255,11 +259,30 @@ const SafeBudsUi = () => {
       );
     }
   };
+  const isStepValid = () => {
+    if (step === 0) {
+      return tapcheck(1) && tapcheck(2) && tapcheck(3) && tapcheck(4);
+    }
+
+    if (step === 1) {
+      return device.is_Audio_play && deviceQc.volumeIncrease;
+    }
+
+    if (step === 2) {
+      return device?.isMic; // adjust if MicCheckUi updates something else
+    }
+
+    if (step === 3) {
+      return fields.body1 && fields.body2 && fields.charging;
+    }
+
+    return true;
+  };
 
   const handleMicCheck = () => {
     if (
-      step === 1 &&
-      (!deviceDataStore.left.result || !deviceDataStore.right.result)
+      step === 0 &&
+      (!deviceDataStore.left.test || !deviceDataStore.right.test)
     ) {
       dispatch(SafebudsDeviceQCResultCheck(false, device?.device_side));
       dispatch(
@@ -272,7 +295,7 @@ const SafeBudsUi = () => {
     } else {
       dispatch(SafebudsDeviceQCResultCheck(false, LISTENING_SIDE.LEFT));
       dispatch(SafebudsDeviceQCResultCheck(false, LISTENING_SIDE.RIGHT));
-      step === 3 ? onComplete : handleNext;
+      step === 3 ? onComplete() : handleNext();
     }
   };
   return (
@@ -292,21 +315,24 @@ const SafeBudsUi = () => {
       }}
       closeText="Reject Qc"
       confirmText={step === 3 ? `Finish` : "Next"}
+      disabledSubmit={isStepValid() === false}
     >
-      <ButtonGroup>
-        <ButtonComponentsUi
-          onSubmit={() => dispatch(ChangeButtonSide(LISTENING_SIDE.LEFT))}
-          ButtonGroup
-          STATUSWiseData={device?.device_side === LISTENING_SIDE.LEFT}
-          Title={"LEFT SIDE"}
-        />
-        <ButtonComponentsUi
-          onSubmit={() => dispatch(ChangeButtonSide(LISTENING_SIDE.RIGHT))}
-          ButtonGroup
-          STATUSWiseData={device?.device_side === LISTENING_SIDE.RIGHT}
-          Title={"RIGHT SIDE"}
-        />
-      </ButtonGroup>
+      {step === 0 && (
+        <ButtonGroup sx={{ width: "100%", mb: 2 }}>
+          <ButtonComponentsUi
+            onSubmit={() => dispatch(ChangeButtonSide(LISTENING_SIDE.LEFT))}
+            ButtonGroup
+            STATUSWiseData={device?.device_side === LISTENING_SIDE.LEFT}
+            Title={"LEFT SIDE"}
+          />
+          <ButtonComponentsUi
+            onSubmit={() => dispatch(ChangeButtonSide(LISTENING_SIDE.RIGHT))}
+            ButtonGroup
+            STATUSWiseData={device?.device_side === LISTENING_SIDE.RIGHT}
+            Title={"RIGHT SIDE"}
+          />
+        </ButtonGroup>
+      )}
       {step === 0 && (
         <>
           <StepCard
