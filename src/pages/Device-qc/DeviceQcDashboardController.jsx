@@ -6,19 +6,20 @@ import { callApiAction } from "../../store/actions/commonAction";
 import { Box, Chip, IconButton, Typography } from "@mui/material";
 import { toTitleSpaceCase } from "../../utils/main";
 import { Visibility } from "@mui/icons-material";
-
+import DeviceQcInformationUi from "./DeviceQcInformationUi";
+import { openModal } from "../../store/actions/modalAction";
 
 const ActionComponent = memo(({ params, setParams, deleteApi }) => {
   const dispatch = useDispatch();
 
   const onInfo = () => {
     dispatch(
-    //   openModal(
-    //     <CreateProductionPlanController id={params?._id} IsVeiw={true} />,
-    //     "lg",
-    //     false,
-    //     "Production-Planning"
-    //   )
+      openModal(
+        <DeviceQcInformationUi id={params?._id} IsVeiw={true} />,
+        "lg",
+        false,
+        "device-qc-information"
+      )
     );
   };
 
@@ -71,7 +72,7 @@ const DeviceQcDashboardController = () => {
         sort: true,
         renderValue: (params, setParams) => (
           <Typography textTransform="capitalize">
-            {toTitleSpaceCase(params.deviceName)}
+            {toTitleSpaceCase(params?.deviceName) || "NA"}
           </Typography>
         ),
       },
@@ -82,7 +83,9 @@ const DeviceQcDashboardController = () => {
         align: "left",
         sort: true,
         renderValue: (params, setParams) => (
-          <Typography textTransform="capitalize">{params.boxId}</Typography>
+          <Typography textTransform="capitalize">
+            {params?.boxId || "NA"}
+          </Typography>
         ),
       },
       {
@@ -93,7 +96,7 @@ const DeviceQcDashboardController = () => {
         sort: true,
         renderValue: (params, setParams) => (
           <Typography textTransform="capitalize">
-            {toTitleSpaceCase(params.deviceColor.name)}
+            {toTitleSpaceCase(params?.deviceColor?.name) || "NA"}
           </Typography>
         ),
       },
@@ -154,21 +157,21 @@ const DeviceQcDashboardController = () => {
         sort: true,
         renderValue: (params, setParams) => (
           <Typography textTransform="capitalize">
-            {toTitleSpaceCase(params.qcExcecutive.name)}
+            {toTitleSpaceCase(params?.qcExcecutive?.name) || "NA"}
           </Typography>
         ),
       },
 
-    //   {
-    //     id: 7,
-    //     fieldName: "",
-    //     label: "Action",
-    //     align: "left",
-    //     sort: true,
-    //     renderValue: (params, setParams) => (
-    //       <ActionComponent params={params} setParams={setParams} />
-    //     ),
-    //   },
+      {
+        id: 7,
+        fieldName: "",
+        label: "Action",
+        align: "left",
+        sort: true,
+        renderValue: (params, setParams) => (
+          <ActionComponent params={params} setParams={setParams} />
+        ),
+      },
     ],
     [fetchDevice]
   );

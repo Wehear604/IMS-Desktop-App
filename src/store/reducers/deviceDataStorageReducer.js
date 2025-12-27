@@ -61,7 +61,7 @@ const deviceDataStorageReducer = (state = initialState, action) => {
             charging: action.charging || false,
             audio: action.audio,
             mac: action.mac,
-            result: true,
+            result: state.left.test ? false : true,
             mic: action.isMic,
           },
         };
@@ -79,14 +79,13 @@ const deviceDataStorageReducer = (state = initialState, action) => {
             charging: action.charging || false,
             audio: action.audio,
             mac: action.mac,
-            result: true,
+            result: state.right.test ? false : true,
             mic: action.isMic,
           },
         };
       }
       return state;
     case actions.SET_QC_TEST_RESULT:
-      console.log("actiondevice_side", action);
       if (action.device_side === LISTENING_SIDE.LEFT) {
         return {
           ...state,
@@ -104,7 +103,10 @@ const deviceDataStorageReducer = (state = initialState, action) => {
           },
         };
       }
-
+    case actions.RESET_DEVICE_DATA_STORE:
+      return {
+        ...initialState,
+      };
     case actions.SET_BOX_DETAILS:
       return {
         ...state,

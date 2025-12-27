@@ -59,7 +59,12 @@ const deviceReducer = (state = initialState, action) => {
         device_type: state.device_type,
         device_side: state.device_side,
       };
-
+    case actions.RESET_DEVICE_DATA_STORE:
+      return {
+        ...initialState,
+        device_type: state.device_type,
+        device_side: state.device_side,
+      };
     default:
       return state;
   }
