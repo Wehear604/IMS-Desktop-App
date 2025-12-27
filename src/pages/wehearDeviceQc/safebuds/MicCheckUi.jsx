@@ -78,7 +78,6 @@ const MicCheckUi = () => {
   const [selectedMic, setSelectedMic] = useState("");
   const [isRunning, setIsRunning] = useState(false);
 
-  // ---------------- Load microphones ----------------
   useEffect(() => {
     const loadDevices = async () => {
       try {
@@ -108,7 +107,6 @@ const MicCheckUi = () => {
     loadDevices();
   }, []);
 
-  // ---------------- Stop monitoring ----------------
   const stopMonitoring = async () => {
     if (rafRef.current) {
       cancelAnimationFrame(rafRef.current);
@@ -136,7 +134,6 @@ const MicCheckUi = () => {
     setIsRunning(false);
   };
 
-  // ---------------- Start monitoring (1 min max) ----------------
   const startMonitoring = async () => {
     if (!selectedMic || isRunning) return;
 
@@ -213,7 +210,6 @@ const MicCheckUi = () => {
     }
   };
 
-  // ---------------- Cleanup on unmount ----------------
   useEffect(() => {
     return () => {
       stopMonitoring();

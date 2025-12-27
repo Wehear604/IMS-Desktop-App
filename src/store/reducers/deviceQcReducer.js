@@ -13,7 +13,6 @@ const initialState = {
 };
 
 const deviceQcReducer = (state = initialState, action) => {
-  console.log("state", action);
   switch (action.type) {
     case actions.SET_DEVICE_SIDE:
       return {

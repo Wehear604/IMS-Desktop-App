@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   DeviceBoxDetailsAction,
   DeviceSideAction,
+  resetDeviceDataStore,
 } from "../../store/actions/deviceDataAction";
 import { create } from "@mui/material/styles/createTransitions";
 import { callSnackBar } from "../../store/actions/snackbarAction";
@@ -94,32 +95,34 @@ const DeviceQcListController = () => {
   const onSubmit = async () => {
     const validationResponse = validate(validationSchemaForCreate);
 
-    // if (validationResponse === true) {
-    setLoading(true);
-    dispatch(
-      callApiAction(
-        async () => await createDeviceQcApi(deviceDataStore),
-        async (response) => {
-          setLoading(false);
-          setStep(0);
-          dispatch(
-            callSnackBar(
-              "Device QC Created Successfully",
-              SNACK_BAR_VARIETNS.suceess
-            )
-          );
-          // dispatch(fetchDeviceQcAction(settings.deviceQc_filters))
-          // dispatch(closeModal("device-qc"))
-        },
-        (err) => {
-          setFields({ ...fields, err });
-          dispatch(callSnackBar(err, SNACK_BAR_VARIETNS.error));
-        }
-      )
-    );
-    // } else {
-    //   setFields({ ...fields, err: validationResponse });
-    // }
+    if (validationResponse === true) {
+      setLoading(true);
+      dispatch(
+        callApiAction(
+          async () => await createDeviceQcApi(deviceDataStore),
+          async (response) => {
+            setLoading(false);
+            setStep(0);
+            dispatch(
+              callSnackBar(
+                "Device QC Created Successfully",
+                SNACK_BAR_VARIETNS.suceess
+              )
+            );
+            dispatch(resetDeviceDataStore());
+
+            // dispatch(fetchDeviceQcAction(settings.deviceQc_filters))
+            // dispatch(closeModal("device-qc"))
+          },
+          (err) => {
+            setFields({ ...fields, err });
+            dispatch(callSnackBar(err, SNACK_BAR_VARIETNS.error));
+          }
+        )
+      );
+    } else {
+      setFields({ ...fields, err: validationResponse });
+    }
   };
 
   return (
@@ -219,6 +222,7 @@ const DeviceQcListController = () => {
                 variant="contained"
                 sx={{ width: "8vw" }}
                 onClick={onSubmit}
+                disabled={fields.boxId ? loading : !fields.boxId}
               >
                 <Typography variant="h5" sx={{ textTransform: "none" }}>
                   Submit

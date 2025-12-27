@@ -38,6 +38,8 @@ import PauseIcon from "@mui/icons-material/Pause";
 import { closeModal } from "../../../store/actions/modalAction";
 import { callSnackBar } from "../../../store/actions/snackbarAction";
 import { BLE_STORE } from "../../../utils/bleStore";
+import { callApiAction } from "../../../store/actions/commonAction";
+import { createDeviceQcApi } from "../../../apis/deviceQc.api";
 
 const StepCard = ({
   isChecked,
@@ -85,20 +87,18 @@ const StepCard = ({
 
 const SafeBudsUi = () => {
   const [step, setStep] = useState(0);
+  const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const { device, deviceQc, deviceDataStore } = useSelector((state) => state);
   const [fields, setFields] = useState({
     body1: false,
     body2: false,
     charging: false,
+    err: "",
   });
 
   const toggle = (key) => () =>
     setFields((prev) => ({ ...prev, [key]: !prev[key] }));
-
-  const handleNext = () => {
-    setStep((prev) => prev + 1);
-  };
 
   const tapcheck = (number) => {
     if (!device?.device_side) return false;
@@ -259,6 +259,7 @@ const SafeBudsUi = () => {
       );
     }
   };
+
   const isStepValid = () => {
     if (step === 0) {
       return tapcheck(1) && tapcheck(2) && tapcheck(3) && tapcheck(4);
@@ -279,11 +280,15 @@ const SafeBudsUi = () => {
     return true;
   };
 
-  const handleMicCheck = () => {
-    if (
-      step === 0 &&
-      (!deviceDataStore.left.test || !deviceDataStore.right.test)
-    ) {
+  const handleNext = () => {
+    setStep((prev) => prev + 1);
+    handlePlayPause();
+  };
+
+  const handleOnReject = () => {
+    const resultLeft = deviceDataStore.left.test ? false : true;
+    const resultRight = deviceDataStore.right.test ? false : true;
+    if (step === 0 && (resultLeft || !resultRight)) {
       dispatch(SafebudsDeviceQCResultCheck(false, device?.device_side));
       dispatch(
         ChangeButtonSide(
@@ -295,23 +300,101 @@ const SafeBudsUi = () => {
     } else {
       dispatch(SafebudsDeviceQCResultCheck(false, LISTENING_SIDE.LEFT));
       dispatch(SafebudsDeviceQCResultCheck(false, LISTENING_SIDE.RIGHT));
+      handlePlayPause();
       step === 3 ? onComplete() : handleNext();
     }
   };
+
+  useEffect(() => {
+    if ([1, 2, 3, 4].every((val) => deviceQc.modeRight?.includes(val))) {
+      dispatch(ChangeButtonSide(LISTENING_SIDE.LEFT));
+    } else if ([1, 2, 3, 4].every((val) => deviceQc.modeLeft?.includes(val))) {
+      dispatch(ChangeButtonSide(LISTENING_SIDE.RIGHT));
+    }
+  }, [deviceQc.modeLeft, deviceQc.modeRight]);
+
+  const data = {
+    left: {
+      device_type: device?.device_type,
+      mode: deviceQc.modeLeft,
+      volume: {
+        volumeIncrease: deviceQc.volumeIncrease,
+        volumeDecrease: deviceQc.volumeIncrease,
+      },
+      body: {
+        body1: fields.body1,
+        body2: fields.body2,
+      },
+      charging: fields.charging,
+      audio: device?.is_Audio_play,
+      mac: device?.mac,
+      result: false,
+      mic: device?.isMic,
+    },
+    right: {
+      device_type: device?.device_type,
+      mode: deviceQc.modeRight,
+      volume: {
+        volumeIncrease: deviceQc.volumeIncrease,
+        volumeDecrease: deviceQc.volumeIncrease,
+      },
+      body: {
+        body1: fields.body1,
+        body2: fields.body2,
+      },
+      charging: fields.charging,
+      audio: device?.is_Audio_play,
+      mac: device?.mac,
+      result: false,
+      mic: device?.isMic,
+    },
+    box_Contains: [],
+    deviceColor: null,
+    boxId: "0000000000",
+    device: device?.device_type,
+  };
+
+  const onSubmit = async () => {
+    setLoading(true);
+    dispatch(
+      callApiAction(
+        async () => await createDeviceQcApi(data),
+        async (response) => {
+          setLoading(false);
+          setStep(0);
+          dispatch(
+            callSnackBar("Device QC Rejectes", SNACK_BAR_VARIETNS.warning)
+          );
+          dispatch(closeModal("deviceAudioMicCheck"));
+
+          BLE_STORE.BTEdisconnect = true;
+
+          dispatch(resetDeviceDataStore());
+        },
+        (err) => {
+          setFields({ ...fields, err });
+          dispatch(callSnackBar(err, SNACK_BAR_VARIETNS.error));
+        }
+      )
+    );
+  };
+
   return (
     <CustomDialog
+      err={fields?.err}
       title="SafeBuds QC Checklist"
-      // id="deviceAudioMicCheck"
+      id="deviceAudioMicCheck"
       onSubmit={step === 3 ? onComplete : handleNext}
       onClose={() => {
-        //   if (audioRef.current) {
-        //     audioRef.current.pause();
-        //     audioRef.current.currentTime = 0;
-        //   }
-        //   dispatch(closeModal("deviceAudioMicCheck"));
-        //   dispatch(resetDeviceDataStore());
-        // }
-        handleMicCheck();
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+        }
+        dispatch(closeModal("deviceAudioMicCheck"));
+        dispatch(resetDeviceDataStore());
+      }}
+      onReject={() => {
+        onSubmit();
       }}
       closeText="Reject Qc"
       confirmText={step === 3 ? `Finish` : "Next"}

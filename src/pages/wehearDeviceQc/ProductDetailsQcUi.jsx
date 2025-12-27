@@ -17,6 +17,7 @@ import {
   Paper,
   TextField,
   CircularProgress,
+  InputAdornment,
 } from "@mui/material";
 import CameraAltOutlinedIcon from "@mui/icons-material/CameraAltOutlined";
 import BarcodeIcon from "@mui/icons-material/QrCode2";
@@ -34,11 +35,11 @@ const ProductDetailsQcUi = ({ setBox, box }) => {
     cable: false,
     doms: false,
     manual: false,
-    "charging_Case": false,
-    "cleaning_Brush": false,
-    "warranty_Card": false,
+    charging_Case: false,
+    cleaning_Brush: false,
+    warranty_Card: false,
   });
-  const [Barcode, setBarcode] = useState(false);
+  const [Barcode, setBarcode] = useState(true);
   const [deviceColor, setDeviceColor] = useState("");
   const [scannerActive, setScannerActive] = useState(false);
   const [box_id, setBox_id] = useState("");
@@ -59,11 +60,9 @@ const ProductDetailsQcUi = ({ setBox, box }) => {
     });
   }, [boxContains, box_id, deviceColor, setBox]);
 
-
   const [colors, setColors] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
 
   useEffect(() => {
     let mounted = true;
@@ -73,7 +72,7 @@ const ProductDetailsQcUi = ({ setBox, box }) => {
       try {
         const res = await fetchColorApi();
         const result = res.data?.result || [];
-        
+
         if (mounted) {
           setColors(result);
           if (!deviceColor && result.length) setDeviceColor(result[0]._id);
@@ -90,7 +89,6 @@ const ProductDetailsQcUi = ({ setBox, box }) => {
       mounted = false;
     };
   }, []);
-
 
   return (
     <Box sx={{ p: 4 }}>
@@ -168,7 +166,10 @@ const ProductDetailsQcUi = ({ setBox, box }) => {
                   {colors.length === 0 ? (
                     <Typography>No colors available</Typography>
                   ) : (
-                    <RadioGroup value={deviceColor} onChange={(e) => setDeviceColor(e.target.value)}>
+                    <RadioGroup
+                      value={deviceColor}
+                      onChange={(e) => setDeviceColor(e.target.value)}
+                    >
                       {colors.map((item) => (
                         <FormControlLabel
                           key={item._id}
@@ -270,13 +271,18 @@ const ProductDetailsQcUi = ({ setBox, box }) => {
               >
                 {Barcode ? (
                   <CustomInput
-                    autoFocus={true}
+                    autoFocus
                     value={box_id}
-                    onChange={(e) => {
-                      setBox_id(e.target.value);
-                      // setBarcode(false);
-                    }}
+                    onChange={(e) => setBox_id(e.target.value)}
                     type="text"
+                    label="Barcode Scanner"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <BarcodeIcon />
+                        </InputAdornment>
+                      ),
+                    }}
                   />
                 ) : (
                   <Button
