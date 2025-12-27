@@ -66,8 +66,6 @@ import { findObjectKeyByValue } from "../../utils/main";
 import SafeBudsFotUpload from "./SafeBudsFotUpload";
 import SafeBudsConnectDeviceModule from "../../components/bluetooth/SafeBudsConnectDeviceModule";
 import SafeBudsUi from "./safebuds/SafeBudsUi";
-import SafeBudsQcCheckListUi from "./SafeBudsQcCheckListUi";
-import { runClassicCheck } from "../../utils/classicSocket";
 
 const Header = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
