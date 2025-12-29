@@ -65,6 +65,13 @@ const deviceReducer = (state = initialState, action) => {
         device_type: state.device_type,
         device_side: state.device_side,
       };
+    case actions.SET_QC_TEST_CLOSE_RESULT:
+      return {
+        ...initialState,
+        device_type: state.device_type,
+        device_side: state.device_side,
+        fotfile: true,
+      };
     default:
       return state;
   }

@@ -107,6 +107,9 @@ export const DeviceBoxDetailsAction = (
 export const resetDeviceDataStore = () => {
   return { type: actions.RESET_DEVICE_DATA_STORE };
 };
+export const CloseDeviceDataStore = () => {
+  return { type: actions.SET_QC_TEST_CLOSE_RESULT };
+};
 export const SetDeviceFOT = () => {
   return { type: actions.SET_FOT_FILES };
 };

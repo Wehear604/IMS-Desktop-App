@@ -90,9 +90,17 @@ function createWindow() {
     }
   });
 
-  win.loadURL("http://localhost:3000"); // dev
-  win.webContents.openDevTools();
-  console.log("Loading development server: http://localhost:3000");
+  if (true) {
+    win.loadFile(path.join(__dirname, "..", "build", "index.html"));
+    console.log(
+      "Forcing static build load from:",
+      path.join(__dirname, "..", "build", "index.html")
+    );
+  } else {
+    win.loadURL("http://localhost:3000");
+    win.webContents.openDevTools();
+    console.log("Loading development server: http://localhost:3000");
+  }
 }
 
 // -----------------------------------------------------

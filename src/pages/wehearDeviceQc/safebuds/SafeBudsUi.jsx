@@ -24,6 +24,7 @@ import disabledChecked from "../../../assets/images/checkIconDisabled.svg";
 import enabledChecked from "../../../assets/images/checkIconEnabled.svg";
 import MicCheckUi from "./MicCheckUi";
 import {
+  CloseDeviceDataStore,
   DeviceIsAudioCheck,
   DeviceSideAction,
   DeviceStoreAction,
@@ -32,7 +33,7 @@ import {
 import { LISTENING_SIDE, SNACK_BAR_VARIETNS } from "../../../utils/constants";
 import ButtonComponentsUi from "../../../components/button/ButtonComponentsUi";
 import { use } from "react";
-import audioUrl from "../../../assets/images/AirplaneInterior.mp3";
+import audioUrl from "../../../assets/images/slow_instrumental.mp3";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import { closeModal } from "../../../store/actions/modalAction";
@@ -155,44 +156,45 @@ const SafeBudsUi = () => {
   };
 
   const onComplete = () => {
-    if (!deviceDataStore.left.result || !deviceDataStore.right.result) {
-      dispatch(
-        DeviceStoreAction(
-          device?.device_type,
-          LISTENING_SIDE.LEFT,
-          deviceQc.modeLeft,
-          {
-            volumeIncrease: deviceQc.volumeIncrease,
-            volumeDecrease: true,
-          },
-          { body1: fields.body1, body2: fields.body2 },
-          fields.charging,
-          device?.is_Audio_play,
-          device?.mac,
-          device?.isMic
-        )
-      );
-      dispatch(
-        DeviceStoreAction(
-          device?.device_type,
-          LISTENING_SIDE.RIGHT,
-          deviceQc.modeRight,
-          {
-            volumeIncrease: deviceQc.volumeIncrease,
-            volumeDecrease: true,
-          },
-          { body1: fields.body1, body2: fields.body2 },
-          fields.charging,
-          device?.is_Audio_play,
-          device?.mac,
-          device?.isMic
-        )
-      );
-      dispatch(closeModal("deviceAudioMicCheck"));
-      BLE_STORE.BTEdisconnect = true;
+    // if (!deviceDataStore.left.result || !deviceDataStore.right.result) {
+    //   dispatch(
+    //     DeviceStoreAction(
+    //       device?.device_type,
+    //       LISTENING_SIDE.LEFT,
+    //       deviceQc.modeLeft,
+    //       {
+    //         volumeIncrease: deviceQc.volumeIncrease,
+    //         volumeDecrease: true,
+    //       },
+    //       { body1: fields.body1, body2: fields.body2 },
+    //       fields.charging,
+    //       device?.is_Audio_play,
+    //       device?.mac,
+    //       device?.isMic
+    //     )
+    //   );
+    //   dispatch(
+    //     DeviceStoreAction(
+    //       device?.device_type,
+    //       LISTENING_SIDE.RIGHT,
+    //       deviceQc.modeRight,
+    //       {
+    //         volumeIncrease: deviceQc.volumeIncrease,
+    //         volumeDecrease: true,
+    //       },
+    //       { body1: fields.body1, body2: fields.body2 },
+    //       fields.charging,
+    //       device?.is_Audio_play,
+    //       device?.mac,
+    //       device?.isMic
+    //     )
+    //   );
+    //   dispatch(closeModal("deviceAudioMicCheck"));
+    //   BLE_STORE.BTEdisconnect = true;
 
-      dispatch(resetDeviceDataStore());
-    } else if (
+    //   dispatch(resetDeviceDataStore());
+    // } else
+    if (
       device?.device_type &&
       device?.device_side &&
       deviceQc.modeLeft &&
@@ -241,9 +243,6 @@ const SafeBudsUi = () => {
       dispatch(closeModal("deviceAudioMicCheck"));
 
       BLE_STORE.BTEdisconnect = true;
-
-      dispatch(resetDeviceDataStore());
-
       dispatch(
         callSnackBar(
           `SafeBuds Side Device QC Completed Successfully.`,
@@ -282,7 +281,9 @@ const SafeBudsUi = () => {
 
   const handleNext = () => {
     setStep((prev) => prev + 1);
-    handlePlayPause();
+    if (isPlaying) {
+      audioRef.current.pause();
+    }
   };
 
   const handleOnReject = () => {
@@ -391,6 +392,7 @@ const SafeBudsUi = () => {
         BLE_STORE.BTEdisconnect = true;
         dispatch(closeModal("deviceAudioMicCheck"));
         dispatch(resetDeviceDataStore());
+        dispatch(CloseDeviceDataStore());
       }}
       onReject={() => {
         onSubmit();

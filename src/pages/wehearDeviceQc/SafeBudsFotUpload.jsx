@@ -595,7 +595,7 @@ const SafeBudsFotUpload = () => {
     if (progress === 100) {
       const timer = setTimeout(() => {
         dispatch(SetDeviceFOT());
-      }, 7000);
+      }, 1000);
 
       return () => clearTimeout(timer);
     }

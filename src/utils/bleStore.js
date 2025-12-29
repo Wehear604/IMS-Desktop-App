@@ -2,7 +2,7 @@ import WriteRicDataToDevice from "../components/bluetooth/WriteRicDataToDevice";
 import { DeviceIsAudioCheck } from "../store/actions/deviceDataAction";
 import { callSnackBar } from "../store/actions/snackbarAction";
 import { LISTENING_SIDE, SNACK_BAR_VARIETNS } from "./constants";
-import audioUrl from "../assets/images/AirplaneInterior.mp3"; // mp3 file
+import audioUrl from "../assets/images/slow_instrumental.mp3"; // mp3 file
 
 export const BLE_STORE = {
   deviceObj: null,

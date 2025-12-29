@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
-import audioUrl from "../../assets/images/AirplaneInterior.mp3";
+import audioUrl from "../../assets/images/slow_instrumental.mp3";
 import {
   DEVICES,
   DEVICES_NAME,
@@ -47,7 +47,6 @@ import {
 } from "../../store/actions/deviceDataAction";
 import { closeModal } from "../../store/actions/modalAction";
 import { callSnackBar } from "../../store/actions/snackbarAction";
-
 
 //--------------------------------------------
 // REUSABLE STEPCARD COMPONENT
@@ -86,9 +85,7 @@ const StepCard = ({
           <ListItemText
             primary={<Typography variant="h5">{title}</Typography>}
             secondary={
-              subtitle ? (
-                <Typography variant="h6">{subtitle}</Typography>
-              ) : null
+              subtitle ? <Typography variant="h6">{subtitle}</Typography> : null
             }
           />
         </Box>
@@ -97,7 +94,6 @@ const StepCard = ({
     </List>
   </Card>
 );
-
 
 //--------------------------------------------
 // MAIN COMPONENT
@@ -158,12 +154,18 @@ const DeviceAudioMicCheckUi = () => {
     const step = stepRef.current;
     const dev = deviceRef.current;
 
-    if (dev?.device_type === DEVICES.BTE_OPTIMA || dev?.device_type === DEVICES.BTE_PRIME) {
+    if (
+      dev?.device_type === DEVICES.BTE_OPTIMA ||
+      dev?.device_type === DEVICES.BTE_PRIME
+    ) {
       if (step === 1) dispatch(BteDeviceVolume(dev.device_side));
       if (step === 2) dispatch(BteDeviceMode());
     }
 
-    if (dev?.device_type === DEVICES.RIC_OPTIMA || dev?.device_type === DEVICES.RIC_32) {
+    if (
+      dev?.device_type === DEVICES.RIC_OPTIMA ||
+      dev?.device_type === DEVICES.RIC_32
+    ) {
       if (step === 1)
         dispatch(readRicVolumeLevel(dev.device_side, BLE_STORE.deviceObj));
       if (step === 2)
@@ -178,7 +180,10 @@ const DeviceAudioMicCheckUi = () => {
       if (step === 1 || step === 2) dispatch(getITEOptimaData(dev.device_side));
     }
 
-    if (dev?.device_type === DEVICES.ITE_PRIME || dev?.device_type === DEVICES.NECKBAND) {
+    if (
+      dev?.device_type === DEVICES.ITE_PRIME ||
+      dev?.device_type === DEVICES.NECKBAND
+    ) {
       if (step === 1)
         dispatch(getITEPrimeVolume(dev.device_side, BLE_STORE.deviceObj));
       if (step === 2)
@@ -212,7 +217,6 @@ const DeviceAudioMicCheckUi = () => {
     else stopReading();
   }, [step, deviceQc.start]);
 
-
   //--------------------------------------------
   // INIT READS
   //--------------------------------------------
@@ -220,10 +224,16 @@ const DeviceAudioMicCheckUi = () => {
     mounted.current = true;
 
     if (device?.device_side) {
-      if (device?.device_type === DEVICES.BTE_OPTIMA || device?.device_type === DEVICES.BTE_PRIME)
+      if (
+        device?.device_type === DEVICES.BTE_OPTIMA ||
+        device?.device_type === DEVICES.BTE_PRIME
+      )
         dispatch(BteDeviceCurrentVolume(device.device_side));
 
-      if (device?.device_type === DEVICES.RIC_OPTIMA || device?.device_type === DEVICES.RIC_32)
+      if (
+        device?.device_type === DEVICES.RIC_OPTIMA ||
+        device?.device_type === DEVICES.RIC_32
+      )
         dispatch(RicDeviceCurrentVolume(device.device_side));
 
       if (device?.device_type === DEVICES.RIC_OPTIMA_8)
@@ -232,7 +242,10 @@ const DeviceAudioMicCheckUi = () => {
       if (device?.device_type === DEVICES.ITE_OPTIMA)
         dispatch(getITEOptimaData(device.device_side, true));
 
-      if (device?.device_type === DEVICES.ITE_PRIME || device?.device_type === DEVICES.NECKBAND)
+      if (
+        device?.device_type === DEVICES.ITE_PRIME ||
+        device?.device_type === DEVICES.NECKBAND
+      )
         dispatch(getITEPrimeVolume(device.device_side, true));
     }
 
@@ -246,7 +259,6 @@ const DeviceAudioMicCheckUi = () => {
       }
     };
   }, [device]);
-
 
   //--------------------------------------------
   // NEXT BUTTON
@@ -262,7 +274,6 @@ const DeviceAudioMicCheckUi = () => {
     setIsPlaying(false);
     setStep((s) => Math.min(s + 1, 3));
   };
-
 
   //--------------------------------------------
   // PLAY/PAUSE LOGIC (FIXED & WORKING)
@@ -288,15 +299,17 @@ const DeviceAudioMicCheckUi = () => {
       sendPlayCommand(
         dispatch,
         device?.device_type,
-        device?.device_side, LISTENING_SIDE,
+        device?.device_side,
+        LISTENING_SIDE,
         30
       );
     } else {
       if (!audioRef.current) audioRef.current = new Audio(audioUrl);
-      audioRef.current.play().catch((err) => console.error("MP3 play error:", err));
+      audioRef.current
+        .play()
+        .catch((err) => console.error("MP3 play error:", err));
     }
   };
-
 
   //--------------------------------------------
   // STEP SUBMIT DISABLED STATE
@@ -328,12 +341,10 @@ const DeviceAudioMicCheckUi = () => {
       );
     }
 
-    if (step === 3)
-      return !(fields.body1 && fields.body2 && fields.charging);
+    if (step === 3) return !(fields.body1 && fields.body2 && fields.charging);
 
     return true;
   })();
-
 
   //--------------------------------------------
   // FINAL COMPLETE QC SUBMIT
@@ -341,7 +352,6 @@ const DeviceAudioMicCheckUi = () => {
   const sideLabel =
     findObjectKeyByValue(device?.device_side, LISTENING_SIDE) ?? "";
   const deviceTitle = DEVICES_NAME[device?.device_type] ?? "Unknown Device";
-
 
   //--------------------------------------------
   // STEP 3 COMPLETE HANDLER
@@ -409,7 +419,6 @@ const DeviceAudioMicCheckUi = () => {
     }
   };
 
-
   //--------------------------------------------
   // RETURN JSX (ALL 4 STEPS INCLUDED)
   //--------------------------------------------
@@ -443,7 +452,11 @@ const DeviceAudioMicCheckUi = () => {
         <Box textAlign="center">
           <Typography variant="h4" fontWeight={700}>
             Device Connected{" "}
-            <img src={bluetoothIcon} alt="Bluetooth" style={{ marginLeft: 8 }} />
+            <img
+              src={bluetoothIcon}
+              alt="Bluetooth"
+              style={{ marginLeft: 8 }}
+            />
           </Typography>
           <Typography variant="h5" sx={{ color: "#DDD" }}>
             {deviceTitle} {sideLabel}
@@ -550,20 +563,14 @@ const DeviceAudioMicCheckUi = () => {
             <Box ml={2}>
               <StepCard
                 checkBox={
-                  <Checkbox
-                    checked={fields.body1}
-                    onChange={toggle("body1")}
-                  />
+                  <Checkbox checked={fields.body1} onChange={toggle("body1")} />
                 }
                 title="Device checked for damage"
               />
 
               <StepCard
                 checkBox={
-                  <Checkbox
-                    checked={fields.body2}
-                    onChange={toggle("body2")}
-                  />
+                  <Checkbox checked={fields.body2} onChange={toggle("body2")} />
                 }
                 title="Body checked for scratches"
               />

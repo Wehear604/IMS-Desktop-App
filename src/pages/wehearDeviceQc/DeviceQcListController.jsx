@@ -73,11 +73,11 @@ const DeviceQcListController = () => {
 
   const validationSchemaForCreate = useMemo(
     () => [
-      {
-        required: true,
-        value: fields.box_Contains.length !== 0,
-        field: "Box Contains",
-      },
+      // {
+      //   required: true,
+      //   value: fields.box_Contains.length !== 0,
+      //   field: "Box Contains",
+      // },
       {
         required: true,
         value: fields.boxId,

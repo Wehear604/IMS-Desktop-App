@@ -1,107 +1,126 @@
-import { DashboardCustomize, Grading, Groups2Outlined, PlaylistAddCheckCircle, Settings, ShowChart } from "@mui/icons-material"
-import SignInController from './pages/signin/SignInController'
-import { Navigate } from 'react-router-dom'
-import NotAllowedComponent from '../src/components/layouts/NotAllowedComponent'
-import { getDefaultRedirect } from './utils/routinghelper'
-import AppContainer from './components/layouts/common/AppContainer'
-import MODULES from './utils/module.constant'
-import PagenotFound from './components/layouts/PagenotFound'
-import DepartmentController from './pages/department/DepartmentController'
-import ApartmentIcon from '@mui/icons-material/Apartment';
-import VendorListController from './pages/vendor/VendorListController'
-import PersonSearchIcon from '@mui/icons-material/PersonSearch';
-import Inventory2Icon from '@mui/icons-material/Inventory2';
-import ListController from './pages/user/UserLIstController';
-import PrecisionManufacturingIcon from '@mui/icons-material/PrecisionManufacturing';
-import ChecklistIcon from '@mui/icons-material/Checklist';
-import TypeOfSalesMainController from './pages/type_of_sales/TypeOfSalesMainController'
-import ProductionListController from './pages/Production/ProductionListController'
-import CategoryTypeMainController from './pages/categories/CategoryTypeMainController'
-import CategoryIcon from '@mui/icons-material/Category';
-import ProductBrandController from './pages/productbrand/ProductBrandController'
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import ProductColorController from './pages/productcolor/ProductColorController'
-import ColorLensIcon from '@mui/icons-material/ColorLens';
-import ProductTypeController from './pages/producttype/ProductTypeController'
-import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
-import ComponentListController from './pages/component/ComponentListController'
-import ItemTypeListController from './pages/itemType/itemTypeListController'
-import ItemListController from './pages/item/ItemListController'
-import InventoryMasterListController from './pages/InventoryMaster/InventoryMasterListController'
-import InventoryLogsListController from './pages/inventoryLogs/InventoryLogsListController'
-import BomUI from './pages/Bom/BomUI'
-import FactoryIcon from '@mui/icons-material/Factory';
-import StockInOutListController from './pages/stockInOut/StockInOutListController'
-import RejectionReasonListController from './pages/RejectionReason/RejectionReasonListController'
-import MacAddressLIstController from './pages/MacAddress/MacAddressListController'
-import QcListController from './pages/Qc-Result/QcListController'
-import PodcastsIcon from '@mui/icons-material/Podcasts';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import GridViewIcon from '@mui/icons-material/GridView';
-import ClassIcon from '@mui/icons-material/Class';
-import DangerousIcon from '@mui/icons-material/Dangerous';
-import InventoryIcon from '@mui/icons-material/Inventory';
-import QcTestCaseListController from './pages/QcTestCase/QcTestCaseListController'
-import QcDashboardListController from './pages/QcDashboard/QcDashboardListController'
-import { LOG_TYPE, USER_ROLES } from './utils/constants'
-import SpecialMarkingListController from './pages/SpecialMarking/SpecialMarkingListController'
-import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
-import SystemUpdateAltIcon from '@mui/icons-material/SystemUpdateAlt';
-import ImportExportIcon from '@mui/icons-material/ImportExport';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import DisplaySettingsIcon from '@mui/icons-material/DisplaySettings';
-import DashboardListController from './pages/dashboard/DashboardListController'
-import PurchaseRequestListController from './pages/purchaseRequest/PurchaseRequestListController';
+import {
+  DashboardCustomize,
+  Grading,
+  Groups2Outlined,
+  PlaylistAddCheckCircle,
+  Settings,
+  ShowChart,
+} from "@mui/icons-material";
+import SignInController from "./pages/signin/SignInController";
+import { Navigate } from "react-router-dom";
+import NotAllowedComponent from "../src/components/layouts/NotAllowedComponent";
+import { getDefaultRedirect } from "./utils/routinghelper";
+import AppContainer from "./components/layouts/common/AppContainer";
+import MODULES from "./utils/module.constant";
+import PagenotFound from "./components/layouts/PagenotFound";
+import DepartmentController from "./pages/department/DepartmentController";
+import ApartmentIcon from "@mui/icons-material/Apartment";
+import VendorListController from "./pages/vendor/VendorListController";
+import PersonSearchIcon from "@mui/icons-material/PersonSearch";
+import Inventory2Icon from "@mui/icons-material/Inventory2";
+import ListController from "./pages/user/UserLIstController";
+import PrecisionManufacturingIcon from "@mui/icons-material/PrecisionManufacturing";
+import ChecklistIcon from "@mui/icons-material/Checklist";
+import TypeOfSalesMainController from "./pages/type_of_sales/TypeOfSalesMainController";
+import ProductionListController from "./pages/Production/ProductionListController";
+import CategoryTypeMainController from "./pages/categories/CategoryTypeMainController";
+import CategoryIcon from "@mui/icons-material/Category";
+import ProductBrandController from "./pages/productbrand/ProductBrandController";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import ProductColorController from "./pages/productcolor/ProductColorController";
+import ColorLensIcon from "@mui/icons-material/ColorLens";
+import ProductTypeController from "./pages/producttype/ProductTypeController";
+import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
+import ComponentListController from "./pages/component/ComponentListController";
+import ItemTypeListController from "./pages/itemType/itemTypeListController";
+import ItemListController from "./pages/item/ItemListController";
+import InventoryMasterListController from "./pages/InventoryMaster/InventoryMasterListController";
+import InventoryLogsListController from "./pages/inventoryLogs/InventoryLogsListController";
+import BomUI from "./pages/Bom/BomUI";
+import FactoryIcon from "@mui/icons-material/Factory";
+import StockInOutListController from "./pages/stockInOut/StockInOutListController";
+import RejectionReasonListController from "./pages/RejectionReason/RejectionReasonListController";
+import MacAddressLIstController from "./pages/MacAddress/MacAddressListController";
+import QcListController from "./pages/Qc-Result/QcListController";
+import PodcastsIcon from "@mui/icons-material/Podcasts";
+import AssessmentIcon from "@mui/icons-material/Assessment";
+import GridViewIcon from "@mui/icons-material/GridView";
+import ClassIcon from "@mui/icons-material/Class";
+import DangerousIcon from "@mui/icons-material/Dangerous";
+import InventoryIcon from "@mui/icons-material/Inventory";
+import QcTestCaseListController from "./pages/QcTestCase/QcTestCaseListController";
+import QcDashboardListController from "./pages/QcDashboard/QcDashboardListController";
+import { LOG_TYPE, USER_ROLES } from "./utils/constants";
+import SpecialMarkingListController from "./pages/SpecialMarking/SpecialMarkingListController";
+import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
+import SystemUpdateAltIcon from "@mui/icons-material/SystemUpdateAlt";
+import ImportExportIcon from "@mui/icons-material/ImportExport";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import DisplaySettingsIcon from "@mui/icons-material/DisplaySettings";
+import DashboardListController from "./pages/dashboard/DashboardListController";
+import PurchaseRequestListController from "./pages/purchaseRequest/PurchaseRequestListController";
 // import VersionsController from './pages/versions/VersionsController';
-import LocationMasterListController from "./pages/LocationMaster/LocationMasterListController"
-import DeviceQcListController from "./pages/wehearDeviceQc/DeviceQcListController"
-import ListControllerPurchaseRequest from "./pages/purchaseRequestNew/ListControllerPurchaseRequest"
-import DeviceQcDashboardController from "./pages/Device-qc/DeviceQcDashboardController"
+import LocationMasterListController from "./pages/LocationMaster/LocationMasterListController";
+import DeviceQcListController from "./pages/wehearDeviceQc/DeviceQcListController";
+import ListControllerPurchaseRequest from "./pages/purchaseRequestNew/ListControllerPurchaseRequest";
+import DeviceQcDashboardController from "./pages/Device-qc/DeviceQcDashboardController";
 // import locationMasterListController from "./pages/LocationMaster/locationMasterListController";
 
-const loggedInPathElementRender = (login, allowed = [], permittedModule = [], Component, defaultRedirect, hideInPannel = false) => {
-
+const loggedInPathElementRender = (
+  login,
+  allowed = [],
+  permittedModule = [],
+  Component,
+  defaultRedirect,
+  hideInPannel = false
+) => {
   const obj = {
     hideInPannel,
     element: Component,
-  }
+  };
   if (!login) {
-    obj['element'] = <Navigate replace to={'/sign-in'} />
+    obj["element"] = <Navigate replace to={"/sign-in"} />;
   } else {
-
-    let found = false
+    let found = false;
     for (let module of allowed) {
       for (let allowedModule of permittedModule) {
         if (module == allowedModule) {
-          found = true
+          found = true;
           break;
         }
       }
     }
     if (!found) {
-      obj['hideInPannel'] = true
-      obj['element'] = <NotAllowedComponent />
+      obj["hideInPannel"] = true;
+      obj["element"] = <NotAllowedComponent />;
     }
-
   }
-  return obj
-}
-
+  return obj;
+};
 
 const defineRoutes = (user) => {
-  const allowedModules = user.data?.ims_modules?.map((item) => item?.module) ?? []
-  const defaultRedirect = getDefaultRedirect(allowedModules)
-  return ([
+  const allowedModules =
+    user.data?.ims_modules?.map((item) => item?.module) ?? [];
+  const defaultRedirect = getDefaultRedirect(allowedModules);
+  return [
     {
       path: "sign-in",
-      element: !user.isLoggedIn ? <SignInController /> : <Navigate replace to={defaultRedirect} />,
-      hideInPannel: true
+      element: !user.isLoggedIn ? (
+        <SignInController />
+      ) : (
+        <Navigate replace to={defaultRedirect} />
+      ),
+      hideInPannel: true,
     },
     {
       path: "",
-      element: user.isLoggedIn ? <Navigate replace to={defaultRedirect} /> : <Navigate replace to="/sign-in" />,
-      hideInPannel: true
+      element: user.isLoggedIn ? (
+        <Navigate replace to={defaultRedirect} />
+      ) : (
+        <Navigate replace to="/sign-in" />
+      ),
+      hideInPannel: true,
     },
     // {
     //   path: "dashboard",
@@ -130,17 +149,33 @@ const defineRoutes = (user) => {
     // },
 
     {
-      path: "bom",
+      path: "qc",
       icon: <FactoryIcon />,
       title: "Device QC",
-      ...loggedInPathElementRender(user.isLoggedIn, [MODULES.DEVICE_QC], allowedModules, <AppContainer ><DeviceQcListController /> </AppContainer>, defaultRedirect),
+      ...loggedInPathElementRender(
+        user.isLoggedIn,
+        [MODULES.DEVICE_QC],
+        allowedModules,
+        <AppContainer>
+          <DeviceQcListController />{" "}
+        </AppContainer>,
+        defaultRedirect
+      ),
     },
 
     {
-      path:"device-qc-dashboard",
-      icon:<ShowChart/>,
-      title:"Device Qc Dashboard",
-      ...loggedInPathElementRender(user.isLoggedIn, [MODULES.DEVICE_QC_DASHBOARD], allowedModules, <AppContainer ><DeviceQcDashboardController /></AppContainer>, defaultRedirect),
+      path: "device-qc-dashboard",
+      icon: <ShowChart />,
+      title: "Device Qc Dashboard",
+      ...loggedInPathElementRender(
+        user.isLoggedIn,
+        [MODULES.DEVICE_QC_DASHBOARD],
+        allowedModules,
+        <AppContainer>
+          <DeviceQcDashboardController />
+        </AppContainer>,
+        defaultRedirect
+      ),
     },
 
     // {
@@ -321,15 +356,16 @@ const defineRoutes = (user) => {
     {
       path: "*",
       hideInPannel: true,
-      element: !user.isLoggedIn ? <Navigate replace to={"/sign-in"} /> : <PagenotFound />,
-    }
-  ])
+      element: !user.isLoggedIn ? (
+        <Navigate replace to={"/sign-in"} />
+      ) : (
+        <PagenotFound />
+      ),
+    },
+  ];
+};
 
-}
-
-export default defineRoutes
-
-
+export default defineRoutes;
 
 // {
 //   path: "quality-check",
