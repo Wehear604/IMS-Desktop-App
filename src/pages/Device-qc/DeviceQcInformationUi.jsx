@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import { InformationUI } from "../../components/InformationUI";
 import moment from "moment";
 import { DEVICES } from "../../utils/constants";
+import { toTitleCase } from "../../utils/main";
 
 const DeviceQcInformationUi = ({ id, IsVeiw }) => {
   const dispatch = useDispatch();
@@ -50,7 +51,7 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
           </Typography>
           <InformationUI
             Data={[
-              { label: "Device Name :", value: fields?.deviceName },
+              { label: "Device Name :", value: toTitleCase(fields?.deviceName) },
               {
                 isField: fields?.device !== DEVICES.SAFE_BUDS,
                 label: "Device Mac Address :",
@@ -78,7 +79,7 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
               },
               {
                 label: "QC Executive :",
-                value: fields?.qcExcecutive?.name || "NA",
+                value: toTitleCase(fields?.qcExcecutive?.name) || "NA",
               },
               {
                 label: "Overall Device QC Result :",
