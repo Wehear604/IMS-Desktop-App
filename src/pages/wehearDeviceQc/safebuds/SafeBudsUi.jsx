@@ -362,14 +362,12 @@ const SafeBudsUi = () => {
         async (response) => {
           setLoading(false);
           setStep(0);
+          BLE_STORE.BTEdisconnect = true;
           dispatch(
             callSnackBar("Device QC Rejectes", SNACK_BAR_VARIETNS.warning)
           );
-          dispatch(closeModal("deviceAudioMicCheck"));
-
-          BLE_STORE.BTEdisconnect = true;
-
           dispatch(resetDeviceDataStore());
+          dispatch(closeModal("deviceAudioMicCheck"));
         },
         (err) => {
           setFields({ ...fields, err });
@@ -390,6 +388,7 @@ const SafeBudsUi = () => {
           audioRef.current.pause();
           audioRef.current.currentTime = 0;
         }
+        BLE_STORE.BTEdisconnect = true;
         dispatch(closeModal("deviceAudioMicCheck"));
         dispatch(resetDeviceDataStore());
       }}
