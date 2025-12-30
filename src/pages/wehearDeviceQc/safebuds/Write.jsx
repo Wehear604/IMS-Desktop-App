@@ -53,7 +53,7 @@ const processQueue = async () => {
       return str.length.toString(16).toUpperCase().padStart(2, "0");
     }
 
-    const devicename = "SafeBuds";
+    const devicename = "MyBuds";
 
     function buildNameCommands(name) {
       const lengthHex = stringLengthHex(name);
