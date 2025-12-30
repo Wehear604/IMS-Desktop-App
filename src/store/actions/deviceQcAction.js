@@ -404,6 +404,25 @@ export const SafeBudsTap = ({ type }) => {
   };
 };
 
+export const SafeBudsVersionRead = ({ type }) => {
+  return async (dispatch) => {
+    try {
+      const command = null;
+      const response = await Read(
+        command,
+        "both",
+        BLE_STORE.deviceObj,
+        type,
+        dispatch
+      );
+
+      console.log("response", response);
+    } catch (err) {
+      console.error("RicDeviceCurrentVolume read failed", err);
+    }
+  };
+};
+
 export const ChangeButtonSide = (device_side) => {
   return { type: actions.SET_DEVICE_SIDE, device_side };
 };
@@ -460,6 +479,20 @@ export const SafebudsDeviceQCResultCheck = (result, device_side) => {
       });
     } catch (err) {
       console.error("BteDeviceCurrentVolume read failed", err);
+    }
+  };
+};
+
+export const SafeBudsVersionUpdate = ({ type }) => {
+  return async (dispatch) => {
+    try {
+      const command = "0x20";
+
+      const response = await Write(command, "both", BLE_STORE.deviceObj, type);
+
+      console.log("response", response);
+    } catch (err) {
+      console.error("RicDeviceCurrentVolume read failed", err);
     }
   };
 };
