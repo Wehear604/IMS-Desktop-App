@@ -30,7 +30,7 @@ import { toTitleCase, toTitleSpaceCase } from "../../utils/main";
 import { useDispatch } from "react-redux";
 import { callApiAction } from "../../store/actions/commonAction";
 
-const ProductDetailsQcUi = ({ setBox, box }) => {
+const ProductDetailsQcUi = ({ setBox, box, isUpdate }) => {
   const [boxContains, setBoxContains] = useState({
     cable: false,
     doms: false,
@@ -105,7 +105,11 @@ const ProductDetailsQcUi = ({ setBox, box }) => {
         <Grid item xs={12} md={4}>
           <Grid container spacing={4}>
             {/* LEFT SECTION */}
-            <Grid item xs={12} md={12}>
+            <Grid
+              item
+              xs={12}
+              md={12}
+            >
               <Stack spacing={4}>
                 {/* BOX CONTAINS */}
                 <Box
@@ -185,121 +189,123 @@ const ProductDetailsQcUi = ({ setBox, box }) => {
             </Grid>
           </Grid>
         </Grid>
-        <Grid item xs={12} md={8}>
-          <Grid container spacing={4}>
-            <Grid item xs={12} md={12}>
-              <Stack spacing={4}>
-                <Paper
-                  onClick={() => setScannerActive(true)}
+        {!isUpdate && (
+          <Grid item xs={12} md={8}>
+            <Grid container spacing={4}>
+              <Grid item xs={12} md={12}>
+                <Stack spacing={4}>
+                  <Paper
+                    onClick={() => setScannerActive(true)}
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: "100%",
+                      height: "45vh",
+                      backgroundColor: box_id ? "#515151" : "",
+                    }}
+                  >
+                    {scannerActive ? (
+                      <QrScannerPopup
+                        isfull={true}
+                        onClose={() => setScannerActive(false)}
+                        onScan={(data) => setBox_id(data.text)}
+                      />
+                    ) : box_id ? (
+                      <Box
+                        sx={{
+                          p: 6,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          backgroundColor: "#EDEDED",
+                          borderRadius: "8px",
+                        }}
+                      >
+                        <Typography
+                          variant="h4"
+                          sx={{
+                            fontWeight: 700,
+                            // mb: 3,
+                            cursor: "pointer",
+                            // textDecoration: "underline",
+                            fontFamily: "League Spartan",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 2,
+                          }}
+                        >
+                          Box ID : {box_id}
+                        </Typography>
+                      </Box>
+                    ) : (
+                      <Box sx={{ p: 4 }}>
+                        <Typography
+                          variant="h4"
+                          sx={{
+                            fontWeight: 700,
+                            mb: 3,
+                            cursor: "pointer",
+                            textDecoration: "underline",
+                            fontFamily: "League Spartan",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 2,
+                          }}
+                        >
+                          <img src={qrScanLogo} alt="QR Scan Logo" />
+                          Scan Box ID
+                        </Typography>
+                      </Box>
+                    )}
+                  </Paper>
+                </Stack>
+                <Box sx={{ display: "flex", justifyContent: "center" }}>
+                  <Typography variant="h4" sx={{ mt: 2 }}>
+                    OR
+                  </Typography>
+                </Box>
+                <Box
                   sx={{
                     display: "flex",
+                    gap: 2,
                     alignItems: "center",
                     justifyContent: "center",
-                    width: "100%",
-                    height: "45vh",
-                    backgroundColor: box_id ? "#515151" : "",
+                    mt: 2,
                   }}
                 >
-                  {scannerActive ? (
-                    <QrScannerPopup
-                      isfull={true}
-                      onClose={() => setScannerActive(false)}
-                      onScan={(data) => setBox_id(data.text)}
-                    />
-                  ) : box_id ? (
-                    <Box
-                      sx={{
-                        p: 6,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        backgroundColor: "#EDEDED",
-                        borderRadius: "8px",
+                  {Barcode ? (
+                    <CustomInput
+                      autoFocus
+                      value={box_id}
+                      onChange={(e) => setBox_id(e.target.value)}
+                      type="text"
+                      label="Barcode Scanner"
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <BarcodeIcon />
+                          </InputAdornment>
+                        ),
                       }}
-                    >
-                      <Typography
-                        variant="h4"
-                        sx={{
-                          fontWeight: 700,
-                          // mb: 3,
-                          cursor: "pointer",
-                          // textDecoration: "underline",
-                          fontFamily: "League Spartan",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 2,
-                        }}
-                      >
-                        Box ID : {box_id}
-                      </Typography>
-                    </Box>
+                    />
                   ) : (
-                    <Box sx={{ p: 4 }}>
-                      <Typography
-                        variant="h4"
-                        sx={{
-                          fontWeight: 700,
-                          mb: 3,
-                          cursor: "pointer",
-                          textDecoration: "underline",
-                          fontFamily: "League Spartan",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 2,
-                        }}
-                      >
-                        <img src={qrScanLogo} alt="QR Scan Logo" />
-                        Scan Box ID
+                    <Button
+                      variant="outlined"
+                      startIcon={<BarcodeIcon />}
+                      onClick={() => setBarcode(true)}
+                      sx={{ width: "50vw", height: "5vh" }}
+                    >
+                      <Typography variant="h4" sx={{ textTransform: "none" }}>
+                        Barcode Scanner
                       </Typography>
-                    </Box>
+                    </Button>
                   )}
-                </Paper>
-              </Stack>
-              <Box sx={{ display: "flex", justifyContent: "center" }}>
-                <Typography variant="h4" sx={{ mt: 2 }}>
-                  OR
-                </Typography>
-              </Box>
-              <Box
-                sx={{
-                  display: "flex",
-                  gap: 2,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  mt: 2,
-                }}
-              >
-                {Barcode ? (
-                  <CustomInput
-                    autoFocus
-                    value={box_id}
-                    onChange={(e) => setBox_id(e.target.value)}
-                    type="text"
-                    label="Barcode Scanner"
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <BarcodeIcon />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                ) : (
-                  <Button
-                    variant="outlined"
-                    startIcon={<BarcodeIcon />}
-                    onClick={() => setBarcode(true)}
-                    sx={{ width: "50vw", height: "5vh" }}
-                  >
-                    <Typography variant="h4" sx={{ textTransform: "none" }}>
-                      Barcode Scanner
-                    </Typography>
-                  </Button>
-                )}
-              </Box>
+                </Box>
+              </Grid>
             </Grid>
           </Grid>
-        </Grid>
+        )}
       </Grid>
     </Box>
   );

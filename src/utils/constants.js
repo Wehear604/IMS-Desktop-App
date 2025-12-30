@@ -393,6 +393,13 @@ export const APP_TYPES = {
   APP: 2,
 };
 
+export const QC_BUTTON_FILTER = {
+  ALL: 1,
+  PASSED: 2,
+  QC_PENDING: 3,
+  REJECTED: 4,
+};
+
 export const MODES = {
   "0b": 0,
   "0c": 1,

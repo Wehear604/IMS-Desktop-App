@@ -17,8 +17,8 @@ import useValidate from "../../store/hooks/useValidator";
 import { callApiAction } from "../../store/actions/commonAction";
 import { createDeviceQcApi } from "../../apis/deviceQc.api";
 
-const DeviceQcListController = () => {
-  const [step, setStep] = useState(0);
+const DeviceQcListController = ({ initialStep = 0, isUpdate }) => {
+  const [step, setStep] = useState(initialStep);
   const [fields, setFields] = useState({
     err: "",
     box_Contains: [],
@@ -125,6 +125,9 @@ const DeviceQcListController = () => {
     }
   };
 
+  useEffect(() => {
+    setStep(initialStep);
+  }, [initialStep]);
   return (
     <Paper
       elevation={3}
@@ -195,7 +198,7 @@ const DeviceQcListController = () => {
 
       {step === 2 && (
         <>
-          <ProductDetailsQcUi setBox={setFields} box={fields} />
+          <ProductDetailsQcUi setBox={setFields} box={fields} isUpdate={isUpdate} />
 
           <Box
             sx={{

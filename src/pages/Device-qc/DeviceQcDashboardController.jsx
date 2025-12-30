@@ -1,15 +1,22 @@
 import React, { memo, useEffect, useMemo, useState } from "react";
 import DeviceQcDashboardUi from "./DeviceQcDashboardUi";
-import { fetchDeviceApi } from "../../apis/deviceQc.api";
+import { fetchDeviceApi, fetchDeviceCountsApi } from "../../apis/deviceQc.api";
 import { useDispatch } from "react-redux";
 import { callApiAction } from "../../store/actions/commonAction";
 import { Box, Chip, IconButton, Typography } from "@mui/material";
-import { toTitleSpaceCase } from "../../utils/main";
-import { Visibility } from "@mui/icons-material";
+import {
+  findObjectKeyByValue,
+  toTitleCase,
+  toTitleSpaceCase,
+} from "../../utils/main";
+import { Edit, Visibility } from "@mui/icons-material";
 import DeviceQcInformationUi from "./DeviceQcInformationUi";
 import { openModal } from "../../store/actions/modalAction";
+import { DEVICES, QC_BUTTON_FILTER } from "../../utils/constants";
+import ProductDetailsQcUi from "../wehearDeviceQc/ProductDetailsQcUi";
+import DeviceQcListController from "../wehearDeviceQc/DeviceQcListController";
 
-const ActionComponent = memo(({ params, setParams, deleteApi }) => {
+const ActionComponent = memo(({ params, setParams, buttonStatus }) => {
   const dispatch = useDispatch();
 
   const onInfo = () => {
@@ -23,25 +30,53 @@ const ActionComponent = memo(({ params, setParams, deleteApi }) => {
     );
   };
 
+  const onEdit = () => {
+    dispatch(
+      openModal(
+        <DeviceQcListController
+          id={params._id}
+          initialStep={2}
+          isUpdate={true}
+          // callBack={(response, updatedData) => {
+          //   setParams({ ...params, ...updatedData });
+          // }}
+        />,
+        "sm",
+        false,
+        "update-product-qc"
+      )
+    );
+  };
+
   return (
     <Box sx={{ width: "100%", alignItems: "flex-start", display: "flex" }}>
       <IconButton size="inherit" onClick={onInfo}>
         <Visibility color="info" fontSize="inherit" />
       </IconButton>
+
+      {buttonStatus === QC_BUTTON_FILTER.QC_PENDING && (
+        <IconButton size="inherit" onClick={onEdit}>
+          <Edit color="info" fontSize="inherit" />
+        </IconButton>
+      )}
     </Box>
   );
 });
 
 const DeviceQcDashboardController = () => {
   const dispatch = useDispatch();
-  const [list, SetList] = useState();
+  const [list, SetList] = useState([]);
+  const [counts, SetCounts] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [buttonStatus, setButtonStatus] = useState(QC_BUTTON_FILTER.ALL);
+  const firstDeviceValue = Object.values(DEVICES)[0];
+  const [selectedDevices, setSelectedDevices] = useState(firstDeviceValue);
 
   const [filters, setFilters] = useState({
     pageNo: 1,
     pageSize: 10,
     search: "",
-    searchable: ["name"],
+    searchable: ["boxId"],
     sort: "",
     sortDirection: -1,
   });
@@ -50,9 +85,35 @@ const DeviceQcDashboardController = () => {
     setLoading(true);
     dispatch(
       callApiAction(
-        async () => await fetchDeviceApi({ ...filters }),
+        async () =>
+          await fetchDeviceApi({
+            ...filters,
+            buttonStatus,
+            device: selectedDevices,
+          }),
         (response) => {
           SetList(response);
+          setLoading(false);
+        },
+        (err) => {
+          setLoading(false);
+        }
+      )
+    );
+  };
+
+  const fetchDeviceCounts = () => {
+    setLoading(true);
+    dispatch(
+      callApiAction(
+        async () =>
+          await fetchDeviceCountsApi({
+            ...filters,
+            buttonStatus,
+            device: selectedDevices,
+          }),
+        (response) => {
+          SetCounts(response);
           setLoading(false);
         },
         (err) => {
@@ -72,7 +133,7 @@ const DeviceQcDashboardController = () => {
         sort: true,
         renderValue: (params, setParams) => (
           <Typography textTransform="capitalize">
-            {toTitleSpaceCase(params?.deviceName) || "NA"}
+            {findObjectKeyByValue(params?.device, DEVICES) || "NA"}
           </Typography>
         ),
       },
@@ -169,16 +230,21 @@ const DeviceQcDashboardController = () => {
         align: "left",
         sort: true,
         renderValue: (params, setParams) => (
-          <ActionComponent params={params} setParams={setParams} />
+          <ActionComponent
+            params={params}
+            setParams={setParams}
+            buttonStatus={buttonStatus}
+          />
         ),
       },
     ],
-    [fetchDevice]
+    [fetchDevice, buttonStatus]
   );
 
   useEffect(() => {
     fetchDevice();
-  }, [filters]);
+    fetchDeviceCounts();
+  }, [filters, buttonStatus, selectedDevices]);
 
   return (
     <DeviceQcDashboardUi
@@ -188,6 +254,11 @@ const DeviceQcDashboardController = () => {
       filters={filters}
       setFilters={setFilters}
       columns={columns}
+      buttonStatus={buttonStatus}
+      setButtonStatus={setButtonStatus}
+      counts={counts}
+      selectedDevices={selectedDevices}
+      setSelectedDevices={setSelectedDevices}
     />
   );
 };
