@@ -1,10 +1,50 @@
+import { DeviceIsAudioCheck } from "../store/actions/deviceDataAction";
+import { callSnackBar } from "../store/actions/snackbarAction";
+import { SNACK_BAR_VARIETNS } from "./constants";
+
 export const BLE_STORE = {
-    deviceObj: null,      
-    writeFun: null,       
-    readFun: null,       
-    disconnectFun: null, 
-    hardwareData: null,  
+    deviceObj: null,
+    writeFun: null,
+    readFun: null,
+    disconnectFun: null,
+    hardwareData: null,
 };
+
+export async function sendPlayCommand(dispatch) {
+    if (!BLE_STORE.writeFun || !BLE_STORE.writeFun.writeData) {
+        console.error("Write function not ready");
+        return;
+    }
+
+    const playPacket = [170, 171, 3, 0, 11, 184, 0];
+
+    try {
+        await BLE_STORE.writeFun.writeData(playPacket);
+        dispatch(DeviceIsAudioCheck(true));
+        console.log("Play command sent");
+    } catch (err) {
+        console.error("Play write failed:", err);
+        dispatch(DeviceIsAudioCheck(true));
+        dispatch(
+            callSnackBar(
+                `Play write failed ${err}`,
+                SNACK_BAR_VARIETNS.error
+            )
+        );
+    }
+}
+
+export async function sendPauseCommand() {
+    const pausePacket = [170, 171, 3, 0, 0, 0, 0];
+
+    try {
+        await BLE_STORE.writeFun.writeData(pausePacket);
+        console.log("Pause command sent");
+    } catch (err) {
+        console.error("Pause write failed:", err);
+    }
+}
+
 
 export const dataViewToHex = (dataView) => {
     if (!dataView) return "";

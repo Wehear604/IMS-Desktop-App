@@ -6,18 +6,19 @@ import {
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import audioUrl from "../../assets/images/AirplaneInterior.mp3";
 import { CHARACTERISTIC_UUID_READ_WRITE, DEVICES_NAME, LISTENING_SIDE } from "../../utils/constants";
-import { useSelector } from "react-redux";
-import { sendPauseCommand, sendPlayCommand } from "../../components/bluetooth/BleConnectDeviceModule";
+import { useDispatch, useSelector } from "react-redux";
 import bluetoothIcon from "../../assets/images/bluetoothIcon.svg";
 import { findObjectKeyByValue } from "../../utils/main";
 import PauseIcon from '@mui/icons-material/Pause';
 import CustomDialog from "../../components/layouts/common/CustomDialog";
 import disabledChecked from "../../assets/images/checkIconDisabled.svg";
 import enabledChecked from "../../assets/images/checkIconEnabled.svg";
+import { sendPauseCommand, sendPlayCommand } from "../../utils/bleStore";
 
 const DeviceAudioMicCheckUi = () => {
     const { device } = useSelector((state) => state);
     const [isPlaying, setIsPlaying] = useState(false);
+    const dispatch = useDispatch();
 
     return (
 
@@ -46,7 +47,7 @@ const DeviceAudioMicCheckUi = () => {
                             <ListItem sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                                 <Box display={"flex"} gap={4}>
                                     <ListItemText sx={{display:"flex", alignItems:"center"}}>
-                                        <img src={isPlaying ? enabledChecked : disabledChecked} alt="Check Icon" />
+                                        <img src={device.is_Audio_play ? enabledChecked : disabledChecked} alt="Check Icon" />
 
                                     </ListItemText>
 
@@ -59,7 +60,7 @@ const DeviceAudioMicCheckUi = () => {
                                 <Box>
                                     {<Button
                                         variant="contained"
-                                        onClick={() => isPlaying ? (setIsPlaying(false), sendPauseCommand()) : (setIsPlaying(true), sendPlayCommand())}
+                                        onClick={() => isPlaying ? (setIsPlaying(false), sendPauseCommand(dispatch)) : (setIsPlaying(true), sendPlayCommand(dispatch))}
                                         startIcon={isPlaying ? <PauseIcon sx={{ ml: 2 }} /> : <PlayArrowIcon sx={{ ml: 2 }} />}
                                         sx={{ bgcolor: "#0d5966", borderRadius: "25%", display: "flex", alignItems: "center", justifyContent: "center", p: 0, height: "6vh" }}
                                     />}

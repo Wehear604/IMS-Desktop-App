@@ -117,6 +117,7 @@ const BleConnectDeviceModule = ({
                 return await readAndDecodeData(characteristic);
             },
             writeData: async (arr_to_be_write) => {
+                console.log("writeData called with:", arr_to_be_write);
                 return await characteristic.writeValueWithoutResponse(
                     Uint8Array.from(arr_to_be_write)
                 );
@@ -301,28 +302,3 @@ const BleConnectDeviceModule = ({
 
 };
 export default memo(BleConnectDeviceModule);
-
-export async function sendPlayCommand() {
-    if (!controlCharacteristic) return;
-    const playByteArray = new Uint8Array([170, 171, 3, 0, 11, 184, 0]);
-
-    try {
-        await controlCharacteristic.writeValueWithoutResponse(playByteArray);
-        console.log("Play command sent");
-    } catch (err) {
-        console.error("Play write failed:", err);
-    }
-}
-
-export async function sendPauseCommand() {
-    if (!controlCharacteristic) return;
-
-    const pauseByteArray = new Uint8Array([170, 171, 3, 0, 0, 0, 0]);
-
-    try {
-        await controlCharacteristic.writeValueWithoutResponse(pauseByteArray);
-        console.log("Pause command sent");
-    } catch (err) {
-        console.error("Pause write failed:", err);
-    }
-}

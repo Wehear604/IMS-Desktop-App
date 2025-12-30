@@ -3,7 +3,8 @@ import { actions } from "../../utils/constants";
 const initialState = {
     device_type: null,
     device_side: null,
-    mac:null,
+    mac: null,
+    is_Audio_play:false,
     connected: false,
     isConnecting: false,
     read_only: false,
@@ -25,9 +26,6 @@ const deviceReducer = (state = initialState, action) => {
         case actions.SET_DEVICE_CONNECT:
             return { ...state, isConnecting: action.isConnecting };
         
-        case actions.SET_DEVICE_MAC:
-            return { ...state, mac: action.mac };
-
         case actions.CONNECT_DEVICE:
             return {
                 ...state,
@@ -35,6 +33,12 @@ const deviceReducer = (state = initialState, action) => {
                 read_only: false,
                 deviceInfo: action.deviceInfo
             };
+        
+        case actions.SET_DEVICE_MAC:
+            return { ...state, mac: action.mac };
+        
+        case actions.IS_AUDIO_CHECK:
+            return { ...state, is_Audio_play: action.is_Audio_play };
 
         case actions.DISCONNECT_DEVICE:
             return {
