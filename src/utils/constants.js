@@ -169,6 +169,7 @@ export const MANUFACTURER_IDENTIFIER = {
   9: "0x3231",
   11: "0x6C42",
   15: "0x0F4B",
+  50: "0xB822", // safeBuds
 };
 
 export const CHARACTERISTIC_UUID_READ_WRITE = {

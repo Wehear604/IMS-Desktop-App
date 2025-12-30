@@ -189,21 +189,27 @@ const SafeBudsConnectDeviceModule = ({
       const characteristicUuidReadWrite =
         CHARACTERISTIC_UUID_READ_WRITE[fitting.device_type];
 
-      const filterData = {};
-      const filter = {
-        manufacturerData: [
-          {
-            companyIdentifier:
-              parseInt(MANUFACTURER_IDENTIFIER[fitting.device_type]) ?? null,
-          },
-        ],
-      };
+      const filters = [];
 
-      if (filter.manufacturerData[0].companyIdentifier) {
-        filterData.filters = [filter];
-      } else {
-        filterData.acceptAllDevices = true;
+      const manufacturerIdA = parseInt(MANUFACTURER_IDENTIFIER[50]);
+      const manufacturerIdB = parseInt(
+        MANUFACTURER_IDENTIFIER[fitting.device_type]
+      );
+
+      if (!Number.isNaN(manufacturerIdA)) {
+        filters.push({
+          manufacturerData: [{ companyIdentifier: manufacturerIdA }],
+        });
       }
+
+      if (!Number.isNaN(manufacturerIdB)) {
+        filters.push({
+          manufacturerData: [{ companyIdentifier: manufacturerIdB }],
+        });
+      }
+
+      const filterData =
+        filters.length > 0 ? { filters } : { acceptAllDevices: true };
 
       const device = await navigator.bluetooth.requestDevice({
         ...filterData,
