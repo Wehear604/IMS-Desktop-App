@@ -67,15 +67,6 @@ const processQueue = async () => {
       return { classic, ble };
     }
 
-    function buildVersionUpdateCommands(name) {
-      const lengthHex = stringLengthHex(name);
-      const asciiHexValues = stringToHexWithSpaces(name);
-
-      const command = `60 01 ${lengthHex} ${asciiHexValues}`;
-
-      return command;
-    }
-
     async function sendHexCommand(characteristic, command) {
       const bytes = command
         .split(" ")
@@ -94,15 +85,6 @@ const processQueue = async () => {
       await sendHexCommand(characteristicWrite, classic);
 
       await sendHexCommand(characteristicWrite, ble);
-    }
-
-    const version = "V1";
-    console.log(" type", type);
-    if (type === "VersionUpdate") {
-      const command = buildVersionUpdateCommands(version);
-      console.log("Inside Version Update", command);
-
-      await sendHexCommand(characteristicWrite, command);
     }
   } catch (error) {
     console.error(`Error reading data from ${side} device:`, error);

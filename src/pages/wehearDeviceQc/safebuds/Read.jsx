@@ -52,7 +52,7 @@ const processQueue = async () => {
       CHARACTERISTIC_UUID_WRITE
     );
     const characteristicRead = await service.getCharacteristic(
-      "86c8a7ac-fae8-4753-a61b8793a0ee26a1"
+      CHARACTERISTIC_UUID_READ
     );
 
     if (type === "Tap") {
@@ -99,31 +99,6 @@ const processQueue = async () => {
         };
 
         console.log("Tap Notification:", decoded);
-        dispatch({
-          type: actions.SET_SAFE_BUDS_TAP,
-          mode: tapChanges(decoded?.event),
-        });
-      };
-
-      characteristicRead.addEventListener(
-        "characteristicvaluechanged",
-        onValueChanged
-      );
-
-      resolve(true);
-      isProcessing = false;
-      processQueue();
-      return;
-    }
-
-    if (type === "VersionRead") {
-      await characteristicRead.startNotifications();
-
-      const onValueChanged = (event) => {
-        const value = event.target.value;
-        console.log("value", value);
-        const bytes = Array.from(new Uint8Array(value.buffer));
-
         dispatch({
           type: actions.SET_SAFE_BUDS_TAP,
           mode: tapChanges(decoded?.event),
