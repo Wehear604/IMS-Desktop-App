@@ -24,7 +24,6 @@ const tapChanges = (value) => {
 
 const commandQueue = [];
 let isProcessing = false;
-const tap = [];
 
 const processQueue = async () => {
   if (isProcessing || commandQueue.length === 0) return;
@@ -49,22 +48,38 @@ const processQueue = async () => {
       CHARACTERISTIC_UUID_READ_NOTIFY[DEVICES.SAFE_BUDS];
 
     const service = await device.gatt.getPrimaryService(serviceUuid);
+
     const characteristicWrite = await service.getCharacteristic(
       CHARACTERISTIC_UUID_WRITE
     );
+
     const characteristicRead = await service.getCharacteristic(
       CHARACTERISTIC_UUID_READ
     );
 
-    if (type === "Tap") {
-      await characteristicRead.startNotifications();
+    // ---- Enable notifications (once per command run) ----
+    await characteristicRead.startNotifications();
 
-      const onValueChanged = (event) => {
-        const value = event.target.value;
-        const bytes = Array.from(new Uint8Array(value.buffer));
+    // ---- SHARED LISTENER ----
+    const onValueChanged = (event) => {
+      const bytes = Array.from(new Uint8Array(event.target.value.buffer));
 
-        if (bytes[0] !== 0x50) return;
+      // ACK for write string (60 01 ...)
+      if (bytes[0] === 0xa0 && bytes[1] === 0x60) {
+        console.log("✔️ Version write success");
+        return;
+      }
 
+      // Read response (B0 60 LEN DATA...)
+      if (bytes[0] === 0xb0 && bytes[1] === 0x60) {
+        const length = bytes[2];
+        const version = String.fromCharCode(...bytes.slice(3, 3 + length));
+        console.log("📦 Stored version:", version);
+        return;
+      }
+
+      // Tap events (50 ...)
+      if (bytes[0] === 0x50) {
         const decoded = {
           raw: bytes.map((b) => b.toString(16).padStart(2, "0")).join(" "),
           device:
@@ -100,6 +115,7 @@ const processQueue = async () => {
         };
 
         console.log("Tap Notification:", decoded);
+
         dispatch({
           type: actions.SET_SAFE_BUDS_TAP,
           mode: tapChanges(decoded?.event),
@@ -108,13 +124,21 @@ const processQueue = async () => {
               ? LISTENING_SIDE.LEFT
               : LISTENING_SIDE.RIGHT,
         });
-      };
 
-      characteristicRead.addEventListener(
-        "characteristicvaluechanged",
-        onValueChanged
-      );
+        return;
+      }
+    };
 
+    characteristicRead.addEventListener(
+      "characteristicvaluechanged",
+      onValueChanged
+    );
+
+    // ------------------------------
+    // ACTIONS
+    // ------------------------------
+
+    if (type === "Tap") {
       resolve(true);
       isProcessing = false;
       processQueue();
@@ -122,31 +146,7 @@ const processQueue = async () => {
     }
 
     if (type === "SafeBudsVersionRead") {
-      await characteristicRead.startNotifications();
-
-      const onValueChanged = (event) => {
-        const value = event.target.value;
-        const bytes = Array.from(new Uint8Array(value.buffer));
-
-        if (bytes[0] !== 0xb0 || bytes[1] !== 0x60) return;
-
-        const length = bytes[2];
-        const versionBytes = bytes.slice(3, 3 + length);
-        const version = String.fromCharCode(...versionBytes);
-
-        console.log("Version:", version);
-
-        characteristicRead.removeEventListener(
-          "characteristicvaluechanged",
-          onValueChanged
-        );
-      };
-
-      characteristicRead.addEventListener(
-        "characteristicvaluechanged",
-        onValueChanged
-      );
-
+      // send read command (60 02)
       await characteristicWrite.writeValue(new Uint8Array([0x60, 0x02]));
 
       resolve(true);

@@ -87,7 +87,7 @@ const processQueue = async () => {
       await sendHexCommand(characteristicWrite, ble);
     }
 
-    const version = V2;
+    const version = "V2";
 
     if (type === "SafeBudsVersionUpdate") {
       const { versionUpdateCommand } = buildNameCommands(version);
