@@ -386,11 +386,11 @@ const SafeBudsUi = () => {
       id="deviceAudioMicCheck"
       onSubmit={step === 3 ? onComplete : handleNext}
       onClose={() => {
+        BLE_STORE.BTEdisconnect = true;
         if (audioRef.current) {
           audioRef.current.pause();
           audioRef.current.currentTime = 0;
         }
-        BLE_STORE.BTEdisconnect = true;
         dispatch(closeModal("deviceAudioMicCheck"));
         dispatch(resetDeviceDataStore());
         dispatch(CloseDeviceDataStore());

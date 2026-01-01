@@ -330,7 +330,12 @@ const SafeBudsConnectDeviceModule = ({
     setLoadingMessage("");
     onDisconnect();
   };
-
+  useEffect(() => {
+    if (BLE_STORE.BTEdisconnect) {
+      disconnect(true);
+      BLE_STORE.BTEdisconnect = false;
+    }
+  }, [BLE_STORE.BTEdisconnect]);
   // Electron modal handlers
   const handleDeviceSelected = (deviceId) => {
     setSelectingDeviceId(deviceId);

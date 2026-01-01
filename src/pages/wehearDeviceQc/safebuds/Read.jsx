@@ -3,6 +3,7 @@ import {
   CHARACTERISTIC_UUID_READ_NOTIFY,
   CHARACTERISTIC_UUID_READ_WRITE,
   DEVICES,
+  LISTENING_SIDE,
   SERVICE_UUID,
 } from "../../../utils/constants";
 
@@ -102,6 +103,10 @@ const processQueue = async () => {
         dispatch({
           type: actions.SET_SAFE_BUDS_TAP,
           mode: tapChanges(decoded?.event),
+          tapSide:
+            decoded.device === "Left"
+              ? LISTENING_SIDE.LEFT
+              : LISTENING_SIDE.RIGHT,
         });
       };
 

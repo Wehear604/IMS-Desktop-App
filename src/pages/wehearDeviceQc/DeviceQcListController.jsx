@@ -213,6 +213,10 @@ const DeviceQcListController = ({
   useEffect(() => {
     getColorList();
   }, []);
+
+  useEffect(() => {
+    dispatch(resetDeviceDataStore());
+  }, []);
   return (
     <Paper
       elevation={3}
