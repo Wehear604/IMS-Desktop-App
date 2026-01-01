@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import DeviceQcListUi from "./DeviceQcListUi";
 import { useLocation } from "react-router-dom";
 import { Box, Button, Paper, Typography } from "@mui/material";
@@ -15,9 +15,20 @@ import { callSnackBar } from "../../store/actions/snackbarAction";
 import { SNACK_BAR_VARIETNS } from "../../utils/constants";
 import useValidate from "../../store/hooks/useValidator";
 import { callApiAction } from "../../store/actions/commonAction";
-import { createDeviceQcApi } from "../../apis/deviceQc.api";
+import {
+  createDeviceQcApi,
+  getDeviceByIdApi,
+  updateDeviceQcApi,
+} from "../../apis/deviceQc.api";
+import { closeModal } from "../../store/actions/modalAction";
+import { fetchProductColorAction } from "../../store/actions/setting.Action";
 
-const DeviceQcListController = ({ initialStep = 0, isUpdate }) => {
+const DeviceQcListController = ({
+  initialStep = 0,
+  isUpdate,
+  callBack = () => {},
+  id,
+}) => {
   const [step, setStep] = useState(initialStep);
   const [fields, setFields] = useState({
     err: "",
@@ -25,10 +36,11 @@ const DeviceQcListController = ({ initialStep = 0, isUpdate }) => {
     boxId: null,
     deviceColor: null,
   });
+  console.log("object fields", fields);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const validate = useValidate();
-  const { deviceDataStore, device } = useSelector((state) => state);
+  const { deviceDataStore, device, settings } = useSelector((state) => state);
   console.log("deviceDataStore", deviceDataStore);
   const [filters, setFilters] = useState({
     search: "",
@@ -125,9 +137,82 @@ const DeviceQcListController = ({ initialStep = 0, isUpdate }) => {
     }
   };
 
+  const updateFunction = async () => {
+    const updatedData = { id };
+
+    if (updatedData) {
+      setLoading(true);
+      dispatch(
+        callApiAction(
+          async () => await updateDeviceQcApi({ ...updatedData, ...fields }),
+          async (response) => {
+            await callBack(updatedData);
+            setFields(response);
+            setLoading(false);
+            dispatch(
+              callSnackBar(
+                "Packaging Details Updated Successfully",
+                SNACK_BAR_VARIETNS.suceess
+              )
+            );
+            dispatch(closeModal("update-product-qc"));
+          },
+          (err) => {
+            setLoading(false);
+            setFields({ ...fields, err });
+          }
+        )
+      );
+    } else {
+      setFields({ ...fields, err: validationResponse });
+    }
+  };
+
   useEffect(() => {
     setStep(initialStep);
   }, [initialStep]);
+  console.log("object id", id);
+
+  const Submit = async (e) => {
+    e.preventDefault();
+    if (id) {
+      updateFunction();
+    } else {
+      onSubmit();
+    }
+  };
+
+  const fetchById = useCallback(
+    (id) => {
+      setLoading(true);
+      dispatch(
+        callApiAction(
+          async () => await getDeviceByIdApi({ id }),
+          async (response) => {
+            setFields((prev) => ({ ...prev, ...response }));
+            setLoading(false);
+          },
+          (err) => {
+            setFields((prev) => ({ ...prev, err }));
+            setLoading(false);
+          }
+        )
+      );
+    },
+    [dispatch]
+  );
+
+  useEffect(() => {
+    if (id) fetchById(id);
+  }, [id, fetchById]);
+
+  const getColorList = () => {
+    dispatch(fetchProductColorAction());
+  };
+
+  useEffect(() => {
+    getColorList();
+  }, []);
   return (
     <Paper
       elevation={3}
@@ -198,7 +283,11 @@ const DeviceQcListController = ({ initialStep = 0, isUpdate }) => {
 
       {step === 2 && (
         <>
-          <ProductDetailsQcUi setBox={setFields} box={fields} isUpdate={isUpdate} />
+          <ProductDetailsQcUi
+            setBox={setFields}
+            box={fields}
+            isUpdate={isUpdate}
+          />
 
           <Box
             sx={{
@@ -224,8 +313,8 @@ const DeviceQcListController = ({ initialStep = 0, isUpdate }) => {
               <Button
                 variant="contained"
                 sx={{ width: "8vw" }}
-                onClick={onSubmit}
-                disabled={fields.boxId ? loading : !fields.boxId}
+                onClick={Submit}
+                // disabled={fields.boxId ? loading : !fields.boxId}
               >
                 <Typography variant="h5" sx={{ textTransform: "none" }}>
                   Submit

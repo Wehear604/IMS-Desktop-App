@@ -54,3 +54,16 @@ export const createDeviceQcApi = async (data) => {
   
     return callResponse;
   };
+
+    export const updateDeviceQcApi = async (data) => {
+    const callResponse = await axios({
+      url: endpoints.updateDeviceQc,
+      method: "patch",
+      headers: getHeaders(),
+      data,
+    })
+      .then((response) => response.data)
+      .catch((err) => ({status:0,response:err.response,code:err.response.status}));
+  
+    return callResponse;
+  };

@@ -34,12 +34,12 @@ const ActionComponent = memo(({ params, setParams, buttonStatus }) => {
     dispatch(
       openModal(
         <DeviceQcListController
-          id={params._id}
+          id={params?._id}
           initialStep={2}
           isUpdate={true}
-          // callBack={(response, updatedData) => {
-          //   setParams({ ...params, ...updatedData });
-          // }}
+          callBack={(response, updatedData) => {
+            setParams({ ...params, ...updatedData });
+          }}
         />,
         "sm",
         false,
@@ -54,11 +54,10 @@ const ActionComponent = memo(({ params, setParams, buttonStatus }) => {
         <Visibility color="info" fontSize="inherit" />
       </IconButton>
 
-      {buttonStatus === QC_BUTTON_FILTER.QC_PENDING && (
+     
         <IconButton size="inherit" onClick={onEdit}>
           <Edit color="info" fontSize="inherit" />
         </IconButton>
-      )}
     </Box>
   );
 });

@@ -226,5 +226,6 @@ export default {
   fetchDeviceQc: `${domain}api/qc-device/fetch`,
   fetchByIdDeviceQc: `${domain}api/qc-device/fetch-by-id`,
   fetchDeviceCounts: `${domain}api/qc-device/fetch-count-device-wise`,
+  updateDeviceQc: `${domain}api/qc-device/update`,
 
 };

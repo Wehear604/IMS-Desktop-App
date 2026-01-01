@@ -27,8 +27,9 @@ import qrScanLogo from "../../assets/images/qrScanLogo.svg";
 import CustomInput from "../../components/inputs/CustomInputs";
 import { fetchColorApi } from "../../apis/productColor.api";
 import { toTitleCase, toTitleSpaceCase } from "../../utils/main";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { callApiAction } from "../../store/actions/commonAction";
+import { fetchProductColorAction } from "../../store/actions/setting.Action";
 
 const ProductDetailsQcUi = ({ setBox, box, isUpdate }) => {
   const [boxContains, setBoxContains] = useState({
@@ -39,6 +40,8 @@ const ProductDetailsQcUi = ({ setBox, box, isUpdate }) => {
     cleaning_Brush: false,
     warranty_Card: false,
   });
+  const dispatch = useDispatch();
+  const { settings } = useSelector((state) => state);
   const [Barcode, setBarcode] = useState(true);
   const [deviceColor, setDeviceColor] = useState("");
   const [scannerActive, setScannerActive] = useState(false);
@@ -65,30 +68,12 @@ const ProductDetailsQcUi = ({ setBox, box, isUpdate }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    let mounted = true;
-    const loadColors = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await fetchColorApi();
-        const result = res.data?.result || [];
-
-        if (mounted) {
-          setColors(result);
-          if (!deviceColor && result.length) setDeviceColor(result[0]._id);
-        }
-      } catch (err) {
-        if (mounted) setError(err.message || "Failed to load colors");
-      } finally {
-        if (mounted) setLoading(false);
+      if (settings?.productColor_data?.result?.length > 0 && !deviceColor) {
+        setDeviceColor(settings?.productColor_data?.result?.[0]?._id);
       }
-    };
+  }, [settings?.productColor_data?.result?.[0]?._id]);
 
-    loadColors();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  console.log("object settings?.productColor_data", settings);
 
   return (
     <Box sx={{ p: 4 }}>
@@ -105,11 +90,7 @@ const ProductDetailsQcUi = ({ setBox, box, isUpdate }) => {
         <Grid item xs={12} md={4}>
           <Grid container spacing={4}>
             {/* LEFT SECTION */}
-            <Grid
-              item
-              xs={12}
-              md={12}
-            >
+            <Grid item xs={12} md={12}>
               <Stack spacing={4}>
                 {/* BOX CONTAINS */}
                 <Box
@@ -167,14 +148,14 @@ const ProductDetailsQcUi = ({ setBox, box, isUpdate }) => {
                     Device Color
                   </Typography>
 
-                  {colors.length === 0 ? (
+                  {settings?.productColor_data?.result?.length === 0 ? (
                     <Typography>No colors available</Typography>
                   ) : (
                     <RadioGroup
                       value={deviceColor}
                       onChange={(e) => setDeviceColor(e.target.value)}
                     >
-                      {colors.map((item) => (
+                      {settings?.productColor_data?.result?.map((item) => (
                         <FormControlLabel
                           key={item._id}
                           value={item._id}
