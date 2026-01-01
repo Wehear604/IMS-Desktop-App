@@ -18,6 +18,7 @@ import {
   TextField,
   CircularProgress,
   InputAdornment,
+  Chip,
 } from "@mui/material";
 import CameraAltOutlinedIcon from "@mui/icons-material/CameraAltOutlined";
 import BarcodeIcon from "@mui/icons-material/QrCode2";
@@ -68,9 +69,9 @@ const ProductDetailsQcUi = ({ setBox, box, isUpdate }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-      if (settings?.productColor_data?.result?.length > 0 && !deviceColor) {
-        setDeviceColor(settings?.productColor_data?.result?.[0]?._id);
-      }
+    if (settings?.productColor_data?.result?.length > 0 && !deviceColor) {
+      setDeviceColor(settings?.productColor_data?.result?.[0]?._id);
+    }
   }, [settings?.productColor_data?.result?.[0]?._id]);
 
   console.log("object settings?.productColor_data", settings);
@@ -87,12 +88,11 @@ const ProductDetailsQcUi = ({ setBox, box, isUpdate }) => {
         {box?.err}
       </Typography>
       <Grid container sx={{ padding: 4 }}>
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={isUpdate ? 12 : 4}>
           <Grid container spacing={4}>
-            {/* LEFT SECTION */}
-            <Grid item xs={12} md={12}>
+            <Grid item xs={12}>
               <Stack spacing={4}>
-                {/* BOX CONTAINS */}
+                {/* ================= BOX CONTAINS ================= */}
                 <Box
                   sx={{
                     display: "flex",
@@ -105,31 +105,38 @@ const ProductDetailsQcUi = ({ setBox, box, isUpdate }) => {
                     sx={{
                       fontWeight: 600,
                       minWidth: { sm: "150px" },
-                      mb: { xs: 1, sm: 0 },
                     }}
                   >
                     Box Contains
                   </Typography>
 
-                  <Box>
+                  <Box sx={{ width: "100%" }}>
                     {Object.keys(boxContains).map((key) => (
-                      <FormControlLabel
+                      <Box
                         key={key}
-                        control={
-                          <Checkbox
-                            checked={boxContains[key]}
-                            onChange={() => toggleContains(key)}
-                            size="small"
-                          />
-                        }
-                        label={toTitleSpaceCase(key)}
-                        sx={{ display: "block", ml: 0.5 }}
-                      />
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          mb: 1,
+                        }}
+                      >
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={boxContains[key]}
+                              onChange={() => toggleContains(key)}
+                              size="small"
+                            />
+                          }
+                          label={toTitleSpaceCase(key)}
+                        />
+                      </Box>
                     ))}
                   </Box>
                 </Box>
 
-                {/* DEVICE COLOR */}
+                {/* ================= DEVICE COLOR ================= */}
                 <Box
                   sx={{
                     display: "flex",
@@ -142,7 +149,6 @@ const ProductDetailsQcUi = ({ setBox, box, isUpdate }) => {
                     sx={{
                       fontWeight: 600,
                       minWidth: { sm: "150px" },
-                      mb: { xs: 1, sm: 0 },
                     }}
                   >
                     Device Color
@@ -154,14 +160,24 @@ const ProductDetailsQcUi = ({ setBox, box, isUpdate }) => {
                     <RadioGroup
                       value={deviceColor}
                       onChange={(e) => setDeviceColor(e.target.value)}
+                      sx={{ width: "100%" }}
                     >
                       {settings?.productColor_data?.result?.map((item) => (
-                        <FormControlLabel
+                        <Box
                           key={item._id}
-                          value={item._id}
-                          control={<Radio />}
-                          label={toTitleCase(item.name)}
-                        />
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            mb: 1,
+                          }}
+                        >
+                          <FormControlLabel
+                            value={item._id}
+                            control={<Radio />}
+                            label={toTitleCase(item.name)}
+                          />
+                        </Box>
                       ))}
                     </RadioGroup>
                   )}
