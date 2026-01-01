@@ -397,7 +397,7 @@ export const SafeBudsTap = ({ type }) => {
         dispatch
       );
 
-      console.log("response", response);
+      console.log("response1", response);
     } catch (err) {
       console.error("RicDeviceCurrentVolume read failed", err);
     }
@@ -407,7 +407,7 @@ export const SafeBudsTap = ({ type }) => {
 export const SafeBudsVersionRead = ({ type }) => {
   return async (dispatch) => {
     try {
-      const command = null;
+      const command = "0x60";
       const response = await Read(
         command,
         "both",
@@ -430,6 +430,7 @@ export const ChangeButtonSide = (device_side) => {
 export const SafebudsDeviceCurrentVolume = () => {
   return async (dispatch) => {
     const data = await window.electronAPI.getVolume();
+    console.log("W", data);
     try {
       dispatch({
         type: actions.SET_SAFE_BUDS_CURRENT_VOLUME,
@@ -486,11 +487,11 @@ export const SafebudsDeviceQCResultCheck = (result, device_side) => {
 export const SafeBudsVersionUpdate = ({ type }) => {
   return async (dispatch) => {
     try {
-      const command = "0x20";
+      const command = "0x60";
 
       const response = await Write(command, "both", BLE_STORE.deviceObj, type);
 
-      console.log("response", response);
+      console.log("response3", response);
     } catch (err) {
       console.error("RicDeviceCurrentVolume read failed", err);
     }

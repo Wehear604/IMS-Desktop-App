@@ -62,9 +62,15 @@ const processQueue = async () => {
       const classic = `20 ${lengthHex} ${asciiHexValues}`;
       const ble = `21 01 ${lengthHex} ${asciiHexValues}`;
 
-      console.log("BLE hex", ble);
-
       return { classic, ble };
+    }
+    function buildNameCommands1(name) {
+      const lengthHex = "02";
+      const asciiHexValues = stringToHexWithSpaces(name);
+
+      const versionUpdateCommand = `60 01 ${lengthHex} ${asciiHexValues}`;
+
+      return { versionUpdateCommand };
     }
 
     async function sendHexCommand(characteristic, command) {
@@ -79,13 +85,16 @@ const processQueue = async () => {
       await characteristic.writeValue(buffer);
     }
 
-    if (type === "NameChange") {
-      const { classic, ble } = buildNameCommands(devicename);
+    const version = "V5";
+    const { classic, ble } = buildNameCommands(devicename);
+    const { versionUpdateCommand } = buildNameCommands1(version);
 
-      await sendHexCommand(characteristicWrite, classic);
+    await sendHexCommand(characteristicWrite, classic);
 
-      await sendHexCommand(characteristicWrite, ble);
-    }
+    await sendHexCommand(characteristicWrite, ble);
+    console.log("versionUpdateCommand", versionUpdateCommand);
+    await sendHexCommand(characteristicWrite, versionUpdateCommand);
+    // }
   } catch (error) {
     console.error(`Error reading data from ${side} device:`, error);
     reject(error);

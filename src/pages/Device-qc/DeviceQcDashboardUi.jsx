@@ -20,7 +20,6 @@ const DeviceQcDashboardUi = ({
   selectedDevices,
   setSelectedDevices,
 }) => {
-  console.log("DeviceQcDashboardUi list", list);
   const totalCounts =
     (list?.statusCounts?.packagingDone || 0) +
     (list?.statusCounts?.packagingPending || 0) +

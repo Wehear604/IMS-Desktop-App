@@ -11,7 +11,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import FOT from "../../assets/images/fotFile.svg";
 import { SetDeviceFOT } from "../../store/actions/deviceDataAction";
 import { useDispatch } from "react-redux";
-import fotfile from "../../assets/blefiles/newfot.fot";
+import fotfile from "../../assets/blefiles/fw2212_V1.fot";
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
   clipPath: "inset(50%)",
@@ -614,7 +614,7 @@ const SafeBudsFotUpload = () => {
         const buf = await response.arrayBuffer();
 
         // Create a File object so rest of logic remains unchanged
-        const defaultFile = new File([buf], "newfot.fot", {
+        const defaultFile = new File([buf], "fw2212_V1.fot", {
           type: "application/octet-stream",
         });
 
