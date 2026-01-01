@@ -10,6 +10,7 @@ const initialState = {
   start: false,
   volumeDecrease: false,
   volumeIncrease: false,
+  tapSide: null,
 };
 
 const deviceQcReducer = (state = initialState, action) => {
@@ -191,11 +192,11 @@ const deviceQcReducer = (state = initialState, action) => {
       return {
         ...state,
         modeLeft:
-          state.device_side === LISTENING_SIDE.LEFT
+          action.tapSide === LISTENING_SIDE.LEFT
             ? [...new Set([...state.modeLeft, action.mode])]
             : state.modeLeft,
         modeRight:
-          state.device_side === LISTENING_SIDE.RIGHT
+          action.tapSide === LISTENING_SIDE.RIGHT
             ? [...new Set([...state.modeRight, action.mode])]
             : state.modeRight,
       };

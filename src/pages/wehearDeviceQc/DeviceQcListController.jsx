@@ -128,6 +128,10 @@ const DeviceQcListController = ({ initialStep = 0, isUpdate }) => {
   useEffect(() => {
     setStep(initialStep);
   }, [initialStep]);
+
+  useEffect(() => {
+    dispatch(resetDeviceDataStore());
+  }, []);
   return (
     <Paper
       elevation={3}
@@ -198,7 +202,11 @@ const DeviceQcListController = ({ initialStep = 0, isUpdate }) => {
 
       {step === 2 && (
         <>
-          <ProductDetailsQcUi setBox={setFields} box={fields} isUpdate={isUpdate} />
+          <ProductDetailsQcUi
+            setBox={setFields}
+            box={fields}
+            isUpdate={isUpdate}
+          />
 
           <Box
             sx={{
