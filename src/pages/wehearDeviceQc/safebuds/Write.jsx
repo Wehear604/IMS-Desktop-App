@@ -62,9 +62,9 @@ const processQueue = async () => {
       const classic = `20 ${lengthHex} ${asciiHexValues}`;
       const ble = `21 01 ${lengthHex} ${asciiHexValues}`;
 
-      console.log("BLE hex", ble);
+      const versionUpdateCommand = `60 01 ${lengthHex} ${asciiHexValues}`;
 
-      return { classic, ble };
+      return { classic, ble, versionUpdateCommand };
     }
 
     async function sendHexCommand(characteristic, command) {
@@ -85,6 +85,14 @@ const processQueue = async () => {
       await sendHexCommand(characteristicWrite, classic);
 
       await sendHexCommand(characteristicWrite, ble);
+    }
+
+    const version = V2;
+
+    if (type === "SafeBudsVersionUpdate") {
+      const { versionUpdateCommand } = buildNameCommands(version);
+
+      await sendHexCommand(characteristicWrite, versionUpdateCommand);
     }
   } catch (error) {
     console.error(`Error reading data from ${side} device:`, error);

@@ -6,6 +6,7 @@ import {
   SafeBudsDeviceName,
   SafebudsDeviceQCResultCheck,
   SafeBudsTap,
+  SafeBudsVersionRead,
   SafeBudsVersionUpdate,
 } from "../../../store/actions/deviceQcAction";
 import { useDispatch, useSelector } from "react-redux";
@@ -115,6 +116,8 @@ const SafeBudsUi = () => {
     dispatch(SafeBudsTap({ type: "Tap" }));
     dispatch(ChangeButtonSide(LISTENING_SIDE.LEFT));
     dispatch(SafebudsDeviceCurrentVolume());
+    dispatch(SafeBudsVersionUpdate({ type: "SafeBudsVersionUpdate" }));
+    dispatch(SafeBudsVersionRead({ type: "SafeBudsVersionRead" }));
   }, []);
 
   useEffect(() => {

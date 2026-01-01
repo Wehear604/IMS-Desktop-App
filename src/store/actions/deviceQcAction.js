@@ -407,7 +407,7 @@ export const SafeBudsTap = ({ type }) => {
 export const SafeBudsVersionRead = ({ type }) => {
   return async (dispatch) => {
     try {
-      const command = null;
+      const command = 0x60;
       const response = await Read(
         command,
         "both",
@@ -486,7 +486,7 @@ export const SafebudsDeviceQCResultCheck = (result, device_side) => {
 export const SafeBudsVersionUpdate = ({ type }) => {
   return async (dispatch) => {
     try {
-      const command = "0x20";
+      const command = "0x60";
 
       const response = await Write(command, "both", BLE_STORE.deviceObj, type);
 

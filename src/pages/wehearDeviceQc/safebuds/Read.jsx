@@ -120,6 +120,40 @@ const processQueue = async () => {
       processQueue();
       return;
     }
+
+    if (type === "SafeBudsVersionRead") {
+      await characteristicRead.startNotifications();
+
+      const onValueChanged = (event) => {
+        const value = event.target.value;
+        const bytes = Array.from(new Uint8Array(value.buffer));
+
+        if (bytes[0] !== 0xb0 || bytes[1] !== 0x60) return;
+
+        const length = bytes[2];
+        const versionBytes = bytes.slice(3, 3 + length);
+        const version = String.fromCharCode(...versionBytes);
+
+        console.log("Version:", version);
+
+        characteristicRead.removeEventListener(
+          "characteristicvaluechanged",
+          onValueChanged
+        );
+      };
+
+      characteristicRead.addEventListener(
+        "characteristicvaluechanged",
+        onValueChanged
+      );
+
+      await characteristicWrite.writeValue(new Uint8Array([0x60, 0x02]));
+
+      resolve(true);
+      isProcessing = false;
+      processQueue();
+      return;
+    }
   } catch (error) {
     console.error(`Error reading data from ${side} device:`, error);
     reject(error);
