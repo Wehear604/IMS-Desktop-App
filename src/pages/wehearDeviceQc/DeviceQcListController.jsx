@@ -1,7 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import DeviceQcListUi from "./DeviceQcListUi";
 import { useLocation } from "react-router-dom";
-import { Box, Button, Paper, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Paper,
+  Typography,
+} from "@mui/material";
 import DeviceConnectUi from "./DeviceConnectUi";
 import ProductDetailsQcUi from "./ProductDetailsQcUi";
 import { useDispatch, useSelector } from "react-redux";
@@ -22,6 +28,8 @@ import {
 } from "../../apis/deviceQc.api";
 import { closeModal } from "../../store/actions/modalAction";
 import { fetchProductColorAction } from "../../store/actions/setting.Action";
+import CustomDialog from "../../components/layouts/common/CustomDialog";
+import { CenteredBox } from "../../components/layouts/OneViewBox";
 
 const DeviceQcListController = ({
   initialStep = 0,
@@ -287,11 +295,19 @@ const DeviceQcListController = ({
 
       {step === 2 && (
         <>
-          <ProductDetailsQcUi
-            setBox={setFields}
-            box={fields}
-            isUpdate={isUpdate}
-          />
+          {loading ? (
+            <CenteredBox>
+              <CircularProgress />
+            </CenteredBox>
+          ) : (
+            <>
+              <ProductDetailsQcUi
+                setBox={setFields}
+                box={fields}
+                isUpdate={isUpdate}
+              />
+            </>
+          )}
 
           <Box
             sx={{
@@ -301,17 +317,19 @@ const DeviceQcListController = ({
               justifyContent: "space-between",
             }}
           >
-            <Box>
-              <Button
-                variant="contained"
-                sx={{ width: "8vw" }}
-                onClick={() => setStep(step - 1)}
-              >
-                <Typography variant="h5" sx={{ textTransform: "none" }}>
-                  Back
-                </Typography>
-              </Button>
-            </Box>
+            {!isUpdate && (
+              <Box>
+                <Button
+                  variant="contained"
+                  sx={{ width: "8vw" }}
+                  onClick={() => setStep(step - 1)}
+                >
+                  <Typography variant="h5" sx={{ textTransform: "none" }}>
+                    Back
+                  </Typography>
+                </Button>
+              </Box>
+            )}
 
             <Box>
               <Button

@@ -40,7 +40,31 @@ const ProductDetailsQcUi = ({ setBox, box, isUpdate }) => {
     cleaning_Brush: false,
     warranty_Card: false,
   });
-  const dispatch = useDispatch();
+
+  const hasUpdatedRef = useRef(false);
+  const runCountRef = useRef(0);
+
+  useEffect(() => {
+    if (!Array.isArray(box?.box_Contains)) return;
+    if (runCountRef.current >= 2) return;
+
+    runCountRef.current += 1;
+
+    if (runCountRef.current === 2) {
+      const updatedState = { ...boxContains };
+
+      box.box_Contains.forEach((item) => {
+        const [key, value] = Object.entries(item)[0];
+        if (key in updatedState && value === true) {
+          updatedState[key] = true;
+        }
+      });
+      hasUpdatedRef.current = true;
+      setBoxContains(updatedState);
+      setDeviceColor(box?.deviceColor?._id);
+    }
+  }, [box?.box_Contains]);
+
   const { settings } = useSelector((state) => state);
   const [Barcode, setBarcode] = useState(true);
   const [deviceColor, setDeviceColor] = useState("");
@@ -51,38 +75,40 @@ const ProductDetailsQcUi = ({ setBox, box, isUpdate }) => {
   }, []);
 
   useEffect(() => {
-    const formattedBoxContains = Object.entries(boxContains)
-      .filter(([key, value]) => value === true)
-      .map(([key]) => ({ [key]: true }));
+    if (isUpdate ? hasUpdatedRef.current : true) {
+      const formattedBoxContains = Object.entries(boxContains)
+        .filter(([key, value]) => value === true)
+        .map(([key]) => ({ [key]: true }));
 
-    setBox({
-      ...box,
-      box_Contains: formattedBoxContains ?? [],
-      boxId: box_id ?? "",
-      deviceColor: deviceColor ?? "",
-    });
+      setBox({
+        ...box,
+        box_Contains: formattedBoxContains ?? [],
+        boxId: box_id ?? "",
+        deviceColor: deviceColor ?? "",
+      });
+    }
   }, [boxContains, box_id, deviceColor, setBox]);
 
-  const [colors, setColors] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-
   useEffect(() => {
-      if (settings?.productColor_data?.result?.length > 0 && !deviceColor) {
-        setDeviceColor(settings?.productColor_data?.result?.[0]?._id);
-      }
+    if (settings?.productColor_data?.result?.length > 0 && !deviceColor) {
+      setDeviceColor(settings?.productColor_data?.result?.[0]?._id);
+    }
   }, [settings?.productColor_data?.result?.[0]?._id]);
-
-  console.log("object settings?.productColor_data", settings);
 
   return (
     <Box sx={{ p: 4 }}>
-      <Typography
-        variant="h4"
-        sx={{ fontWeight: 700, mb: 3, textAlign: { xs: "center", md: "left" } }}
-      >
-        Package Details
-      </Typography>
+      {!isUpdate && (
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 700,
+            mb: 3,
+            textAlign: { xs: "center", md: "left" },
+          }}
+        >
+          Package Details
+        </Typography>
+      )}
       <Typography variant="h5" sx={{ fontWeight: 600, mb: 4, color: "red" }}>
         {box?.err}
       </Typography>
