@@ -85,7 +85,7 @@ const processQueue = async () => {
       await characteristic.writeValue(buffer);
     }
 
-    const version = "V5";
+    const version = "V1";
     const { classic, ble } = buildNameCommands(devicename);
     const { versionUpdateCommand } = buildNameCommands1(version);
 
