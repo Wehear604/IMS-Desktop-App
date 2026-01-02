@@ -13,7 +13,7 @@ const initialState = {
     name: "",
     id: "",
   },
-  fotfile: false,
+  fotfile: true,
 };
 
 const deviceReducer = (state = initialState, action) => {

@@ -49,6 +49,14 @@ const processQueue = async () => {
         .join(" ");
     }
 
+    function stringToHexWithSpaces1(str) {
+      return Array.from(str)
+        .map((char) =>
+          char.charCodeAt(0).toString(16).toUpperCase().padStart(2, "0")
+        )
+        .join(" ");
+    }
+
     function stringLengthHex(str) {
       return str.length.toString(16).toUpperCase().padStart(2, "0");
     }
@@ -66,7 +74,7 @@ const processQueue = async () => {
     }
     function buildNameCommands1(name) {
       const lengthHex = "02";
-      const asciiHexValues = stringToHexWithSpaces(name);
+      const asciiHexValues = stringToHexWithSpaces1(name);
 
       const versionUpdateCommand = `60 01 ${lengthHex} ${asciiHexValues}`;
 
