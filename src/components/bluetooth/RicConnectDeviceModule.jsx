@@ -219,6 +219,7 @@ const RicConnectDevice = ({
       if (!device) {
         setLoadingMessage("No device selected.");
         setLoading(false);
+        BLE_STORE.BTEdisconnect = true;
         dispatch(DeviceIsConnectingAction(false));
         return;
       }

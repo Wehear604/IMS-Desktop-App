@@ -13,7 +13,7 @@ const initialState = {
     name: "",
     id: "",
   },
-  fotfile: true,
+  fotfile: false,
 };
 
 const deviceReducer = (state = initialState, action) => {
@@ -37,7 +37,7 @@ const deviceReducer = (state = initialState, action) => {
       };
 
     case actions.SET_DEVICE_MAC:
-      return { ...state, mac: action.mac };
+      return { ...state, mac: action.mac, version: action.version };
 
     case actions.IS_AUDIO_CHECK:
       return { ...state, is_Audio_play: action.is_Audio_play };

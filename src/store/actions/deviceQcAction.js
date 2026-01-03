@@ -2,7 +2,9 @@ import ReadITEDataFromDevice from "../../pages/wehearDeviceQc/ite/ReadITEDataFro
 import ReadITEPrimeDataFromDevice from "../../pages/wehearDeviceQc/ite/ReadITEPrimeDataFromDevice";
 import ReadRicDataFromDevice from "../../pages/wehearDeviceQc/ric/ReadRicDataToDevice";
 import Read from "../../pages/wehearDeviceQc/safebuds/Read";
+import ReadVersion from "../../pages/wehearDeviceQc/safebuds/ReadVersion";
 import Write from "../../pages/wehearDeviceQc/safebuds/Write";
+import WriteVersion from "../../pages/wehearDeviceQc/safebuds/WriteVersion";
 import { BLE_STORE, interpolateValue } from "../../utils/bleStore";
 import {
   actions,
@@ -378,7 +380,7 @@ export const SafeBudsDeviceName = ({ type }) => {
 
       const response = await Write(command, "both", BLE_STORE.deviceObj, type);
 
-      console.log("response", response);
+      console.log(`"response" : - ${type}`, response);
     } catch (err) {
       console.error("RicDeviceCurrentVolume read failed", err);
     }
@@ -407,8 +409,8 @@ export const SafeBudsTap = ({ type }) => {
 export const SafeBudsVersionRead = ({ type }) => {
   return async (dispatch) => {
     try {
-      const command = "0x60";
-      const response = await Read(
+      const command = 0x60;
+      const response = await ReadVersion(
         command,
         "both",
         BLE_STORE.deviceObj,
@@ -417,6 +419,7 @@ export const SafeBudsVersionRead = ({ type }) => {
       );
 
       console.log("response", response);
+      dispatch(SafeBudsVersionUpdate({ type: "ble" }));
     } catch (err) {
       console.error("RicDeviceCurrentVolume read failed", err);
     }
@@ -489,9 +492,15 @@ export const SafeBudsVersionUpdate = ({ type }) => {
     try {
       const command = "0x60";
 
-      const response = await Write(command, "both", BLE_STORE.deviceObj, type);
+      const response = await WriteVersion(
+        command,
+        "both",
+        BLE_STORE.deviceObj,
+        type
+      );
 
       console.log("response3", response);
+      dispatch(SafeBudsDeviceName({ type: "NameChange" }));
     } catch (err) {
       console.error("RicDeviceCurrentVolume read failed", err);
     }

@@ -112,15 +112,13 @@ const SafeBudsUi = () => {
   };
 
   useEffect(() => {
-    dispatch(SafeBudsDeviceName({ type: "NameChange" }));
+    // dispatch(SafeBudsVersionUpdate({ type: "ble" }));
+    // dispatch(SafeBudsDeviceName({ type: "NameChange" }));
     dispatch(SafeBudsTap({ type: "Tap" }));
     dispatch(ChangeButtonSide(LISTENING_SIDE.LEFT));
     dispatch(SafebudsDeviceCurrentVolume());
+    // dispatch(SafeBudsVersionRead({ type: "SafeBudsVersionRead" }));
   }, []);
-
-  // useEffect(() => {
-  //   dispatch(SafeBudsVersionUpdate({ type: "SafeBudsVersionUpdate" }));
-  // }, []);
 
   useEffect(() => {
     if (deviceQc.volumeIncrease) return;
