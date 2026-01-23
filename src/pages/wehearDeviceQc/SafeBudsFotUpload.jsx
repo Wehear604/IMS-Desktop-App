@@ -11,7 +11,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import FOT from "../../assets/images/fotFile.svg";
 import { SetDeviceFOT } from "../../store/actions/deviceDataAction";
 import { useDispatch } from "react-redux";
-import fotfile from "../../assets/blefiles/fw2212_V1.fot";
+import fotfile from "../../assets/blefiles/fw5000_latest.fot";
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
   clipPath: "inset(50%)",
@@ -276,7 +276,7 @@ class OtaDataProvider {
   nextChunk(maxLen) {
     const remaining = Math.min(
       this.getSize() - this.fileOffset,
-      this.currentBlockRemaining()
+      this.currentBlockRemaining(),
     );
     const len = Math.min(remaining, maxLen);
     const chunk = this.reader.read(this.fileOffset, len);
@@ -310,7 +310,7 @@ class OtaSession {
   }
   async start() {
     this.chIn.addEventListener("characteristicvaluechanged", (e) =>
-      this.onNotify(e)
+      this.onNotify(e),
     );
     await this.chIn.startNotifications();
     this.log("Notifications enabled");
@@ -363,7 +363,7 @@ class OtaSession {
     if (!this.hash4) this.hash4 = await this.reader.hashHead4();
     const cmd = this.cmdGen.cmdGetInfoUpdate(
       this.dataProvider.deviceVersion || 0,
-      this.hash4
+      this.hash4,
     );
     await this.sendCtl(cmd, "getInfoUpdate");
     this.onStatus("requested update info");
@@ -373,11 +373,11 @@ class OtaSession {
     const totalLen = this.dataProvider.beginBlock();
     const header = this.cmdGen.cmdStartSendHeader(
       this.dataProvider.fileOffset,
-      totalLen
+      totalLen,
     );
     const maxData = Math.min(
       this.packetSize - header.length,
-      this.maxPayload - header.length
+      this.maxPayload - header.length,
     );
     const chunk = this.dataProvider.nextChunk(maxData);
     const packet = new Uint8Array(header.length + chunk.length);
@@ -395,7 +395,7 @@ class OtaSession {
     const maxData = Math.min(
       this.packetSize - header.length,
       this.maxPayload - header.length,
-      this.dataProvider.currentBlockRemaining()
+      this.dataProvider.currentBlockRemaining(),
     );
     const chunk = this.dataProvider.nextChunk(maxData);
     const packet = new Uint8Array(header.length + chunk.length);
@@ -444,7 +444,7 @@ class OtaSession {
       case STATE_DONE:
         if (this.isCompressed) {
           this.onStatus(
-            "Data sent; device decompressing/rebooting. Wait for auto-reconnect."
+            "Data sent; device decompressing/rebooting. Wait for auto-reconnect.",
           );
         } else {
           this.onStatus("OTA done");
@@ -614,7 +614,7 @@ const SafeBudsFotUpload = () => {
         const buf = await response.arrayBuffer();
 
         // Create a File object so rest of logic remains unchanged
-        const defaultFile = new File([buf], "fw2212_V1.fot", {
+        const defaultFile = new File([buf], "fw5000_latest.fot", {
           type: "application/octet-stream",
         });
 

@@ -4,6 +4,7 @@ const initialState = {
   device_type: null,
   device_side: null,
   mac: null,
+  otaBeforeMac: null,
   is_Audio_play: false,
   isMic: false,
   connected: false,
@@ -37,7 +38,19 @@ const deviceReducer = (state = initialState, action) => {
       };
 
     case actions.SET_DEVICE_MAC:
-      return { ...state, mac: action.mac, version: action.version };
+      return state.fotfile
+        ? {
+            ...state,
+            mac: action.mac,
+            version: action.version,
+          }
+        : {
+            ...state,
+            otaBeforeMac: action.mac,
+          };
+
+    case actions.SET_DEVICE_PREV_MAC:
+      return { ...state, otaBeforeMac: action.otaBeforeMac };
 
     case actions.IS_AUDIO_CHECK:
       return { ...state, is_Audio_play: action.is_Audio_play };
