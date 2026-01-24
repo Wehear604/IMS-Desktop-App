@@ -61,7 +61,7 @@ function createWindow() {
 
   ipcMain.on("bluetooth-device-selected", (event, deviceId) => {
     if (selectBluetoothCallback) {
-      console.log("User selected device:", deviceId);
+      console.log("User selected device:", deviceId); 
       selectBluetoothCallback(deviceId);
       selectBluetoothCallback = null;
     }

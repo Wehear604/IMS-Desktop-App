@@ -259,6 +259,7 @@ const BleConnectDeviceModule = ({
     if (window.electronAPI) {
       window.electronAPI.selectBluetoothDevice(deviceId);
     }
+    console.log("object conection done", deviceId);
   };
 
   const handleCancelSelect = () => {

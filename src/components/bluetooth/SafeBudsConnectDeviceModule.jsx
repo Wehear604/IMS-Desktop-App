@@ -24,7 +24,7 @@ import {
 } from "../../utils/constants";
 
 import { BLE_STORE, SAFE_BUDS_STORE } from "../../utils/bleStore"; // <-- Make sure this file exports BLE_STORE
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { callSnackBar } from "../../store/actions/snackbarAction";
 import {
   DeviceIsConnectingAction,
@@ -70,7 +70,7 @@ const SafeBudsConnectDeviceModule = ({
   const [rightDeviceConnected, setRightDeviceConnected] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState(
-    "Checking Browser Support"
+    "Checking Browser Support",
   );
   const [deviceInfo, setDeviceInfo] = useState({ name: "", id: "" });
   const [data, setData] = useState([]); // serializable activity data (e.g., parsed notifications)
@@ -81,6 +81,7 @@ const SafeBudsConnectDeviceModule = ({
   const [deviceList, setDeviceList] = useState([]);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [selectingDeviceId, setSelectingDeviceId] = useState(null);
+  const { device } = useSelector((state) => state);
 
   const dispatch = useDispatch();
 
@@ -105,7 +106,7 @@ const SafeBudsConnectDeviceModule = ({
       };
     } else {
       console.warn(
-        "electronAPI is not available. Running in a standard browser."
+        "electronAPI is not available. Running in a standard browser.",
       );
     }
   }, []);
@@ -122,7 +123,7 @@ const SafeBudsConnectDeviceModule = ({
             onEnableChange(true);
           } else {
             setLoadingMessage(
-              "Bluetooth is turned off. Please turn on Bluetooth in your system settings."
+              "Bluetooth is turned off. Please turn on Bluetooth in your system settings.",
             );
             setEnabled(false);
             onEnableChange(false);
@@ -130,14 +131,14 @@ const SafeBudsConnectDeviceModule = ({
         } catch (error) {
           console.error("Error checking Bluetooth availability:", error);
           setLoadingMessage(
-            "Could not check Bluetooth status. Ensure permissions are granted."
+            "Could not check Bluetooth status. Ensure permissions are granted.",
           );
           setEnabled(false);
           onEnableChange(false);
         }
       } else {
         setLoadingMessage(
-          "Web Bluetooth is not supported by this application."
+          "Web Bluetooth is not supported by this application.",
         );
         setEnabled(false);
         onEnableChange(false);
@@ -193,7 +194,7 @@ const SafeBudsConnectDeviceModule = ({
 
       const manufacturerIdA = parseInt(MANUFACTURER_IDENTIFIER[50]);
       const manufacturerIdB = parseInt(
-        MANUFACTURER_IDENTIFIER[fitting.device_type]
+        MANUFACTURER_IDENTIFIER[fitting.device_type],
       );
 
       if (!Number.isNaN(manufacturerIdA)) {
@@ -261,13 +262,13 @@ const SafeBudsConnectDeviceModule = ({
           await WriteRicDataToDevice(
             "0x0B",
             side,
-            BLE_STORE.deviceObj || device
+            BLE_STORE.deviceObj || device,
           );
         } else {
           await WriteRicDataToDevice(
             "0x0B",
             side,
-            BLE_STORE.deviceObj || device
+            BLE_STORE.deviceObj || device,
           );
         }
       }
@@ -291,7 +292,7 @@ const SafeBudsConnectDeviceModule = ({
     } catch (error) {
       console.error("Error:", error);
       setLoadingMessage(
-        "Failed to connect: " + (error?.message || String(error))
+        "Failed to connect: " + (error?.message || String(error)),
       );
       setLoading(false);
       dispatch(DeviceIsConnectingAction(false));
@@ -344,6 +345,10 @@ const SafeBudsConnectDeviceModule = ({
       window.electronAPI.selectBluetoothDevice(deviceId);
     }
   };
+
+  useEffect(() => {
+    console.log("Device data", device);
+  },[device])
 
   const handleCancelSelect = () => {
     if (selectingDeviceId) return;

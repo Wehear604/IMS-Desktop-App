@@ -73,8 +73,8 @@ const DeviceQcListController = ({
           fields?.box_Contains,
           fields?.boxId,
           fields?.deviceColor,
-          device.device_type
-        )
+          device.device_type,
+        ),
       );
     } else if (step === 2 && fields.boxId) {
       dispatch(
@@ -82,8 +82,8 @@ const DeviceQcListController = ({
           fields?.box_Contains,
           fields?.boxId,
           fields?.deviceColor,
-          device.device_type
-        )
+          device.device_type,
+        ),
       );
     }
   }, [fields]);
@@ -107,9 +107,9 @@ const DeviceQcListController = ({
         field: "Device Color",
       },
     ],
-    [fields]
+    [fields],
   );
-
+console.log("object device.macBeforeData", device);
   const onSubmit = async () => {
     const validationResponse = validate(validationSchemaForCreate);
 
@@ -117,15 +117,19 @@ const DeviceQcListController = ({
       setLoading(true);
       dispatch(
         callApiAction(
-          async () => await createDeviceQcApi(deviceDataStore),
+          async () =>
+            await createDeviceQcApi({
+              ...deviceDataStore,
+              macBeforeOta: device.macBeforeOta,
+            }),
           async (response) => {
             setLoading(false);
             setStep(0);
             dispatch(
               callSnackBar(
                 "Device QC Created Successfully",
-                SNACK_BAR_VARIETNS.suceess
-              )
+                SNACK_BAR_VARIETNS.suceess,
+              ),
             );
             dispatch(resetDeviceDataStore());
 
@@ -135,8 +139,8 @@ const DeviceQcListController = ({
           (err) => {
             setFields({ ...fields, err });
             dispatch(callSnackBar(err, SNACK_BAR_VARIETNS.error));
-          }
-        )
+          },
+        ),
       );
     } else {
       setFields({ ...fields, err: validationResponse });
@@ -158,16 +162,16 @@ const DeviceQcListController = ({
             dispatch(
               callSnackBar(
                 "Packaging Details Updated Successfully",
-                SNACK_BAR_VARIETNS.suceess
-              )
+                SNACK_BAR_VARIETNS.suceess,
+              ),
             );
             dispatch(closeModal("update-product-qc"));
           },
           (err) => {
             setLoading(false);
             setFields({ ...fields, err });
-          }
-        )
+          },
+        ),
       );
     } else {
       setFields({ ...fields, err: validationResponse });
@@ -201,11 +205,11 @@ const DeviceQcListController = ({
           (err) => {
             setFields((prev) => ({ ...prev, err }));
             setLoading(false);
-          }
-        )
+          },
+        ),
       );
     },
-    [dispatch]
+    [dispatch],
   );
 
   useEffect(() => {

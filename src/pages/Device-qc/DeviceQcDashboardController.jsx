@@ -223,6 +223,32 @@ const DeviceQcDashboardController = () => {
         ),
       },
 
+       {
+        id: 8,
+        fieldName: "",
+        label: "Mac Address",
+        align: "left",
+        sort: true,
+        renderValue: (params, setParams) => (
+          <Typography textTransform="capitalize">
+            {params?.left?.mac || "NA"}
+          </Typography>
+        ),
+      },
+
+       {
+        id: 9,
+        fieldName: "",
+        label: "Mac Address Before OTA",
+        align: "left",
+        sort: true,
+        renderValue: (params, setParams) => (
+          <Typography textTransform="capitalize">
+            {params?.macBeforeOta || "NA"}
+          </Typography>
+        ),
+      },
+
       {
         id: 7,
         fieldName: "",

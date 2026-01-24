@@ -4,7 +4,7 @@ const initialState = {
   device_type: null,
   device_side: null,
   mac: null,
-  otaBeforeMac: null,
+  macBeforeOta: null,
   is_Audio_play: false,
   isMic: false,
   connected: false,
@@ -18,6 +18,7 @@ const initialState = {
 };
 
 const deviceReducer = (state = initialState, action) => {
+  console.log("object action", action);
   switch (action.type) {
     case actions.SET_DEVICE_SELECTED:
       return { ...state, device_type: action.device_type };
@@ -46,11 +47,9 @@ const deviceReducer = (state = initialState, action) => {
           }
         : {
             ...state,
-            otaBeforeMac: action.mac,
+            macBeforeOta: action.mac,
           };
 
-    case actions.SET_DEVICE_PREV_MAC:
-      return { ...state, otaBeforeMac: action.otaBeforeMac };
 
     case actions.IS_AUDIO_CHECK:
       return { ...state, is_Audio_play: action.is_Audio_play };
@@ -64,6 +63,7 @@ const deviceReducer = (state = initialState, action) => {
         device_type: state.device_type,
         device_side: state.device_side,
         fotfile: state.fotfile,
+        macBeforeOta: state.macBeforeOta
       };
     case actions.SET_FOT_FILES:
       return {
@@ -71,6 +71,8 @@ const deviceReducer = (state = initialState, action) => {
         fotfile: true,
         device_type: state.device_type,
         device_side: state.device_side,
+        macBeforeOta: state.macBeforeOta
+
       };
     case actions.RESET_DEVICE_DATA_STORE:
       return {
@@ -84,6 +86,7 @@ const deviceReducer = (state = initialState, action) => {
         device_type: state.device_type,
         device_side: state.device_side,
         fotfile: true,
+        macBeforeOta: state.macBeforeOta
       };
     default:
       return state;

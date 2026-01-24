@@ -19,6 +19,7 @@ const initialState = {
     result: false,
     mic: null,
     test: false,
+    macBeforeOta: null
   },
   right: {
     device_type: null,

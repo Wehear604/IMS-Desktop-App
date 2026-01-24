@@ -382,6 +382,9 @@ const SafeBudsUi = () => {
     );
   };
 
+    console.log("object device reducer data", device);
+
+
   return (
     <CustomDialog
       err={fields?.err}

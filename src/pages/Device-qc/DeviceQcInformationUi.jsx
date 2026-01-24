@@ -77,6 +77,11 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                 label: "Device Color :",
                 value: fields?.deviceColor?.name || "NA",
               },
+
+              {
+                label: "Mac Before OTA :",
+                value: fields?.macBeforeOta || "NA",
+              },
               {
                 label: "QC Executive :",
                 value: toTitleCase(fields?.qcExcecutive?.name) || "NA",
