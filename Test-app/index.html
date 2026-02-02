@@ -1,19 +1,10 @@
 <!doctype html>
 <html>
-  <body
-    style="font-family: sans-serif; text-align: center; background: #f4f4f4"
-  >
-    <h2>Test App</h2>
-    <p><strong>Version:</strong> <span id="ver"></span></p>
-    <p><strong>Time:</strong> <span id="time"></span></p>
-
+  <body style="background-color: #ccffcc; text-align: center; padding: 50px">
+    <h1>I AM THE LOCAL VERSION</h1>
+    <p>If this background is GREEN, you are loading the correct file.</p>
     <script>
-      document.getElementById("ver").innerText =
-        require("./package.json").version;
-      setInterval(() => {
-        document.getElementById("time").innerText =
-          new Date().toLocaleTimeString();
-      }, 1000);
+      document.write("Current Directory: " + __dirname);
     </script>
   </body>
 </html>
