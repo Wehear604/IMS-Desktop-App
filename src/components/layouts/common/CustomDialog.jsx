@@ -71,6 +71,7 @@ const CustomDialog = ({
           </Box>
           {!disableDirectClose && (
             <IconButton
+              disabled={disableDirectClose}
               onClick={() => {
                 if (isReject) {
                   onClose();
@@ -90,6 +91,7 @@ const CustomDialog = ({
         <DialogActions>
           {
             <SubmitButton
+              disabled={disabledSubmit || loading || disableDirectClose}
               variant="outlined"
               onClick={handleClose}
               title={closeText}

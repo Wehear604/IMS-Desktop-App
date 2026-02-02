@@ -109,7 +109,7 @@ const DeviceQcListController = ({
     ],
     [fields],
   );
-console.log("object device.macBeforeData", device);
+  console.log("object device.macBeforeData", device);
   const onSubmit = async () => {
     const validationResponse = validate(validationSchemaForCreate);
 
@@ -319,20 +319,6 @@ console.log("object device.macBeforeData", device);
               justifyContent: isUpdate ? "flex-end" : "space-between",
             }}
           >
-            {!isUpdate && (
-              <Box>
-                <Button
-                  variant="contained"
-                  sx={{ width: "8vw" }}
-                  onClick={() => setStep(step - 1)}
-                >
-                  <Typography variant="h5" sx={{ textTransform: "none" }}>
-                    Back
-                  </Typography>
-                </Button>
-              </Box>
-            )}
-
             <Box>
               <Button
                 variant="contained"

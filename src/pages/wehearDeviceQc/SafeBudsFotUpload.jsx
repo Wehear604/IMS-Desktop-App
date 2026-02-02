@@ -4,7 +4,7 @@ import Button from "@mui/material/Button";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { styled } from "@mui/material/styles";
 import { Box, CircularProgress, Paper, Typography } from "@mui/material";
-import { SAFE_BUDS_STORE } from "../../utils/bleStore";
+import { BLE_STORE, SAFE_BUDS_STORE } from "../../utils/bleStore";
 import CustomDialog from "../../components/layouts/common/CustomDialog";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import CloseIcon from "@mui/icons-material/Close";
@@ -561,7 +561,8 @@ const SafeBudsFotUpload = () => {
     log(`Selected: ${f.name}`);
   };
 
-  const Start = async () => {
+  const Start = async (e) => {
+    e.preventDefault();
     if (!buffer) return alert("Select firmware file");
 
     if (!SAFE_BUDS_STORE.device) {
@@ -634,10 +635,13 @@ const SafeBudsFotUpload = () => {
     <CustomDialog
       id={"deviceAudioMicCheck"}
       title={"Safe Buds FOT Upload"}
-      onSubmit={Start}
+      onSubmit={(e) => Start(e)}
       confirmText={isUploading ? "Uploading..." : "Start OTA"}
       disabledSubmit={isUploading}
       disableDirectClose={isUploading}
+      onClose={() => {
+        BLE_STORE.BTEdisconnect = true;
+      }}
     >
       <>
         {isUploading ? (
