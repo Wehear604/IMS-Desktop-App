@@ -42,7 +42,7 @@ function createWindow() {
 
       // send device list to React UI
       win.webContents.send("bluetooth-device-list", deviceList);
-    }
+    },
   );
 
   ipcMain.on("bluetooth-pairing-response", (event, response) => {
@@ -61,7 +61,7 @@ function createWindow() {
 
   ipcMain.on("bluetooth-device-selected", (event, deviceId) => {
     if (selectBluetoothCallback) {
-      console.log("User selected device:", deviceId); 
+      console.log("User selected device:", deviceId);
       selectBluetoothCallback(deviceId);
       selectBluetoothCallback = null;
     }
@@ -94,7 +94,7 @@ function createWindow() {
     win.loadFile(path.join(__dirname, "..", "build", "index.html"));
     console.log(
       "Forcing static build load from:",
-      path.join(__dirname, "..", "build", "index.html")
+      path.join(__dirname, "..", "build", "index.html"),
     );
   } else {
     win.loadURL("http://localhost:3000");
