@@ -91,7 +91,7 @@ const CustomDialog = ({
         <DialogActions>
           {
             <SubmitButton
-              disabled={disabledSubmit || loading || disableDirectClose}
+              disabled={loading || disableDirectClose}
               variant="outlined"
               onClick={handleClose}
               title={closeText}

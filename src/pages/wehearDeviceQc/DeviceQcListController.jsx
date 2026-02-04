@@ -316,7 +316,7 @@ const DeviceQcListController = ({
               p: 4,
               width: "100%",
               display: "flex",
-              justifyContent: isUpdate ? "flex-end" : "space-between",
+              justifyContent: "flex-end",
             }}
           >
             <Box>
