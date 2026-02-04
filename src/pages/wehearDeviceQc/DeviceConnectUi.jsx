@@ -66,7 +66,10 @@ import { findObjectKeyByValue } from "../../utils/main";
 import SafeBudsFotUpload from "./SafeBudsFotUpload";
 import SafeBudsConnectDeviceModule from "../../components/bluetooth/SafeBudsConnectDeviceModule";
 import SafeBudsUi from "./safebuds/SafeBudsUi";
-import { SafeBudsVersionRead } from "../../store/actions/deviceQcAction";
+import {
+  SafeBudsOnlyVersionRead,
+  SafeBudsVersionRead,
+} from "../../store/actions/deviceQcAction";
 
 const Header = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
@@ -116,26 +119,46 @@ const ConnectButton = ({
   //Need to check
   let b = false;
 
-  const AudioAndMicCheck = () => {
-    if (device.device_type == DEVICES.SAFE_BUDS && !device?.fotfile) {
-      // dispatch(SafeBudsVersionRead({ type: "SafeBudsVersionRead" }));
-      dispatch(
-        openModal(
-          <SafeBudsFotUpload fotfile={fotfile} />,
-          "sm",
-          true,
-          "deviceAudioMicCheck"
-        )
+  const AudioAndMicCheck = async () => {
+    if (device.device_type === DEVICES.SAFE_BUDS && !device?.fotfile) {
+      const version = await dispatch(
+        SafeBudsVersionRead({
+          type: "SafeBudsVersionRead",
+          isOnlyVersionFetch: true,
+        }),
       );
+
+      console.log("📦 Safe Version:", version);
+
+      if (version.includes("V2")) {
+        dispatch(openModal(<SafeBudsUi />, "sm", true, "deviceAudioMicCheck"));
+
+      } else {
+        dispatch(
+          openModal(
+            <SafeBudsFotUpload fotfile={fotfile} />,
+            "sm",
+            true,
+            "deviceAudioMicCheck",
+          ),
+        );
+      }
     } else {
-      dispatch(SafeBudsVersionRead({ type: "SafeBudsVersionRead" }));
+      dispatch(
+        SafeBudsVersionRead({
+          type: "SafeBudsVersionRead",
+          isOnlyVersionFetch: false,
+        }),
+      );
       dispatch(openModal(<SafeBudsUi />, "sm", true, "deviceAudioMicCheck"));
     }
   };
 
   useEffect(() => {
     if (isConnected) {
-      AudioAndMicCheck();
+      setTimeout(() => {
+        AudioAndMicCheck();
+      }, 5000);
     }
   }, [isConnected]);
 
@@ -229,7 +252,7 @@ const DeviceConnectUi = () => {
   const dispatch = useDispatch();
   console.log(
     "device?.device_type === DEVICES.SAFE_BUDS && !device?.fotfile",
-    device?.fotfile
+    device?.fotfile,
   );
   const devices = [
     { side: "L", label: "BTE", value: LISTENING_SIDE.LEFT },
@@ -494,8 +517,8 @@ const DeviceConnectUi = () => {
                 connectDevice(
                   deviceInfo,
                   device?.device_side,
-                  device?.device_type
-                )
+                  device?.device_type,
+                ),
               );
             }}
             Component={ConnectButton}
@@ -524,8 +547,8 @@ const DeviceConnectUi = () => {
                 connectDevice(
                   deviceInfo,
                   device?.device_side,
-                  device?.device_type
-                )
+                  device?.device_type,
+                ),
               );
             }}
             Component={ConnectButton}
@@ -553,8 +576,8 @@ const DeviceConnectUi = () => {
                 connectDevice(
                   deviceInfo,
                   device?.device_side,
-                  device?.device_type
-                )
+                  device?.device_type,
+                ),
               );
             }}
             Component={ConnectButton}

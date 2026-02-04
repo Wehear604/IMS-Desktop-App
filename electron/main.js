@@ -31,6 +31,7 @@ function createWindow() {
   });
 
   win.maximize();
+ 
 
   win.webContents.on(
     "select-bluetooth-device",
@@ -40,7 +41,7 @@ function createWindow() {
 
       console.log("Sending device list to renderer:", deviceList.length);
 
-      // send device list to React UI
+      // send device list to React UI  
       win.webContents.send("bluetooth-device-list", deviceList);
     },
   );

@@ -406,7 +406,36 @@ export const SafeBudsTap = ({ type }) => {
   };
 };
 
-export const SafeBudsVersionRead = ({ type }) => {
+export const SafeBudsVersionRead = ({ type,isOnlyVersionFetch }) => {
+  return async (dispatch) => {
+    try {
+      // console.log("response of top-");
+      //  console.log("isOnlyVersionFetch", isOnlyVersionFetch);
+
+      const command = 0x60;
+      const response = await ReadVersion(
+        command,
+        "both",
+        BLE_STORE.deviceObj,
+        type,
+        dispatch
+      );
+
+      console.log("response of above", response);
+      console.log("isOnlyVersionFetch", isOnlyVersionFetch);
+      if(isOnlyVersionFetch){
+        return response;
+      }
+      dispatch(SafeBudsVersionUpdate({ type: "ble" }));
+    } catch (err) {
+      console.log("RicDeviceCurrentVolume read failed", err);
+    }
+  };
+};
+
+
+
+export const SafeBudsOnlyVersionRead = ({ type }) => {
   return async (dispatch) => {
     try {
       const command = 0x60;
@@ -418,8 +447,10 @@ export const SafeBudsVersionRead = ({ type }) => {
         dispatch
       );
 
-      console.log("response", response);
-      dispatch(SafeBudsVersionUpdate({ type: "ble" }));
+      console.log("only response", response);
+
+      return response;
+
     } catch (err) {
       console.error("RicDeviceCurrentVolume read failed", err);
     }
