@@ -12,6 +12,9 @@ import FOT from "../../assets/images/fotFile.svg";
 import { SetDeviceFOT } from "../../store/actions/deviceDataAction";
 import { useDispatch } from "react-redux";
 import fotfile from "../../assets/blefiles/fw5000_latest.fot";
+import { createDeviceQcLogsApi } from "../../apis/deviceQc.api";
+import { use } from "react";
+import { callApiAction } from "../../store/actions/commonAction";
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
   clipPath: "inset(50%)",
@@ -538,6 +541,7 @@ const SafeBudsFotUpload = () => {
   const [logs, setLogs] = useState("");
   const dispatch = useDispatch();
   const [isUploading, setIsUploading] = useState(false);
+  const { device } = useSelector((state) => state);
 
   const logRef = React.useRef(null);
   let session = null;
@@ -591,10 +595,23 @@ const SafeBudsFotUpload = () => {
     setBuffer(null);
   };
 
+  const createFunction = async () => {
+    dispatch(
+      callApiAction(
+        async () => await createDeviceQcLogsApi({ mac: device?.mac }),
+        // async (response) => {
+        //   await callBack(response);
+
+        // },
+      ),
+    );
+  };
+
   useEffect(() => {
     if (progress === 100) {
       const timer = setTimeout(() => {
         dispatch(SetDeviceFOT());
+        createFunction();
       }, 1000);
 
       return () => clearTimeout(timer);

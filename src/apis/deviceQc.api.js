@@ -82,3 +82,35 @@ export const updateDeviceQcApi = async (data) => {
 
   return callResponse;
 };
+
+
+export const createDeviceQcLogsApi = async (data) => {
+  const callResponse = await axios({
+    url: endpoints.createLogsDeviceQc,
+    method: "post",
+    headers: getHeaders(),
+    data,
+  })
+    .then((response) => response.data)
+    .catch((err) => ({
+      status: 0,
+      response: err.response,
+      code: err.response.status,
+    }));
+
+  return callResponse;
+};
+
+
+export const getDeviceLogsApi = async (params) => {
+  const callResponse = await axios({
+    url: endpoints.getLogsDeviceQc,
+    method: "get",
+    headers: getHeaders(),
+    params,
+  })
+    .then((response) => response.data)
+    .catch((err) => err.response.data);
+
+  return callResponse;
+};
