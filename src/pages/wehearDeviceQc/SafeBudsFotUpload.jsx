@@ -591,6 +591,19 @@ const SafeBudsFotUpload = () => {
     setBuffer(null);
   };
 
+    const createFunction = async () => {
+    dispatch(
+      callApiAction(
+        async () => await createDeviceQcLogsApi({ mac: device?.mac }),
+        // async (response) => {
+        //   await callBack(response);
+
+        // },
+      ),
+    );
+  };
+
+
   useEffect(() => {
     if (progress === 100) {
       const timer = setTimeout(() => {
