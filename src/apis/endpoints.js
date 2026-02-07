@@ -1,4 +1,4 @@
-export const mode = "development";
+export const mode = "local";
 let domain = "";
 
 switch (mode) {
@@ -232,4 +232,7 @@ export default {
   fetchByIdDeviceQc: `${domain}api/qc-device/fetch-by-id`,
   fetchDeviceCounts: `${domain}api/qc-device/fetch-count-device-wise`,
   updateDeviceQc: `${domain}api/qc-device/update`,
+
+  createLogsDeviceQc: `${domain}api/qc-device/create-logs`,
+  getLogsDeviceQc: `${domain}api/qc-device/get-log`,
 };

@@ -4,7 +4,7 @@ import endpoints from "./endpoints";
 
 export const CreateQcMacCheckApi = async (data) => {
   const callResponse = await axios({
-    url: endpoints.qcMacCheck,
+    url: endpoints.createLogsDeviceQc,
     method: "POST",
     headers: getHeaders(),
 
@@ -18,7 +18,7 @@ export const CreateQcMacCheckApi = async (data) => {
 
 export const fetchQcMacCheckByIdApi = async (params) => {
   const callResponse = await axios({
-    url: endpoints.qcMacCheckById,
+    url: endpoints.getLogsDeviceQc,
     method: "get",
     headers: getHeaders(),
     params,

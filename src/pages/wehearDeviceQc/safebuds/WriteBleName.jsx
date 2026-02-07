@@ -24,8 +24,10 @@ const processQueue = async () => {
     }
 
     const serviceUuid = SERVICE_UUID[DEVICES.SAFE_BUDS];
+
     const CHARACTERISTIC_UUID_WRITE =
       CHARACTERISTIC_UUID_READ_WRITE[DEVICES.SAFE_BUDS];
+
     const CHARACTERISTIC_UUID_READ =
       CHARACTERISTIC_UUID_READ_NOTIFY[DEVICES.SAFE_BUDS];
 
@@ -39,6 +41,14 @@ const processQueue = async () => {
 
     await characteristicRead.startNotifications();
 
+    function stringToHexWithSpaces(str) {
+      return Array.from(str)
+        .map((char) =>
+          char.charCodeAt(0).toString(16).toUpperCase().padStart(2, "0"),
+        )
+        .join(" ");
+    }
+
     function stringToHexWithSpaces1(str) {
       return Array.from(str)
         .map((char) =>
@@ -46,14 +56,28 @@ const processQueue = async () => {
         )
         .join(" ");
     }
+
     function stringLengthHex(str) {
       return str.length.toString(16).toUpperCase().padStart(2, "0");
     }
-    function buildNameCommands1(name) {
+
+    const devicename = type == "bleWrite" ? "WeHear" : "SafeBuds";
+
+    function buildNameCommands(name) {
       const lengthHex = stringLengthHex(name);
+      const asciiHexValues = stringToHexWithSpaces(name);
+
+      const classic = `20 ${lengthHex} ${asciiHexValues}`;
+      const ble = `21 01 ${lengthHex} ${asciiHexValues}`;
+
+      return { classic, ble };
+    }
+    function buildNameCommands1(name) {
+      const lengthHex = "02";
       const asciiHexValues = stringToHexWithSpaces1(name);
-      const versionUpdateCommand = `60 01 ${lengthHex} ${asciiHexValues} 00`;
-      console.log("Write command for versionUpdate", versionUpdateCommand);
+
+      const versionUpdateCommand = `60 01 ${lengthHex} ${asciiHexValues}`;
+
       return { versionUpdateCommand };
     }
 
@@ -65,30 +89,34 @@ const processQueue = async () => {
 
       if (!bytes.length) throw new Error("Invalid command format");
 
-      await characteristic.writeValue(new Uint8Array(bytes));
+      const buffer = new Uint8Array(bytes);
+      await characteristic.writeValue(buffer);
     }
 
-    const version = "V2";
+    const version = "V1";
+    const { classic, ble } = buildNameCommands(devicename);
     const { versionUpdateCommand } = buildNameCommands1(version);
 
-    await sendHexCommand(characteristicWrite, versionUpdateCommand);
+    await sendHexCommand(characteristicWrite, classic);
 
-    resolve("WRITE_SUCCESS");
+    await sendHexCommand(characteristicWrite, ble);
+    resolve(true);
+    console.log("versionUpdateCommand", versionUpdateCommand);
+    // await sendHexCommand(characteristicWrite, versionUpdateCommand);
+    // }
   } catch (error) {
     console.error(`Error reading data from ${side} device:`, error);
     reject(error);
-  } finally {
     isProcessing = false;
-    processQueue(); // process next queued command
+    processQueue();
   }
 };
 
-const WriteVersion = (command, side, deviceObj, type) => {
-  console.log("deviceObj", deviceObj);
+const WriteBleName = (command, side, deviceObj, type) => {
   return new Promise((resolve, reject) => {
     commandQueue.push({ command, side, deviceObj, type, resolve, reject });
     processQueue();
   });
 };
 
-export default WriteVersion;
+export default WriteBleName;

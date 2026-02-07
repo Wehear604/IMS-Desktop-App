@@ -9,7 +9,7 @@ export const connectDevice = (
   deviceInfo,
   deviceObj,
   disconnectFun,
-  side
+  side,
 ) => {
   console.log("Connecting to device:", deviceInfo);
   console.log("Hardware Data:", hardwareData);
@@ -36,9 +36,9 @@ export const disconnectDevice = (side, flag) => {
 
 export const callApiAction = (
   asyncFun,
-  onSuccess = () => { },
-  onError = () => { },
-  isFile = false
+  onSuccess = () => {},
+  onError = () => {},
+  isFile = false,
 ) => {
   return async (dispatch, getState) => {
     try {
@@ -52,8 +52,7 @@ export const callApiAction = (
           if (response?.code === 400) {
             if (response?.response?.status === 400) {
               onError(response?.response?.data?.data[0]?.msg);
-            }
-            else {
+            } else {
               onError(response?.data[0]?.msg);
             }
           }
@@ -71,8 +70,8 @@ export const callApiAction = (
           dispatch(
             callSnackBar(
               "Your session has expired due to unautherized access",
-              SNACK_BAR_VARIETNS.error
-            )
+              SNACK_BAR_VARIETNS.error,
+            ),
           );
           dispatch(signOutAction());
         } else if (response.code === 406) {
@@ -81,8 +80,8 @@ export const callApiAction = (
           dispatch(
             callSnackBar(
               response.message || "OOPS! Something went wrong",
-              SNACK_BAR_VARIETNS.error
-            )
+              SNACK_BAR_VARIETNS.error,
+            ),
           );
           onError(response.message || "OOPS! Something went wrong");
         }
@@ -90,7 +89,7 @@ export const callApiAction = (
     } catch (e) {
       onError(e.message);
       dispatch(
-        callSnackBar("OOPS! Something went wrong", SNACK_BAR_VARIETNS.error)
+        callSnackBar("OOPS! Something went wrong", SNACK_BAR_VARIETNS.error),
       );
     }
   };

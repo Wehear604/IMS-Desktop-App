@@ -1,5 +1,5 @@
 // SafeBudsConnectDeviceModule.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   Button,
   Box,
@@ -30,8 +30,19 @@ import {
   DeviceIsConnectingAction,
   DeviceMACAction,
   disconnectAction,
+  SetDeviceFOT,
+  SetDevicVersionFOT,
 } from "../../store/actions/deviceDataAction";
 import WriteRicDataToDevice from "./WriteRicDataToDevice";
+import {
+  SafeBudsBLEDeviceName,
+  SafeBudsBleRead,
+  SafeBudsDeviceName,
+  SafeBudsVersionRead,
+} from "../../store/actions/deviceQcAction";
+import ReadBLEName from "../../pages/wehearDeviceQc/safebuds/ReadBLEName";
+import { fetchQcMacCheckByIdApi } from "../../apis/qcmac.api";
+import { callApiAction } from "../../store/actions/commonAction";
 // import WriteSafeBudsDataToDevice from "./WriteSafeBudsDataToDevice";
 
 const modalStyle = {
@@ -81,6 +92,8 @@ const SafeBudsConnectDeviceModule = ({
   const [deviceList, setDeviceList] = useState([]);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [selectingDeviceId, setSelectingDeviceId] = useState(null);
+  const selectingDeviceId1 = useRef(null);
+  const getMacId = useRef(null);
   const { device } = useSelector((state) => state);
 
   const dispatch = useDispatch();
@@ -178,39 +191,38 @@ const SafeBudsConnectDeviceModule = ({
   }, []);
 
   const connectDeviceFun = async (e) => {
-    if (e && e.preventDefault) e.preventDefault();
+    e.preventDefault();
     try {
       setLoadingMessage("Connecting Device...");
       setLoading(true);
       dispatch(DeviceIsConnectingAction(true));
 
-      const serviceUuid = "0000ff12-0000-1000-8000-00805f9b34fb";
+      const serviceUuid = SERVICE_UUID[fitting.device_type];
       const characteristicUuidReadNotify =
         CHARACTERISTIC_UUID_READ_NOTIFY[fitting.device_type];
       const characteristicUuidReadWrite =
         CHARACTERISTIC_UUID_READ_WRITE[fitting.device_type];
 
-      const filters = [];
-
-      const manufacturerIdA = parseInt(MANUFACTURER_IDENTIFIER[50]);
-      const manufacturerIdB = parseInt(
-        MANUFACTURER_IDENTIFIER[fitting.device_type],
-      );
-
-      if (!Number.isNaN(manufacturerIdA)) {
-        filters.push({
-          manufacturerData: [{ companyIdentifier: manufacturerIdA }],
-        });
+      const filterData = {};
+      const filter = {
+        manufacturerData: [
+          {
+            companyIdentifier:
+              parseInt(MANUFACTURER_IDENTIFIER[fitting.device_type]) ?? null,
+          },
+        ],
+      };
+      if (fitting.device_type === DEVICES.ITE_PRIME) {
+        filterData.filters = [
+          {
+            namePrefix: "ITE",
+          },
+        ];
+      } else if (filter.manufacturerData[0].companyIdentifier) {
+        filterData.filters = [filter];
+      } else {
+        filterData.acceptAllDevices = true;
       }
-
-      if (!Number.isNaN(manufacturerIdB)) {
-        filters.push({
-          manufacturerData: [{ companyIdentifier: manufacturerIdB }],
-        });
-      }
-
-      const filterData =
-        filters.length > 0 ? { filters } : { acceptAllDevices: true };
 
       const device = await navigator.bluetooth.requestDevice({
         ...filterData,
@@ -220,34 +232,54 @@ const SafeBudsConnectDeviceModule = ({
       if (!device) {
         setLoadingMessage("No device selected.");
         setLoading(false);
+        BLE_STORE.BTEdisconnect = true;
         dispatch(DeviceIsConnectingAction(false));
         return;
       }
-      const UUID_SVC = "0000ff12-0000-1000-8000-00805f9b34fb";
-      const UUID_IN = "0000ff14-0000-1000-8000-00805f9b34fb";
-      const UUID_OUT = "0000ff15-0000-1000-8000-00805f9b34fb";
 
       const server = await device.gatt.connect();
-      const svc = await server.getPrimaryService(UUID_SVC);
-      const chIn = await svc.getCharacteristic(UUID_IN);
-      const chOut = await svc.getCharacteristic(UUID_OUT);
-
-      SAFE_BUDS_STORE.device = device;
-      SAFE_BUDS_STORE.server = server;
-      SAFE_BUDS_STORE.svc = svc; // <-- IMPORTANT
-      SAFE_BUDS_STORE.chIn = chIn;
-      SAFE_BUDS_STORE.chOut = chOut;
+      const service = await server.getPrimaryService(serviceUuid);
+      const characteristicReadNotify = await service.getCharacteristic(
+        characteristicUuidReadNotify,
+      );
+      const characteristicReadWrite = await service.getCharacteristic(
+        characteristicUuidReadWrite,
+      );
 
       BLE_STORE.deviceObj = device;
-      // BLE_STORE.writeFun = characteristicReadWrite;
+      BLE_STORE.writeFun = characteristicReadWrite;
       BLE_STORE.disconnectFun = () => disconnect(side);
       BLE_STORE.hardwareData = data;
 
-      if (side === "Left") {
-        setLeftDeviceConnected(true);
-      } else {
-        setRightDeviceConnected(true);
+      try {
+        await characteristicReadNotify.startNotifications();
+        characteristicReadNotify.addEventListener(
+          "characteristicvaluechanged",
+          (event) => {
+            try {
+              const value = event.target.value; // DataView
+              const arr = [];
+              for (let i = 0; i < value.byteLength; i++) {
+                arr.push(("0" + value.getUint8(i).toString(16)).slice(-2));
+              }
+              const hex = arr.join(" ");
+              // console.log("hex notification", hex);
+              // Keep `data` serializable and small
+              setData((prev) => {
+                const next = [...prev.slice(-49), { ts: Date.now(), hex }];
+                BLE_STORE.hardwareData = next;
+                console.log("object next", next);
+                return next;
+              });
+            } catch (err) {
+              console.error("Error parsing notification", err);
+            }
+          },
+        );
+      } catch (err) {
+        console.warn("Could not start notifications:", err);
       }
+
       setConnected(true);
 
       setLoadingMessage("Device connected successfully");
@@ -256,22 +288,7 @@ const SafeBudsConnectDeviceModule = ({
 
       const currentDeviceInfo = { name: device.name, id: device.id };
       setDeviceInfo(currentDeviceInfo);
-      if (fitting.device_type === DEVICES.RIC_OPTIMA_8) {
-        await WriteRicDataToDevice("0x02", side, BLE_STORE.deviceObj || device);
-        if (side === "Left") {
-          await WriteRicDataToDevice(
-            "0x0B",
-            side,
-            BLE_STORE.deviceObj || device,
-          );
-        } else {
-          await WriteRicDataToDevice(
-            "0x0B",
-            side,
-            BLE_STORE.deviceObj || device,
-          );
-        }
-      }
+
       device.ongattserverdisconnected = (err) => {
         console.log("GATT disconnected:", err);
         if (side === "Left") {
@@ -287,8 +304,139 @@ const SafeBudsConnectDeviceModule = ({
         BLE_STORE.writeFun = null;
         BLE_STORE.disconnectFun = null;
       };
-      console.log("BLE_STORE.deviceObj", BLE_STORE.deviceObj);
-      onConnectWithDevice(data, currentDeviceInfo);
+
+      if (getMacId.current?.version !== "V2") {
+        try {
+          try {
+            if (BLE_STORE.deviceObj?.gatt?.connected) {
+              BLE_STORE.deviceObj.gatt.disconnect();
+              BLE_STORE.BTEdisconnect = true;
+            }
+          } catch (err) {}
+          setLoadingMessage("Connecting Device...");
+          setLoading(true);
+          dispatch(DeviceIsConnectingAction(true));
+
+          const targetId = selectingDeviceId1.current;
+
+          if (window.electronAPI) {
+            window.electronAPI.selectBluetoothDevice(targetId);
+          }
+
+          const serviceUuid = "0000ff12-0000-1000-8000-00805f9b34fb";
+          const UUID_SVC = "0000ff12-0000-1000-8000-00805f9b34fb";
+          const UUID_IN = "0000ff14-0000-1000-8000-00805f9b34fb";
+          const UUID_OUT = "0000ff15-0000-1000-8000-00805f9b34fb";
+
+          const filters = [];
+          const manufacturerIdA = parseInt(MANUFACTURER_IDENTIFIER[50]);
+          const manufacturerIdB = parseInt(
+            MANUFACTURER_IDENTIFIER[fitting.device_type],
+          );
+
+          if (!Number.isNaN(manufacturerIdA)) {
+            filters.push({
+              manufacturerData: [{ companyIdentifier: manufacturerIdA }],
+            });
+          }
+          if (!Number.isNaN(manufacturerIdB)) {
+            filters.push({
+              manufacturerData: [{ companyIdentifier: manufacturerIdB }],
+            });
+          }
+
+          const filterData =
+            filters.length > 0 ? { filters } : { acceptAllDevices: true };
+
+          // --- DEVICE RETRIEVAL ---
+          let device;
+
+          if (
+            navigator.bluetooth &&
+            typeof navigator.bluetooth.getDevices === "function"
+          ) {
+            const devices = await navigator.bluetooth.getDevices();
+            device = devices.find((d) => d.id === targetId);
+          }
+
+          if (!device) {
+            console.log("Requesting device...");
+            // Do NOT put 'await wait(5000)' here! It breaks the security context.
+            device = await navigator.bluetooth.requestDevice({
+              ...filterData,
+              optionalServices: [serviceUuid, UUID_SVC, UUID_IN, UUID_OUT],
+            });
+          }
+
+          if (!device) throw new Error("No device selected.");
+
+          const server = await device.gatt.connect();
+          const svc = await server.getPrimaryService(UUID_SVC);
+          const chIn = await svc.getCharacteristic(UUID_IN);
+          const chOut = await svc.getCharacteristic(UUID_OUT);
+
+          SAFE_BUDS_STORE.device = device;
+          SAFE_BUDS_STORE.server = server;
+          SAFE_BUDS_STORE.svc = svc;
+          SAFE_BUDS_STORE.chIn = chIn;
+          SAFE_BUDS_STORE.chOut = chOut;
+
+          BLE_STORE.deviceObj = device;
+          BLE_STORE.disconnectFun = () => disconnect(side);
+          BLE_STORE.hardwareData = data;
+
+          if (side === "Left") setLeftDeviceConnected(true);
+          else setRightDeviceConnected(true);
+
+          setConnected(true);
+          setLoadingMessage("Device connected successfully");
+          setLoading(false);
+          dispatch(DeviceIsConnectingAction(false));
+
+          const currentDeviceInfo = { name: device.name, id: device.id };
+          setDeviceInfo(currentDeviceInfo);
+
+          if (fitting.device_type === DEVICES.RIC_OPTIMA_8) {
+            await WriteRicDataToDevice(
+              "0x02",
+              side,
+              BLE_STORE.deviceObj || device,
+            );
+            await WriteRicDataToDevice(
+              "0x0B",
+              side,
+              BLE_STORE.deviceObj || device,
+            );
+          }
+
+          device.ongattserverdisconnected = (err) => {
+            console.log("GATT disconnected:", err);
+            if (side === "Left") {
+              setLeftDeviceConnected(false);
+              dispatch(disconnectAction(LISTENING_SIDE.LEFT, true));
+            } else {
+              setRightDeviceConnected(false);
+              dispatch(disconnectAction(LISTENING_SIDE.RIGHT, true));
+            }
+            setLoadingMessage("Device disconnected");
+            BLE_STORE.deviceObj = null;
+            BLE_STORE.writeFun = null;
+            BLE_STORE.disconnectFun = null;
+          };
+
+          onConnectWithDevice(data, currentDeviceInfo);
+        } catch (error) {
+          console.error("Error:", error);
+          setLoadingMessage("Failed: " + (error?.message || String(error)));
+          setLoading(false);
+          dispatch(DeviceIsConnectingAction(false));
+          if (side === "Left") setLeftDeviceConnected(false);
+          else setRightDeviceConnected(false);
+        }
+      } else {
+        dispatch(SetDevicVersionFOT());
+        onConnectWithDevice(data, currentDeviceInfo);
+      }
     } catch (error) {
       console.error("Error:", error);
       setLoadingMessage(
@@ -337,18 +485,30 @@ const SafeBudsConnectDeviceModule = ({
       BLE_STORE.BTEdisconnect = false;
     }
   }, [BLE_STORE.BTEdisconnect]);
-  // Electron modal handlers
+
   const handleDeviceSelected = (deviceId) => {
+    dispatch(
+      callApiAction(
+        async () =>
+          await fetchQcMacCheckByIdApi({
+            mac: deviceId,
+            device_type: DEVICES.SAFE_BUDS,
+          }),
+        async (response) => {
+          getMacId.current = response;
+        },
+        (err) => {
+          console.log("first err", err);
+        },
+      ),
+    );
     setSelectingDeviceId(deviceId);
+    selectingDeviceId1.current = deviceId;
     dispatch(DeviceMACAction(deviceId));
     if (window.electronAPI) {
       window.electronAPI.selectBluetoothDevice(deviceId);
     }
   };
-
-  useEffect(() => {
-    console.log("Device data", device);
-  },[device])
 
   const handleCancelSelect = () => {
     if (selectingDeviceId) return;
@@ -417,3 +577,25 @@ const SafeBudsConnectDeviceModule = ({
 };
 
 export default SafeBudsConnectDeviceModule;
+
+// const VersionGet1 = await dispatch(
+//   SafeBudsVersionRead({
+//     type: "SafeBudsVersionRead",
+//     isVersionRead: false,
+//   }),
+// );
+
+// const bleNameRead = await dispatch(SafeBudsBleRead());
+// let checkCondition =
+//   bleNameRead === "SafeBuds" && String(VersionGet1).startsWith("V2")
+//     ? false
+//     : !String(VersionGet1).startsWith("V2")
+//       ? bleNameRead === "WeHear"
+//         ? false
+//         : !String(VersionGet1).startsWith("V2")
+//       : !String(VersionGet1).startsWith("V2");
+
+// if (bleNameRead === "WeHear" && !String(VersionGet1).startsWith("V2")) {
+//   checkCondition = true;
+// }
+// console.log("!String(VersionGet).startsWith", checkCondition);

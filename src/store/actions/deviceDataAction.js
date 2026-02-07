@@ -47,7 +47,10 @@ export const disconnectAction = (side, flag = false) => {
 
       if (flag) {
         dispatch(
-          callSnackBar("Please try connecting again.", SNACK_BAR_VARIETNS.error)
+          callSnackBar(
+            "Please try connecting again.",
+            SNACK_BAR_VARIETNS.error,
+          ),
         );
       }
     } catch (err) {}
@@ -73,7 +76,7 @@ export const DeviceStoreAction = (
   charging,
   audio,
   mac,
-  isMic
+  isMic,
 ) => {
   return {
     type: actions.SET_DEVICE_STORAGE,
@@ -93,7 +96,7 @@ export const DeviceBoxDetailsAction = (
   box_Contains,
   boxId,
   deviceColor,
-  device_type
+  device_type,
 ) => {
   return {
     type: actions.SET_BOX_DETAILS,
@@ -112,4 +115,7 @@ export const CloseDeviceDataStore = () => {
 };
 export const SetDeviceFOT = () => {
   return { type: actions.SET_FOT_FILES };
+};
+export const SetDevicVersionFOT = () => {
+  return { type: actions.SET_FOT_FILES_VERSION };
 };

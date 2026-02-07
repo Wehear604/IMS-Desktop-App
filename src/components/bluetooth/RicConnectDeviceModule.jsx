@@ -71,7 +71,7 @@ const RicConnectDevice = ({
   const [rightDeviceConnected, setRightDeviceConnected] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState(
-    "Checking Browser Support"
+    "Checking Browser Support",
   );
   const [deviceInfo, setDeviceInfo] = useState({ name: "", id: "" });
   const [data, setData] = useState([]); // serializable activity data (e.g., parsed notifications)
@@ -106,7 +106,7 @@ const RicConnectDevice = ({
       };
     } else {
       console.warn(
-        "electronAPI is not available. Running in a standard browser."
+        "electronAPI is not available. Running in a standard browser.",
       );
     }
   }, []);
@@ -123,7 +123,7 @@ const RicConnectDevice = ({
             onEnableChange(true);
           } else {
             setLoadingMessage(
-              "Bluetooth is turned off. Please turn on Bluetooth in your system settings."
+              "Bluetooth is turned off. Please turn on Bluetooth in your system settings.",
             );
             setEnabled(false);
             onEnableChange(false);
@@ -131,14 +131,14 @@ const RicConnectDevice = ({
         } catch (error) {
           console.error("Error checking Bluetooth availability:", error);
           setLoadingMessage(
-            "Could not check Bluetooth status. Ensure permissions are granted."
+            "Could not check Bluetooth status. Ensure permissions are granted.",
           );
           setEnabled(false);
           onEnableChange(false);
         }
       } else {
         setLoadingMessage(
-          "Web Bluetooth is not supported by this application."
+          "Web Bluetooth is not supported by this application.",
         );
         setEnabled(false);
         onEnableChange(false);
@@ -178,7 +178,7 @@ const RicConnectDevice = ({
   }, []);
 
   const connectDeviceFun = async (e) => {
-    if (e && e.preventDefault) e.preventDefault();
+    e.preventDefault();
     try {
       setLoadingMessage("Connecting Device...");
       setLoading(true);
@@ -231,13 +231,13 @@ const RicConnectDevice = ({
           (side === "Right" && !device.name?.endsWith("R")))
       ) {
         setLoadingMessage(
-          `Please connect the correct device for the ${side} side.`
+          `Please connect the correct device for the ${side} side.`,
         );
         dispatch(
           callSnackBar(
             `Please connect the ${side} side device `,
-            SNACK_BAR_VARIETNS.error
-          )
+            SNACK_BAR_VARIETNS.error,
+          ),
         );
         setLoading(false);
         dispatch(DeviceIsConnectingAction(false));
@@ -247,10 +247,10 @@ const RicConnectDevice = ({
       const server = await device.gatt.connect();
       const service = await server.getPrimaryService(serviceUuid);
       const characteristicReadNotify = await service.getCharacteristic(
-        characteristicUuidReadNotify
+        characteristicUuidReadNotify,
       );
       const characteristicReadWrite = await service.getCharacteristic(
-        characteristicUuidReadWrite
+        characteristicUuidReadWrite,
       );
 
       // store non-serializable bluetooth objects in BLE_STORE (not in React state)
@@ -282,7 +282,7 @@ const RicConnectDevice = ({
             } catch (err) {
               console.error("Error parsing notification", err);
             }
-          }
+          },
         );
       } catch (err) {
         console.warn("Could not start notifications:", err);
@@ -308,13 +308,13 @@ const RicConnectDevice = ({
           await WriteRicDataToDevice(
             "0x0B",
             side,
-            BLE_STORE.deviceObj || device
+            BLE_STORE.deviceObj || device,
           );
         } else {
           await WriteRicDataToDevice(
             "0x0B",
             side,
-            BLE_STORE.deviceObj || device
+            BLE_STORE.deviceObj || device,
           );
         }
       }
@@ -359,7 +359,7 @@ const RicConnectDevice = ({
     } catch (error) {
       console.error("Error:", error);
       setLoadingMessage(
-        "Failed to connect: " + (error?.message || String(error))
+        "Failed to connect: " + (error?.message || String(error)),
       );
       setLoading(false);
       dispatch(DeviceIsConnectingAction(false));

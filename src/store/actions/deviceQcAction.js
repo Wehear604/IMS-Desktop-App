@@ -2,8 +2,10 @@ import ReadITEDataFromDevice from "../../pages/wehearDeviceQc/ite/ReadITEDataFro
 import ReadITEPrimeDataFromDevice from "../../pages/wehearDeviceQc/ite/ReadITEPrimeDataFromDevice";
 import ReadRicDataFromDevice from "../../pages/wehearDeviceQc/ric/ReadRicDataToDevice";
 import Read from "../../pages/wehearDeviceQc/safebuds/Read";
+import ReadBLEName from "../../pages/wehearDeviceQc/safebuds/ReadBLEName";
 import ReadVersion from "../../pages/wehearDeviceQc/safebuds/ReadVersion";
 import Write from "../../pages/wehearDeviceQc/safebuds/Write";
+import WriteBleName from "../../pages/wehearDeviceQc/safebuds/WriteBleName";
 import WriteVersion from "../../pages/wehearDeviceQc/safebuds/WriteVersion";
 import { BLE_STORE, interpolateValue } from "../../utils/bleStore";
 import {
@@ -98,7 +100,7 @@ export const RicDeviceCurrentVolume = (side) => {
       const response = await ReadRicDataFromDevice(
         command,
         side,
-        BLE_STORE.deviceObj
+        BLE_STORE.deviceObj,
       );
 
       if (response && response.startsWith("82 03")) {
@@ -184,9 +186,12 @@ export const readRicMode = (side, deviceObj) => {
       const d1 = parseInt(data[4], 16);
 
       let mode;
-      if (d1 === 1) mode = 0; // Quiet
-      else if (d1 === 2) mode = 1; // Noise
-      else if (d1 === 3) mode = 2; // Outdoor
+      if (d1 === 1)
+        mode = 0; // Quiet
+      else if (d1 === 2)
+        mode = 1; // Noise
+      else if (d1 === 3)
+        mode = 2; // Outdoor
       else {
         console.error(`Unexpected mode value: ${d1}`);
         return;
@@ -212,7 +217,7 @@ export const readRic8Volume = (side, currentVolume) => {
       const response = await ReadRicDataFromDevice(
         command,
         side,
-        BLE_STORE.deviceObj
+        BLE_STORE.deviceObj,
       );
       const responseParts = response.trim().split(" ");
       console.log("first response", response);
@@ -228,7 +233,7 @@ export const readRic8Volume = (side, currentVolume) => {
           eqData.push(twoDataObj);
         } else {
           eqData.push(
-            parseInt(responseParts[i], 16) - parseInt(EQ_LEVEL[i], 16)
+            parseInt(responseParts[i], 16) - parseInt(EQ_LEVEL[i], 16),
           );
         }
       }
@@ -265,7 +270,7 @@ export const getITEOptimaData = (side, currentVolume) => {
     const response = await ReadITEDataFromDevice(
       command,
       side,
-      BLE_STORE.deviceObj
+      BLE_STORE.deviceObj,
     );
     const responseParts = response.trim().split(" ");
     console.log("object response", response);
@@ -337,7 +342,7 @@ export const getITEPrimeVolume = (side, currentVolume) => {
     const response = await ReadITEPrimeDataFromDevice(
       command,
       side,
-      BLE_STORE.deviceObj
+      BLE_STORE.deviceObj,
     );
     const parts = response;
     const payload = parts.slice(3);
@@ -386,6 +391,24 @@ export const SafeBudsDeviceName = ({ type }) => {
     }
   };
 };
+export const SafeBudsBLEDeviceName = ({ type }) => {
+  return async (dispatch) => {
+    try {
+      const command = "0x20";
+
+      const response = await WriteBleName(
+        command,
+        "both",
+        BLE_STORE.deviceObj,
+        type,
+      );
+
+      console.log(`"response" : - ${type}`, response);
+    } catch (err) {
+      console.error("RicDeviceCurrentVolume read failed", err);
+    }
+  };
+};
 
 export const SafeBudsTap = ({ type }) => {
   return async (dispatch) => {
@@ -396,7 +419,7 @@ export const SafeBudsTap = ({ type }) => {
         "both",
         BLE_STORE.deviceObj,
         type,
-        dispatch
+        dispatch,
       );
 
       console.log("response1", response);
@@ -406,7 +429,7 @@ export const SafeBudsTap = ({ type }) => {
   };
 };
 
-export const SafeBudsVersionRead = ({ type }) => {
+export const SafeBudsVersionRead = ({ type, isVersionRead = true }) => {
   return async (dispatch) => {
     try {
       const command = 0x60;
@@ -415,11 +438,31 @@ export const SafeBudsVersionRead = ({ type }) => {
         "both",
         BLE_STORE.deviceObj,
         type,
-        dispatch
+        dispatch,
       );
+      console.log("version response", response);
+      if (isVersionRead) {
+        dispatch(SafeBudsVersionUpdate({ type: "ble" }));
+      }
+      return response;
+    } catch (err) {
+      console.error("RicDeviceCurrentVolume read failed", err);
+    }
+  };
+};
+export const SafeBudsBleRead = (payload = {}) => {
+  return async (dispatch) => {
+    try {
+      const command = 0x21;
+      const response = await ReadBLEName(
+        command,
+        "both",
+        BLE_STORE.deviceObj,
+        dispatch,
+      );
+      console.log("version response", response);
 
-      console.log("response", response);
-      dispatch(SafeBudsVersionUpdate({ type: "ble" }));
+      return response;
     } catch (err) {
       console.error("RicDeviceCurrentVolume read failed", err);
     }
@@ -496,7 +539,7 @@ export const SafeBudsVersionUpdate = ({ type }) => {
         command,
         "both",
         BLE_STORE.deviceObj,
-        type
+        type,
       );
 
       console.log("response3", response);

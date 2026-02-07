@@ -117,15 +117,10 @@ const ConnectButton = ({
   let b = false;
 
   const AudioAndMicCheck = () => {
-    if (device.device_type == DEVICES.SAFE_BUDS && !device?.fotfile) {
+    if (device.device_type == DEVICES.SAFE_BUDS && !device?.fotfile1) {
       // dispatch(SafeBudsVersionRead({ type: "SafeBudsVersionRead" }));
       dispatch(
-        openModal(
-          <SafeBudsFotUpload fotfile={fotfile} />,
-          "sm",
-          true,
-          "deviceAudioMicCheck"
-        )
+        openModal(<SafeBudsFotUpload />, "sm", true, "deviceAudioMicCheck"),
       );
     } else {
       dispatch(SafeBudsVersionRead({ type: "SafeBudsVersionRead" }));
@@ -229,7 +224,7 @@ const DeviceConnectUi = () => {
   const dispatch = useDispatch();
   console.log(
     "device?.device_type === DEVICES.SAFE_BUDS && !device?.fotfile",
-    device?.fotfile
+    device?.fotfile,
   );
   const devices = [
     { side: "L", label: "BTE", value: LISTENING_SIDE.LEFT },
@@ -483,7 +478,7 @@ const DeviceConnectUi = () => {
           </Grid>
         )}
 
-        {device?.device_type === DEVICES.SAFE_BUDS && !device?.fotfile ? (
+        {device?.device_type === DEVICES.SAFE_BUDS ? (
           <SafeBudsConnectDeviceModule
             side={
               device?.device_side === LISTENING_SIDE.RIGHT ? "Right" : "Left"
@@ -494,8 +489,8 @@ const DeviceConnectUi = () => {
                 connectDevice(
                   deviceInfo,
                   device?.device_side,
-                  device?.device_type
-                )
+                  device?.device_type,
+                ),
               );
             }}
             Component={ConnectButton}
@@ -524,8 +519,8 @@ const DeviceConnectUi = () => {
                 connectDevice(
                   deviceInfo,
                   device?.device_side,
-                  device?.device_type
-                )
+                  device?.device_type,
+                ),
               );
             }}
             Component={ConnectButton}
@@ -553,8 +548,8 @@ const DeviceConnectUi = () => {
                 connectDevice(
                   deviceInfo,
                   device?.device_side,
-                  device?.device_type
-                )
+                  device?.device_type,
+                ),
               );
             }}
             Component={ConnectButton}

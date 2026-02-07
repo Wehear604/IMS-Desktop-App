@@ -10,8 +10,10 @@ import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import FOT from "../../assets/images/fotFile.svg";
 import { SetDeviceFOT } from "../../store/actions/deviceDataAction";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import fotfile from "../../assets/blefiles/fw5000_latest.fot";
+import { callApiAction } from "../../store/actions/commonAction";
+import { CreateQcMacCheckApi } from "../../apis/qcmac.api";
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
   clipPath: "inset(50%)",
@@ -538,6 +540,7 @@ const SafeBudsFotUpload = () => {
   const [logs, setLogs] = useState("");
   const dispatch = useDispatch();
   const [isUploading, setIsUploading] = useState(false);
+  const deviceData = useSelector((state) => state.device);
 
   const logRef = React.useRef(null);
   let session = null;
@@ -605,6 +608,23 @@ const SafeBudsFotUpload = () => {
   useEffect(() => {
     if (progress === 100) {
       setIsUploading(false);
+
+      dispatch(
+        callApiAction(
+          async () =>
+            await CreateQcMacCheckApi({
+              device_type: deviceData?.device_type,
+              mac: deviceData?.macBeforeOta,
+              version: "V2",
+            }),
+          async (response) => {
+            console.log("first CreateQcMacCheckApi", response);
+          },
+          (err) => {
+            console.log("first CreateQcMacCheckApi", err);
+          },
+        ),
+      );
     }
   }, [progress]);
 

@@ -33,10 +33,10 @@ const processQueue = async () => {
 
     const service = await device.gatt.getPrimaryService(serviceUuid);
     const characteristicWrite = await service.getCharacteristic(
-      CHARACTERISTIC_UUID_WRITE
+      CHARACTERISTIC_UUID_WRITE,
     );
     const characteristicRead = await service.getCharacteristic(
-      CHARACTERISTIC_UUID_READ
+      CHARACTERISTIC_UUID_READ,
     );
 
     await characteristicRead.startNotifications();
@@ -44,7 +44,7 @@ const processQueue = async () => {
     function stringToHexWithSpaces(str) {
       return Array.from(str)
         .map((char) =>
-          char.charCodeAt(0).toString(16).toUpperCase().padStart(2, "0")
+          char.charCodeAt(0).toString(16).toUpperCase().padStart(2, "0"),
         )
         .join(" ");
     }
@@ -52,7 +52,7 @@ const processQueue = async () => {
     function stringToHexWithSpaces1(str) {
       return Array.from(str)
         .map((char) =>
-          char.charCodeAt(0).toString(16).toUpperCase().padStart(2, "0")
+          char.charCodeAt(0).toString(16).toUpperCase().padStart(2, "0"),
         )
         .join(" ");
     }
