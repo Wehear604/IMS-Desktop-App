@@ -19,7 +19,7 @@ const initialState = {
     result: false,
     mic: null,
     test: false,
-    macBeforeOta: null
+    macBeforeOta: null,
   },
   right: {
     device_type: null,
@@ -39,7 +39,15 @@ const initialState = {
     mic: null,
     test: false,
   },
-  box_Contains: [],
+  box_Contains: [
+    { cable: false },
+    { doms: false },
+    { manual: false },
+    { charging_Case: false },
+    { charging_Adepter: false },
+    { cleaning_Brush: false },
+    { warranty_Card: false },
+  ],
   deviceColor: null,
   boxId: null,
   device: null,
@@ -108,12 +116,20 @@ const deviceDataStorageReducer = (state = initialState, action) => {
       return {
         ...initialState,
       };
+    case actions.SET_DEVICE_COLOR_DETAILS:
+      return {
+        ...state,
+        deviceColor: action.deviceColor,
+      };
+    case actions.SET_DEVICE_BOXID_DETAILS:
+      return {
+        ...state,
+        boxId: action.boxId,
+      };
     case actions.SET_BOX_DETAILS:
       return {
         ...state,
         box_Contains: action.box_Contains,
-        boxId: action.boxId,
-        deviceColor: action.deviceColor,
         device: action.device_type,
       };
     default:

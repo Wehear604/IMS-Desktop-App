@@ -33,6 +33,8 @@ import { closeModal } from "../../store/actions/modalAction";
 import { fetchProductColorAction } from "../../store/actions/setting.Action";
 import CustomDialog from "../../components/layouts/common/CustomDialog";
 import { CenteredBox } from "../../components/layouts/OneViewBox";
+import SafeBudsBoxContainsUI from "./SafebudsUi/SafeBudsBoxContainsUI";
+import SafebudsMainUi from "./SafebudsUi/SafebudsMainUi";
 
 const DeviceQcListController = ({
   initialStep = 0,
@@ -253,7 +255,7 @@ const DeviceQcListController = ({
           justifyContent: "space-between",
         }}
       >
-        {step === 0 && (
+        {step === 2 && (
           <>
             {" "}
             <Box>
@@ -317,7 +319,7 @@ const DeviceQcListController = ({
           </>
         )}
 
-        {step === 2 && (
+        {step === 0 && (
           <>
             {loading ? (
               <CenteredBox>
@@ -325,11 +327,12 @@ const DeviceQcListController = ({
               </CenteredBox>
             ) : (
               <>
-                <ProductDetailsQcUi
+                <SafebudsMainUi />
+                {/* <ProductDetailsQcUi
                   setBox={setFields}
                   box={fields}
                   isUpdate={isUpdate}
-                />
+                /> */}
               </>
             )}
 

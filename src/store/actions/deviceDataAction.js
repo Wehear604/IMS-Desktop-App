@@ -92,18 +92,23 @@ export const DeviceStoreAction = (
   };
 };
 
-export const DeviceBoxDetailsAction = (
-  box_Contains,
-  boxId,
-  deviceColor,
-  device_type,
-) => {
+export const DeviceBoxDetailsAction = (box_Contains, device_type) => {
   return {
     type: actions.SET_BOX_DETAILS,
     box_Contains,
-    boxId,
-    deviceColor,
     device_type,
+  };
+};
+export const DeviceColorAction = (deviceColor) => {
+  return {
+    type: actions.SET_DEVICE_COLOR_DETAILS,
+    deviceColor,
+  };
+};
+export const DeviceBoxIDAction = (boxId) => {
+  return {
+    type: actions.SET_DEVICE_BOXID_DETAILS,
+    boxId,
   };
 };
 

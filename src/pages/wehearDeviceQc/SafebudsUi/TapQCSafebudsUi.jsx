@@ -4,11 +4,18 @@ import ButtonComponentsUi from "../../../components/button/ButtonComponentsUi";
 import { ChangeButtonSide } from "../../../store/actions/deviceQcAction";
 import { LISTENING_SIDE } from "../../../utils/constants";
 import { useDispatch, useSelector } from "react-redux";
+import StepCard from "../../../components/StepCard";
 
 const TapQCSafebudsUi = () => {
   const dispatch = useDispatch();
-  const { device } = useSelector((state) => state);
+  const { device, deviceQc } = useSelector((state) => state);
+  const tapcheck = (number) => {
+    if (!device?.device_side) return false;
 
+    return device?.device_side === LISTENING_SIDE.LEFT
+      ? deviceQc.modeLeft?.includes(number)
+      : deviceQc.modeRight?.includes(number);
+  };
   return (
     <>
       <ButtonGroup sx={{ width: "100%", mb: 2 }}>
@@ -25,6 +32,36 @@ const TapQCSafebudsUi = () => {
           Title={"RIGHT SIDE"}
         />
       </ButtonGroup>
+
+      <>
+        <StepCard
+          isChecked={true}
+          checked={tapcheck(1)}
+          title="Single Touch"
+          //   subtitle="Test device audio output"
+        />
+
+        <StepCard
+          isChecked={true}
+          checked={tapcheck(2)}
+          title="Double Touch"
+          //   subtitle="Test device audio output"
+        />
+
+        <StepCard
+          isChecked={true}
+          checked={tapcheck(3)}
+          title="Triple Touch"
+          //   subtitle="Test device audio output"
+        />
+
+        <StepCard
+          isChecked={true}
+          checked={tapcheck(4)}
+          title="Long Press"
+          //   subtitle="Test device audio output"
+        />
+      </>
     </>
   );
 };
