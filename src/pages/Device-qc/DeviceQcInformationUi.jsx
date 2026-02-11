@@ -1,4 +1,4 @@
-import { Box, Chip, Typography } from "@mui/material";
+import { Box, Chip, Divider, Typography } from "@mui/material";
 import React, { useCallback, useEffect, useState } from "react";
 import CustomDialog from "../../components/layouts/common/CustomDialog";
 import { fetchDeviceApi, getDeviceByIdApi } from "../../apis/deviceQc.api";
@@ -27,11 +27,11 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
           (err) => {
             setFields((prev) => ({ ...prev, err }));
             setLoading(false);
-          }
-        )
+          },
+        ),
       );
     },
-    [dispatch]
+    [dispatch],
   );
 
   useEffect(() => {
@@ -51,7 +51,10 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
           </Typography>
           <InformationUI
             Data={[
-              { label: "Device Name :", value: toTitleCase(fields?.deviceName) },
+              {
+                label: "Device Name :",
+                value: toTitleCase(fields?.deviceName),
+              },
               {
                 isField: fields?.device !== DEVICES.SAFE_BUDS,
                 label: "Device Mac Address :",
@@ -63,10 +66,10 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                 label: "Box Contains :",
                 isArray: true,
                 value: fields?.box_Contains?.length
-                  ? fields.box_Contains
+                  ? toTitleCase(fields.box_Contains
                       .flatMap((item) => Object.keys(item))
                       .map((key) => key.replace(/_/g, " "))
-                      .join(", ")
+                      .join(", "))
                   : ["NA"],
               },
               {
@@ -114,10 +117,52 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
 
         <Box mt={4}>
           <Typography variant="h4" fontWeight="bold" mb={2}>
-            Left Device QC Details :
+            Device QC Details :
           </Typography>
           <InformationUI
             Data={[
+              {
+                label: "Test Case Executed",
+                value: (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-evenly",
+                      width: "100%",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Typography variant="body1" fontWeight={600} ml={2}>
+                      Left Device
+                    </Typography>
+                    <Divider orientation="vertical" flexItem />
+                    <Typography variant="body1" fontWeight={600}>
+                      Right Device
+                    </Typography>
+                  </Box>
+                ),
+              },
+              {
+                label: "Test Case Executed",
+                value: (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-evenly",
+                      width: "100%",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Typography variant="body1" fontWeight={600} ml={2}>
+                      Left Device
+                    </Typography>
+                    <Divider orientation="vertical" flexItem />
+                    <Typography variant="body1" fontWeight={600}>
+                      Right Device
+                    </Typography>
+                  </Box>
+                ),
+              },
               {
                 isField: fields?.device === DEVICES.SAFE_BUDS,
                 label: "Left Device Mac :",
@@ -126,23 +171,51 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
               {
                 label: "Overall Device QC Result :",
                 value: (
-                  <Chip
-                    label={fields?.left?.result ? "Passed" : "Failed"}
-                    size="small"
+                  <Box
                     sx={{
-                      backgroundColor: fields?.left?.result
-                        ? "success.main"
-                        : "error.main",
-                      color: "#fff",
-                      fontWeight: 500,
-                      textTransform: "capitalize",
+                      display: "flex",
+                      justifyContent: "space-evenly",
+                      width: "100%",
                     }}
-                  />
+                  >
+                    <Chip
+                      label={fields?.left?.result ? "Passed" : "Failed"}
+                      size="small"
+                      sx={{
+                        backgroundColor: fields?.left?.result
+                          ? "success.main"
+                          : "error.main",
+                        color: "#fff",
+                        fontWeight: 500,
+                        textTransform: "capitalize",
+                      }}
+                    />
+                    <Divider orientation="vertical" flexItem />
+                    <Chip
+                      label={fields?.right?.result ? "Passed" : "Failed"}
+                      size="small"
+                      sx={{
+                        backgroundColor: fields?.right?.result
+                          ? "success.main"
+                          : "error.main",
+                        color: "#fff",
+                        fontWeight: 500,
+                        textTransform: "capitalize",
+                      }}
+                    />
+                  </Box>
                 ),
               },
               {
                 label: "Device Audio Test :",
                 value: (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-evenly",
+                      width: "100%",
+                    }}
+                    >
                   <Chip
                     label={fields?.left?.audio ? "Passed" : "Failed"}
                     size="small"
@@ -155,11 +228,32 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                       textTransform: "capitalize",
                     }}
                   />
+                  <Divider orientation="vertical" flexItem />
+                  <Chip
+                    label={fields?.right?.audio ? "Passed" : "Failed"}
+                    size="small"
+                    sx={{
+                      backgroundColor: fields?.right?.audio
+                        ? "success.main"
+                        : "error.main",
+                      color: "#fff",
+                      fontWeight: 500,
+                      textTransform: "capitalize",
+                    }}
+                  />
+                  </Box>
                 ),
               },
               {
                 label: "Device Charging Test :",
                 value: (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-evenly",
+                        width: "100%",
+                      }}
+                    >
                   <Chip
                     label={fields?.left?.charging ? "Passed" : "Failed"}
                     size="small"
@@ -172,12 +266,33 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                       textTransform: "capitalize",
                     }}
                   />
+                  <Divider orientation="vertical" flexItem />
+                  <Chip
+                    label={fields?.right?.charging ? "Passed" : "Failed"}
+                    size="small"
+                    sx={{
+                      backgroundColor: fields?.right?.charging
+                        ? "success.main"
+                        : "error.main",
+                      color: "#fff",
+                      fontWeight: 500,
+                      textTransform: "capitalize",
+                    }}
+                  />
+                  </Box>
                 ),
               },
               {
                 isField: fields?.device !== DEVICES.SAFE_BUDS,
                 label: "Device Mic Test :",
                 value: (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-evenly",
+                        width: "100%",
+                      }}
+                    >
                   <Chip
                     label={fields?.left?.mic ? "Passed" : "Failed"}
                     size="small"
@@ -190,11 +305,33 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                       textTransform: "capitalize",
                     }}
                   />
+                  <Divider orientation="vertical" flexItem />
+                  <Chip
+                    label={fields?.right?.mic ? "Passed" : "Failed"}
+                    size="small"
+                    sx={{
+                      backgroundColor: fields?.right?.mic
+                        ? "success.main"
+                        : "error.main",
+                      color: "#fff",
+                      fontWeight: 500,
+                      textTransform: "capitalize",
+                    }}
+                  />
+                  </Box>
+
                 ),
               },
               {
                 label: "Device is not Damaged :",
                 value: (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-evenly",
+                      width: "100%",
+                    }}
+                  >
                   <Chip
                     label={fields?.left?.body?.body1 ? "Passed" : "Damaged"}
                     size="small"
@@ -207,11 +344,32 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                       textTransform: "capitalize",
                     }}
                   />
+                  <Divider orientation="vertical" flexItem />
+                  <Chip
+                    label={fields?.right?.body?.body1 ? "Passed" : "Damaged"}
+                    size="small"
+                    sx={{
+                      backgroundColor: fields?.right?.body?.body1
+                        ? "success.main"
+                        : "error.main",
+                      color: "#fff",
+                      fontWeight: 500,
+                      textTransform: "capitalize",
+                    }}
+                  />
+                  </Box>
                 ),
               },
               {
                 label: "Device is not Scratched :",
                 value: (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-evenly",
+                        width: "100%",
+                      }}
+                    >
                   <Chip
                     label={fields?.left?.body?.body2 ? "Passed" : "Scratched"}
                     size="small"
@@ -224,11 +382,32 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                       textTransform: "capitalize",
                     }}
                   />
+                  <Divider orientation="vertical" flexItem />
+                  <Chip
+                    label={fields?.right?.body?.body2 ? "Passed" : "Scratched"}
+                    size="small"
+                    sx={{
+                      backgroundColor: fields?.right?.body?.body2
+                        ? "success.main"
+                        : "error.main",
+                      color: "#fff",
+                      fontWeight: 500,
+                      textTransform: "capitalize",  
+                    }}
+                  />
+                  </Box>
                 ),
               },
               {
                 label: "Device Volume Increased :",
                 value: (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-evenly",
+                      width: "100%",
+                    }}
+                  >
                   <Chip
                     label={
                       fields?.left?.volume?.volumeIncrease ? "Passed" : "Failed"
@@ -243,11 +422,36 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                       textTransform: "capitalize",
                     }}
                   />
+                  <Divider orientation="vertical" flexItem />
+                  <Chip
+                    label={
+                      fields?.right?.volume?.volumeIncrease
+                        ? "Passed"
+                        : "Failed"
+                    }
+                    size="small"
+                    sx={{
+                      backgroundColor: fields?.right?.volume?.volumeIncrease
+                        ? "success.main"
+                        : "error.main",
+                      color: "#fff",
+                      fontWeight: 500,
+                      textTransform: "capitalize",
+                    }}
+                  />
+                  </Box>
                 ),
               },
               {
                 label: "Device Volume Decreased :",
                 value: (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-evenly",
+                        width: "100%",
+                      }}
+                    >
                   <Chip
                     label={
                       fields?.left?.volume?.volumeDecrease ? "Passed" : "Failed"
@@ -262,11 +466,36 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                       textTransform: "capitalize",
                     }}
                   />
+                  <Divider orientation="vertical" flexItem />
+                  <Chip
+                    label={
+                      fields?.right?.volume?.volumeDecrease
+                        ? "Passed"
+                        : "Failed"
+                    }
+                    size="small"
+                    sx={{
+                      backgroundColor: fields?.right?.volume?.volumeDecrease
+                        ? "success.main"
+                        : "error.main",
+                      color: "#fff",
+                      fontWeight: 500,
+                      textTransform: "capitalize",
+                    }}
+                  />
+                  </Box>
                 ),
               },
               {
                 label: "Single Touch :",
                 value: (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-evenly",
+                      width: "100%",
+                    }}
+                  >
                   <Chip
                     label={fields?.left?.mode.includes(1) ? "Passed" : "Failed"}
                     size="small"
@@ -279,11 +508,32 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                       textTransform: "capitalize",
                     }}
                   />
+                  <Divider orientation="vertical" flexItem />
+                  <Chip
+                    label={fields?.right?.mode.includes(1) ? "Passed" : "Failed"}
+                    size="small"
+                    sx={{
+                      backgroundColor: fields?.right?.mode.includes(1)
+                        ? "success.main"
+                        : "error.main",
+                      color: "#fff",
+                      fontWeight: 500,
+                      textTransform: "capitalize",
+                    }}
+                  />
+                  </Box>
                 ),
               },
               {
                 label: "Double Touch :",
                 value: (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-evenly",
+                        width: "100%",
+                      }}
+                    >
                   <Chip
                     label={fields?.left?.mode.includes(2) ? "Passed" : "Failed"}
                     size="small"
@@ -296,11 +546,32 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                       textTransform: "capitalize",
                     }}
                   />
+                                    <Divider orientation="vertical" flexItem />
+                  <Chip
+                    label={fields?.right?.mode.includes(2) ? "Passed" : "Failed"}
+                    size="small"
+                    sx={{
+                      backgroundColor: fields?.right?.mode.includes(2)
+                        ? "success.main"
+                        : "error.main",
+                      color: "#fff",
+                      fontWeight: 500,
+                      textTransform: "capitalize",
+                    }}
+                  />
+                  </Box>
                 ),
               },
               {
                 label: "Triple Touch :",
                 value: (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-evenly",
+                        width: "100%",
+                      }}
+                    >
                   <Chip
                     label={fields?.left?.mode.includes(3) ? "Passed" : "Failed"}
                     size="small"
@@ -313,11 +584,32 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                       textTransform: "capitalize",
                     }}
                   />
+                                    <Divider orientation="vertical" flexItem />
+                  <Chip
+                    label={fields?.right?.mode.includes(3) ? "Passed" : "Failed"}
+                    size="small"
+                    sx={{
+                      backgroundColor: fields?.right?.mode.includes(3)
+                        ? "success.main"
+                        : "error.main",
+                      color: "#fff",
+                      fontWeight: 500,
+                      textTransform: "capitalize",
+                    }}
+                  />
+                  </Box>
                 ),
               },
               {
                 label: "Long Press :",
                 value: (
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-evenly",
+                          width: "100%",
+                        }}
+                      >
                   <Chip
                     label={fields?.left?.mode.includes(4) ? "Passed" : "Failed"}
                     size="small"
@@ -330,13 +622,27 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                       textTransform: "capitalize",
                     }}
                   />
+                  <Divider orientation="vertical" flexItem />
+                  <Chip
+                    label={fields?.right?.mode.includes(4) ? "Passed" : "Failed"}
+                    size="small"
+                    sx={{
+                      backgroundColor: fields?.right?.mode.includes(4)
+                        ? "success.main"
+                        : "error.main",
+                      color: "#fff",
+                      fontWeight: 500,
+                      textTransform: "capitalize",
+                    }}
+                  />
+                  </Box>
                 ),
               },
             ]}
           />
         </Box>
 
-        <Box mt={4}>
+        {/* <Box mt={4}>
           <Typography variant="h4" fontWeight="bold" mb={2}>
             Right Device QC Details :
           </Typography>
@@ -570,7 +876,7 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
               },
             ]}
           />
-        </Box>
+        </Box> */}
       </CustomDialog>
       ;
     </>
