@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import StepCard from "../../../components/StepCard";
-import { Box, Button } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import PauseIcon from "@mui/icons-material/Pause";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import { FetchVolumeSafebudsDevice } from "../../../store/actions/deviceQcAction";
@@ -46,6 +46,11 @@ const AudioCheckSafeBudsUi = () => {
   }, [deviceQc.volumeIncrease]);
   return (
     <Box>
+      <Box>
+        <Typography variant="h3" fontWeight={700} mb={2}>
+          Audio Check
+        </Typography>
+      </Box>
       <StepCard
         isChecked={true}
         title="Audio Check"

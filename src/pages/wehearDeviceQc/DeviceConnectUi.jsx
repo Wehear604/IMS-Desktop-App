@@ -351,10 +351,10 @@ const DeviceConnectUi = () => {
 
   return (
     <>
-      <Header sx={{ m: 4 }} variant="h4">
+      {/* <Header sx={{ m: 4 }} variant="h4">
         Device Dashboard
       </Header>
-      <Divider orientation="horizontal" />
+      <Divider orientation="horizontal" /> */}
       <Box
         sx={{
           minHeight: "60vh",

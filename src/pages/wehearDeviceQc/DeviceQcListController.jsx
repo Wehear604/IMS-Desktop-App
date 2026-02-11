@@ -21,7 +21,7 @@ import {
 } from "../../store/actions/deviceDataAction";
 import { create } from "@mui/material/styles/createTransitions";
 import { callSnackBar } from "../../store/actions/snackbarAction";
-import { SNACK_BAR_VARIETNS } from "../../utils/constants";
+import { DEVICES, SNACK_BAR_VARIETNS } from "../../utils/constants";
 import useValidate from "../../store/hooks/useValidator";
 import { callApiAction } from "../../store/actions/commonAction";
 import {
@@ -234,19 +234,6 @@ const DeviceQcListController = ({
   }, []);
   return (
     <>
-      {step !== 0 && (
-        <Stepper activeStep={step} alternativeLabel>
-          <Step key="list">
-            <StepLabel>Device List</StepLabel>
-          </Step>
-          <Step key="connect">
-            <StepLabel>Device Connection</StepLabel>
-          </Step>
-          <Step key="details">
-            <StepLabel>Device Details</StepLabel>
-          </Step>
-        </Stepper>
-      )}
       <Paper
         elevation={3}
         sx={{
@@ -255,7 +242,7 @@ const DeviceQcListController = ({
           justifyContent: "space-between",
         }}
       >
-        {step === 2 && (
+        {step === 0 && (
           <>
             {" "}
             <Box>
@@ -289,7 +276,7 @@ const DeviceQcListController = ({
           </>
         )}
 
-        {step === 1 && (
+        {step === 1 && device.device_type !== DEVICES.SAFE_BUDS && (
           <>
             <DeviceConnectUi />
 
@@ -319,7 +306,7 @@ const DeviceQcListController = ({
           </>
         )}
 
-        {step === 0 && (
+        {step === 1 && device.device_type === DEVICES.SAFE_BUDS && (
           <>
             {loading ? (
               <CenteredBox>
@@ -327,6 +314,19 @@ const DeviceQcListController = ({
               </CenteredBox>
             ) : (
               <>
+                {
+                  <Stepper sx={{ mt: 4 }} activeStep={step} alternativeLabel>
+                    <Step key="list">
+                      <StepLabel>Device List</StepLabel>
+                    </Step>
+                    <Step key="connect">
+                      <StepLabel>Device Connection</StepLabel>
+                    </Step>
+                    <Step key="details">
+                      <StepLabel>Device Details</StepLabel>
+                    </Step>
+                  </Stepper>
+                }
                 <SafebudsMainUi />
                 {/* <ProductDetailsQcUi
                   setBox={setFields}
@@ -336,7 +336,7 @@ const DeviceQcListController = ({
               </>
             )}
 
-            <Box
+            {/* <Box
               sx={{
                 p: 4,
                 width: "100%",
@@ -356,7 +356,7 @@ const DeviceQcListController = ({
                   </Typography>
                 </Button>
               </Box>
-            </Box>
+            </Box> */}
           </>
         )}
       </Paper>

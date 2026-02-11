@@ -180,10 +180,15 @@ const MicCheckUiSafeBudsUi = () => {
 
   return (
     <>
+      <Box>
+        <Typography variant="h3" fontWeight={700} mb={2}>
+          Mic Check
+        </Typography>
+      </Box>
       <Card
         sx={{
           maxWidth: 520,
-          m: "24px auto",
+          // m: "24px auto",
           borderRadius: 4,
           background:
             "linear-gradient(140deg, #0b1225 0%, #0f1c38 60%, #0a1023 100%)",
@@ -340,15 +345,24 @@ const MicCheckUiSafeBudsUi = () => {
           </Stack>
         </CardContent>
       </Card>
-      <StepCard
-        isChecked={true}
-        checked={device.isMic}
-        title={
-          device.isMic
-            ? "Microphone Functionality Verified"
-            : "Microphone Functionality Not Verified"
-        }
-      />
+      <Box
+        sx={{
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          mt: 4,
+        }}
+      >
+        <StepCard
+          isChecked={true}
+          checked={device.isMic}
+          title={
+            device.isMic
+              ? "Microphone Functionality Verified"
+              : "Microphone Functionality Not Verified"
+          }
+        />
+      </Box>
     </>
   );
 };

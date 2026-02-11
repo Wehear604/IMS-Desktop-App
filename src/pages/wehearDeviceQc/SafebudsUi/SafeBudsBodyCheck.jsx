@@ -1,4 +1,4 @@
-import { Box, Checkbox, Typography } from "@mui/material";
+import { Box, Checkbox, Divider, Typography } from "@mui/material";
 import React, { useState } from "react";
 import StepCard from "../../../components/StepCard";
 
@@ -29,9 +29,10 @@ const SafeBudsBodyCheck = ({ fields, setFields }) => {
           title="Body checked for scratches"
         />
       </Box>
+      <Divider />
 
       {/* CHARGING CHECK */}
-      <Box width="100%">
+      <Box width="100%" mt={2}>
         <Typography variant="h3" fontWeight={700} mb={2}>
           Charging
         </Typography>
