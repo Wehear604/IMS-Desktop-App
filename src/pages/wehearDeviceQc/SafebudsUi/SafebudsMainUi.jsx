@@ -9,6 +9,13 @@ import { Grid, Stack } from "@mui/material";
 import SafeBudsBoxContainsUI from "./SafeBudsBoxContainsUI";
 import SafeBudsColorUi from "./SafeBudsColorUi";
 import SafeBudsBoxIdUi from "./SafeBudsBoxIdUi";
+import {
+  ChangeButtonSide,
+  FetchVolumeSafebudsDevice,
+  SafebudsDeviceCurrentVolume,
+  SafeBudsTap,
+} from "../../../store/actions/deviceQcAction";
+import { LISTENING_SIDE } from "../../../utils/constants";
 
 const SafebudsMainUi = () => {
   const [fields, setFields] = useState({
@@ -16,6 +23,13 @@ const SafebudsMainUi = () => {
     body2: false,
     charging: false,
   });
+
+  useEffect(() => {
+    dispatch(SafeBudsTap({ type: "Tap" }));
+    dispatch(ChangeButtonSide(LISTENING_SIDE.LEFT));
+    dispatch(SafebudsDeviceCurrentVolume());
+  }, []);
+
   return (
     <>
       <SafeBudsFotUpload />

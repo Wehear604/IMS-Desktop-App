@@ -16,6 +16,14 @@ const TapQCSafebudsUi = () => {
       ? deviceQc.modeLeft?.includes(number)
       : deviceQc.modeRight?.includes(number);
   };
+
+  useEffect(() => {
+    if ([1, 2, 3, 4].every((val) => deviceQc.modeRight?.includes(val))) {
+      dispatch(ChangeButtonSide(LISTENING_SIDE.LEFT));
+    } else if ([1, 2, 3, 4].every((val) => deviceQc.modeLeft?.includes(val))) {
+      dispatch(ChangeButtonSide(LISTENING_SIDE.RIGHT));
+    }
+  }, [deviceQc.modeLeft, deviceQc.modeRight]);
   return (
     <>
       <ButtonGroup sx={{ width: "100%", mb: 2 }}>

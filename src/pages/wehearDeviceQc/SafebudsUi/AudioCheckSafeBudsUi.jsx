@@ -4,6 +4,7 @@ import StepCard from "../../../components/StepCard";
 import { Box, Button } from "@mui/material";
 import PauseIcon from "@mui/icons-material/Pause";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import { FetchVolumeSafebudsDevice } from "../../../store/actions/deviceQcAction";
 
 const AudioCheckSafeBudsUi = () => {
   const dispatch = useDispatch();
@@ -23,6 +24,25 @@ const AudioCheckSafeBudsUi = () => {
     dispatch(DeviceIsAudioCheck(true));
     setIsPlaying((prev) => !prev);
   };
+  useEffect(() => {
+    audioRef.current = new Audio(audioUrl);
+    audioRef.current.loop = true; // optional
+    audioRef.current.volume = 1;
+
+    return () => {
+      audioRef.current.pause();
+      audioRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (deviceQc.volumeIncrease) return;
+    const interval = setInterval(async () => {
+      dispatch(FetchVolumeSafebudsDevice());
+    }, 1500);
+
+    return () => clearInterval(interval);
+  }, [deviceQc.volumeIncrease]);
   return (
     <Box>
       <StepCard
