@@ -13,6 +13,8 @@ import { useDispatch, useSelector } from "react-redux";
 import fotfile from "../../../assets/blefiles/fw5000_latest.fot";
 import { callApiAction } from "../../../store/actions/commonAction";
 import { CreateQcMacCheckApi } from "../../../apis/qcmac.api";
+import safeBudsGif from "../../../assets/images/Safe Buds Video Final C.mp4";
+import { openModal } from "../../../store/actions/modalAction";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -531,7 +533,7 @@ class OtaSession {
   }
 }
 
-const SafeBudsFotUpload = ({setStep, step}) => {
+const SafeBudsFotUpload = ({ setStep, step }) => {
   const [file, setFile] = useState(null);
   const [buffer, setBuffer] = useState(null);
   const [status, setStatus] = useState("Idle");
@@ -609,6 +611,34 @@ const SafeBudsFotUpload = ({setStep, step}) => {
     if (progress === 100) {
       setIsUploading(false);
       setStep(step + 1);
+      dispatch(
+        openModal(
+          <CustomDialog
+            id={"safeBuds"}
+            title={"Step to follow after FOT Upload"}
+            onClose={() => setStep((prev) => prev + 1)}
+          >
+            <video
+              src={safeBudsGif}
+              autoPlay
+              loop
+              controls={false}
+              style={{ width: "100%", borderRadius: 8 }}
+            />
+            <Typography
+              variant="h6"
+              mt={2}
+              sx={{ fontFamily: "League Spartan" }}
+            >
+              <b>NOTE:-</b> Please ensure to follow this step after uploading
+              the FOT file:
+            </Typography>
+          </CustomDialog>,
+          "xs",
+          false,
+          "safeBuds",
+        ),
+      );
       dispatch(
         callApiAction(
           async () =>
@@ -815,7 +845,7 @@ const SafeBudsFotUpload = ({setStep, step}) => {
                 }}
               >
                 {" "}
-                {status.toUpperCase()}{" "}
+                {status}{" "}
               </Typography>{" "}
             </Box>{" "}
           </Box>

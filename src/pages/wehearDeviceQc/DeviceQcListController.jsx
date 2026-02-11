@@ -314,19 +314,6 @@ const DeviceQcListController = ({
               </CenteredBox>
             ) : (
               <>
-                {
-                  <Stepper sx={{ mt: 4 }} activeStep={step} alternativeLabel>
-                    <Step key="list">
-                      <StepLabel>Device List</StepLabel>
-                    </Step>
-                    <Step key="connect">
-                      <StepLabel>Device Connection</StepLabel>
-                    </Step>
-                    <Step key="details">
-                      <StepLabel>Device Details</StepLabel>
-                    </Step>
-                  </Stepper>
-                }
                 <SafebudsMainUi />
                 {/* <ProductDetailsQcUi
                   setBox={setFields}

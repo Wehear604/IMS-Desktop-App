@@ -5,7 +5,18 @@ import TapQCSafebudsUi from "./TapQCSafebudsUi";
 import MicCheckUiSafeBudsUi from "./MicCheckUiSafeBudsUi";
 import AudioCheckSafeBudsUi from "./AudioCheckSafeBudsUi";
 import SafeBudsBodyCheck from "./SafeBudsBodyCheck";
-import { Box, Button, Divider, Grid, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Divider,
+  Grid,
+  Paper,
+  Stack,
+  Step,
+  StepLabel,
+  Stepper,
+  Typography,
+} from "@mui/material";
 import SafeBudsBoxContainsUI from "./SafeBudsBoxContainsUI";
 import SafeBudsColorUi from "./SafeBudsColorUi";
 import SafeBudsBoxIdUi from "./SafeBudsBoxIdUi";
@@ -17,6 +28,9 @@ import {
 } from "../../../store/actions/deviceQcAction";
 import { LISTENING_SIDE } from "../../../utils/constants";
 import { useDispatch, useSelector } from "react-redux";
+import safeBudsGif from "../../../assets/images/Safe Buds Video Final C.mp4";
+import { openModal } from "../../../store/actions/modalAction";
+import CustomDialog from "../../../components/layouts/common/CustomDialog";
 
 const SafebudsMainUi = () => {
   const dispatch = useDispatch();
@@ -39,8 +53,32 @@ const SafebudsMainUi = () => {
 
   return (
     <Box sx={{ p: 4 }}>
+      <Stepper
+        activeStep={step}
+        alternativeLabel
+      >
+        <Step>
+          <StepLabel>Device Connection</StepLabel>
+        </Step>
+        <Step>
+          <StepLabel>Upload FOT</StepLabel>
+        </Step>
+        <Step>
+          <StepLabel>Functioning Test</StepLabel>
+        </Step>
+        <Step>
+          <StepLabel>Audio and Mic Test</StepLabel>
+        </Step>
+        <Step>
+          <StepLabel>Packaging Details</StepLabel>
+        </Step>
+      </Stepper>
+
+      <Divider sx={{ my: 4 }} />
       {!device.connected && step === 0 && <DeviceConnectUi />}
-      {!device.fotfile1 && step === 1 && <SafeBudsFotUpload step={step} setStep={setStep} />}
+      {!device.fotfile1 && step === 1 && (
+        <SafeBudsFotUpload step={step} setStep={setStep} />
+      )}
       {step === 2 && (
         <Box p={6}>
           <TapQCSafebudsUi />
@@ -87,22 +125,25 @@ const SafebudsMainUi = () => {
           </Grid>{" "}
         </>
       )}
-      {!step === 1 && <Box
-        sx={{
-          display: "flex",
-          justifyContent: "flex-end",
-          width: "100%",
-        }}
-      >
-        <Button
-          variant="contained"
-          onClick={() => {
-            setStep((prev) => prev + 1);
+      {
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "flex-end",
+            width: "100%",
           }}
         >
-          <Typography variant="h5">Next</Typography>
-        </Button>
-      </Box>}
+          <Button
+            variant="contained"
+            onClick={() => {
+              setStep((prev) => prev + 1);
+            }}
+            sx={{ visibility: step === 1 && "hidden" }}
+          >
+            <Typography variant="h5">Next</Typography>
+          </Button>
+        </Box>
+      }
     </Box>
   );
 };
