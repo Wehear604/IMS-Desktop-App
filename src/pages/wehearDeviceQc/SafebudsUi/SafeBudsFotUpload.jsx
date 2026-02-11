@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from "react";
-import UploadButtonSafeBuds from "../../components/inputs/UploadButtonSafeBuds";
 import Button from "@mui/material/Button";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import { styled } from "@mui/material/styles";
 import { Box, CircularProgress, Paper, Typography } from "@mui/material";
-import { BLE_STORE, SAFE_BUDS_STORE } from "../../utils/bleStore";
-import CustomDialog from "../../components/layouts/common/CustomDialog";
+import { BLE_STORE, SAFE_BUDS_STORE } from "../../../utils/bleStore";
+import CustomDialog from "../../../components/layouts/common/CustomDialog";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import CloseIcon from "@mui/icons-material/Close";
-import FOT from "../../assets/images/fotFile.svg";
-import { SetDeviceFOT } from "../../store/actions/deviceDataAction";
+import FOT from "../../../assets/images/fotFile.svg";
+import { SetDeviceFOT } from "../../../store/actions/deviceDataAction";
 import { useDispatch, useSelector } from "react-redux";
-import fotfile from "../../assets/blefiles/fw5000_latest.fot";
-import { callApiAction } from "../../store/actions/commonAction";
-import { CreateQcMacCheckApi } from "../../apis/qcmac.api";
+import fotfile from "../../../assets/blefiles/fw5000_latest.fot";
+import { callApiAction } from "../../../store/actions/commonAction";
+import { CreateQcMacCheckApi } from "../../../apis/qcmac.api";
+
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
   clipPath: "inset(50%)",

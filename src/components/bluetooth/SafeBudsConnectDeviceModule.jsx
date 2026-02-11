@@ -168,7 +168,7 @@ const SafeBudsConnectDeviceModule = ({
     if (loading && isPickerOpen) {
       setIsPickerOpen(false);
       setSelectingDeviceId(null);
-      dispatch(DeviceMACAction(null));
+      // dispatch(DeviceMACAction(null));
     }
   }, [loading, isPickerOpen]);
 

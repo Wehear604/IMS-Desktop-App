@@ -222,10 +222,7 @@ const DeviceConnectUi = () => {
   const [selected, setSelected] = useState("");
   const { device } = useSelector((state) => state);
   const dispatch = useDispatch();
-  console.log(
-    "device?.device_type === DEVICES.SAFE_BUDS && !device?.fotfile",
-    device?.fotfile,
-  );
+
   const devices = [
     { side: "L", label: "BTE", value: LISTENING_SIDE.LEFT },
     { side: "R", label: "BTE", value: LISTENING_SIDE.RIGHT },
@@ -567,16 +564,6 @@ const DeviceConnectUi = () => {
             }}
           />
         )}
-        {/* </CenterArea> */}
-
-        {/* <Box sx={{ display: "flex", gap: 2, justifyContent: "center", mt: 3 }}>
-                <Button onClick={startReading} variant="contained" disabled={!BLE_STORE.readFun && !BLE_STORE.writeFun || isReading}>
-                    Start Reading
-                </Button>
-                <Button onClick={stopReading} variant="outlined" disabled={!isReading}>
-                    Stop Reading
-                </Button>
-            </Box> */}
       </Box>
     </>
   );
