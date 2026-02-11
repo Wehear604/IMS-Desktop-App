@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import StepCard from "../../../components/StepCard";
 import { Box, Button } from "@mui/material";
 import PauseIcon from "@mui/icons-material/Pause";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import { FetchVolumeSafebudsDevice } from "../../../store/actions/deviceQcAction";
+import audioUrl from "../../../assets/images/slow_instrumental.mp3";
 
 const AudioCheckSafeBudsUi = () => {
   const dispatch = useDispatch();

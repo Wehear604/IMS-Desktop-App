@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import SafeBudsFotUpload from "./SafeBudsFotUpload";
 import DeviceConnectUi from "../DeviceConnectUi";
 import TapQCSafebudsUi from "./TapQCSafebudsUi";
@@ -16,8 +16,11 @@ import {
   SafeBudsTap,
 } from "../../../store/actions/deviceQcAction";
 import { LISTENING_SIDE } from "../../../utils/constants";
+import { useDispatch } from "react-redux";
 
 const SafebudsMainUi = () => {
+  const dispatch = useDispatch();
+
   const [fields, setFields] = useState({
     body1: false,
     body2: false,

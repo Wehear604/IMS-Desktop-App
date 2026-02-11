@@ -1,5 +1,5 @@
 import { ButtonGroup } from "@mui/material";
-import React from "react";
+import React, { useEffect } from "react";
 import ButtonComponentsUi from "../../../components/button/ButtonComponentsUi";
 import { ChangeButtonSide } from "../../../store/actions/deviceQcAction";
 import { LISTENING_SIDE } from "../../../utils/constants";
