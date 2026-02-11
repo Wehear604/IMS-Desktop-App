@@ -360,7 +360,7 @@ const DeviceConnectUi = () => {
       <Divider orientation="horizontal" />
       <Box
         sx={{
-          minHeight: "70vh",
+          minHeight: "60vh",
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-evenly",

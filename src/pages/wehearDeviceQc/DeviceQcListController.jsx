@@ -6,6 +6,9 @@ import {
   Button,
   CircularProgress,
   Paper,
+  Step,
+  StepLabel,
+  Stepper,
   Typography,
 } from "@mui/material";
 import DeviceConnectUi from "./DeviceConnectUi";
@@ -228,113 +231,133 @@ const DeviceQcListController = ({
     dispatch(resetDeviceDataStore());
   }, []);
   return (
-    <Paper
-      elevation={3}
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-      }}
-    >
-      {step === 0 && (
-        <>
-          {" "}
-          <Box>
-            <DeviceQcListUi
-              fields={fields}
-              setFields={setFields}
-              filters={filters}
-              setFilters={setFilters}
-            />
-          </Box>
-          <Box
-            p={2}
-            mt={4}
-            sx={{ width: "100%", display: "flex", justifyContent: "flex-end" }}
-          >
-            <Button
-              variant="contained"
-              sx={{ width: "8vw" }}
-              onClick={() => setStep(step + 1)}
-              disabled={device.device_type === null}
-            >
-              <Typography variant="h5" sx={{ textTransform: "none" }}>
-                Next
-              </Typography>
-            </Button>
-          </Box>
-        </>
+    <>
+      {step !== 0 && (
+        <Stepper activeStep={step} alternativeLabel>
+          <Step key="list">
+            <StepLabel>Device List</StepLabel>
+          </Step>
+          <Step key="connect">
+            <StepLabel>Device Connection</StepLabel>
+          </Step>
+          <Step key="details">
+            <StepLabel>Device Details</StepLabel>
+          </Step>
+        </Stepper>
       )}
-      {step === 1 && (
-        <>
-          <DeviceConnectUi />
-
-          <Box
-            p={2}
-            mt={4}
-            m={2}
-            sx={{
-              width: "100%",
-              display: "flex",
-              justifyContent: "flex-start",
-            }}
-          >
-            <Button
-              variant="contained"
-              sx={{ width: "8vw" }}
-              onClick={() => {
-                dispatch(DeviceSideAction(null));
-                setStep(step - 1);
+      <Paper
+        elevation={3}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+        }}
+      >
+        {step === 0 && (
+          <>
+            {" "}
+            <Box>
+              <DeviceQcListUi
+                fields={fields}
+                setFields={setFields}
+                filters={filters}
+                setFilters={setFilters}
+              />
+            </Box>
+            <Box
+              p={2}
+              mt={4}
+              sx={{
+                width: "100%",
+                display: "flex",
+                justifyContent: "flex-end",
               }}
             >
-              <Typography variant="h5" sx={{ textTransform: "none" }}>
-                Back
-              </Typography>
-            </Button>
-          </Box>
-        </>
-      )}
-
-      {step === 2 && (
-        <>
-          {loading ? (
-            <CenteredBox>
-              <CircularProgress />
-            </CenteredBox>
-          ) : (
-            <>
-              <ProductDetailsQcUi
-                setBox={setFields}
-                box={fields}
-                isUpdate={isUpdate}
-              />
-            </>
-          )}
-
-          <Box
-            sx={{
-              p: 4,
-              width: "100%",
-              display: "flex",
-              justifyContent: "flex-end",
-            }}
-          >
-            <Box>
               <Button
                 variant="contained"
                 sx={{ width: "8vw" }}
-                onClick={Submit}
-                // disabled={fields.boxId ? loading : !fields.boxId}
+                onClick={() => setStep(step + 1)}
+                disabled={device.device_type === null}
               >
                 <Typography variant="h5" sx={{ textTransform: "none" }}>
-                  Submit
+                  Next
                 </Typography>
               </Button>
             </Box>
-          </Box>
-        </>
-      )}
-    </Paper>
+          </>
+        )}
+
+        {step === 1 && (
+          <>
+            <DeviceConnectUi />
+
+            <Box
+              p={2}
+              mt={4}
+              m={2}
+              sx={{
+                width: "100%",
+                display: "flex",
+                justifyContent: "flex-start",
+              }}
+            >
+              <Button
+                variant="contained"
+                sx={{ width: "8vw" }}
+                onClick={() => {
+                  dispatch(DeviceSideAction(null));
+                  setStep(step - 1);
+                }}
+              >
+                <Typography variant="h5" sx={{ textTransform: "none" }}>
+                  Back
+                </Typography>
+              </Button>
+            </Box>
+          </>
+        )}
+
+        {step === 2 && (
+          <>
+            {loading ? (
+              <CenteredBox>
+                <CircularProgress />
+              </CenteredBox>
+            ) : (
+              <>
+                <ProductDetailsQcUi
+                  setBox={setFields}
+                  box={fields}
+                  isUpdate={isUpdate}
+                />
+              </>
+            )}
+
+            <Box
+              sx={{
+                p: 4,
+                width: "100%",
+                display: "flex",
+                justifyContent: "flex-end",
+              }}
+            >
+              <Box>
+                <Button
+                  variant="contained"
+                  sx={{ width: "8vw" }}
+                  onClick={Submit}
+                  // disabled={fields.boxId ? loading : !fields.boxId}
+                >
+                  <Typography variant="h5" sx={{ textTransform: "none" }}>
+                    Submit
+                  </Typography>
+                </Button>
+              </Box>
+            </Box>
+          </>
+        )}
+      </Paper>
+    </>
   );
 };
 
