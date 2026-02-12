@@ -15,7 +15,8 @@ import { SafebudsDeviceAudioCheck } from "../../../store/actions/deviceQcAction"
 import { useDispatch, useSelector } from "react-redux";
 import StepCard from "../../../components/StepCard";
 
-const MicCheckUiSafeBudsUi = () => {
+
+const MicCheckUiSafeBudsUi = ({isPlaying, setIsPlaying, audioRef}) => {
   const dispatch = useDispatch();
   const { device, deviceQc } = useSelector((state) => state);
   const canvasRef = useRef(null);
@@ -89,6 +90,10 @@ const MicCheckUiSafeBudsUi = () => {
 
   const startMonitoring = async () => {
     if (!selectedMic || isRunning) return;
+    if(isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    }
 
     await stopMonitoring();
 

@@ -6,6 +6,8 @@ import { LISTENING_SIDE } from "../../../utils/constants";
 import { useDispatch, useSelector } from "react-redux";
 import StepCard from "../../../components/StepCard";
 
+
+
 const TapQCSafebudsUi = () => {
   const dispatch = useDispatch();
   const { device, deviceQc } = useSelector((state) => state);

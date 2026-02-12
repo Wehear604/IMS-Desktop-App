@@ -8,10 +8,8 @@ import { FetchVolumeSafebudsDevice } from "../../../store/actions/deviceQcAction
 import audioUrl from "../../../assets/images/slow_instrumental.mp3";
 import { DeviceIsAudioCheck } from "../../../store/actions/deviceDataAction";
 
-const AudioCheckSafeBudsUi = () => {
+const AudioCheckSafeBudsUi = ({isPlaying, setIsPlaying, audioRef}) => {
   const dispatch = useDispatch();
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = React.useRef(null);
   const { device, deviceQc } = useSelector((state) => state);
   const handlePlayPause = () => {
     if (!audioRef.current) return;

@@ -44,6 +44,8 @@ import ReadBLEName from "../../pages/wehearDeviceQc/safebuds/ReadBLEName";
 import { fetchQcMacCheckByIdApi } from "../../apis/qcmac.api";
 import { callApiAction } from "../../store/actions/commonAction";
 import { runClassicCheck } from "../../utils/classicSocket";
+import { CenteredBox } from "../layouts/OneViewBox";
+import VersionCheckingLoader from "../../utils/customeloader";
 // import WriteSafeBudsDataToDevice from "./WriteSafeBudsDataToDevice";
 
 const modalStyle = {
@@ -81,6 +83,7 @@ const SafeBudsConnectDeviceModule = ({
   const [leftDeviceConnected, setLeftDeviceConnected] = useState(false);
   const [rightDeviceConnected, setRightDeviceConnected] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loading1, setLoading1] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState(
     "Checking Browser Support",
   );
@@ -284,7 +287,6 @@ const SafeBudsConnectDeviceModule = ({
       setConnected(true);
 
       setLoadingMessage("Device connected successfully");
-      setLoading(false);
       dispatch(DeviceIsConnectingAction(false));
 
       const currentDeviceInfo = { name: device.name, id: device.id };
@@ -424,7 +426,7 @@ const SafeBudsConnectDeviceModule = ({
             BLE_STORE.writeFun = null;
             BLE_STORE.disconnectFun = null;
           };
-
+setLoading1(false);
           onConnectWithDevice(data, currentDeviceInfo);
         } catch (error) {
           console.error("Error:", error);
@@ -435,6 +437,8 @@ const SafeBudsConnectDeviceModule = ({
           else setRightDeviceConnected(false);
         }
       } else {
+              setLoading(false);
+              setLoading1(false);
         dispatch(SetDevicVersionFOT());
         onConnectWithDevice(data, currentDeviceInfo);
       }
@@ -510,6 +514,7 @@ const SafeBudsConnectDeviceModule = ({
       ),
     );
     setSelectingDeviceId(deviceId);
+    setLoading1(true);
     selectingDeviceId1.current = deviceId;
     dispatch(DeviceMACAction(deviceId));
     if (window.electronAPI) {
@@ -527,6 +532,7 @@ const SafeBudsConnectDeviceModule = ({
 
   return (
     <>
+    <VersionCheckingLoader open={loading1} />
       <Component
         loading={loading}
         connected={side === "Left" ? leftDeviceConnected : rightDeviceConnected}
@@ -534,8 +540,8 @@ const SafeBudsConnectDeviceModule = ({
         disconnect={() => disconnect(side)}
         deviceSide={fitting?.device_side}
       />
-
-      <Modal open={loading} onClose={handleCancelSelect}>
+      {
+        !loading1 && (  <Modal open={loading} onClose={handleCancelSelect}>
         <Box sx={modalStyle}>
           <Typography variant="h6" component="h2" sx={{ mb: 2 }}>
             Select a Bluetooth Device
@@ -578,7 +584,10 @@ const SafeBudsConnectDeviceModule = ({
             Cancel
           </Button>
         </Box>
-      </Modal>
+      </Modal>)
+      }
+    
+    
     </>
   );
 };

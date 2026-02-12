@@ -49,6 +49,8 @@ const SafebudsMainUi = () => {
   );
   const validate = useValidate();
   const [loading, setLoading] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = React.useRef(null);
 
   const [fields, setFields] = useState({
     body1: false,
@@ -250,7 +252,7 @@ console.log("data check",        device.is_Audio_play ,
           <Grid container>
             <Grid item xs={12} md={5.9} mt={2} pr={2}>
               <Box>
-                <AudioCheckSafeBudsUi />
+                <AudioCheckSafeBudsUi isPlaying={isPlaying} setIsPlaying={setIsPlaying} audioRef={audioRef} />
               </Box>
               <Divider />
               <Box mt={2} pr={2}>
@@ -259,7 +261,7 @@ console.log("data check",        device.is_Audio_play ,
             </Grid>
             <Divider orientation="vertical" flexItem />
             <Grid item xs={12} md={5.9} mt={2} p={2}>
-              <MicCheckUiSafeBudsUi />{" "}
+              <MicCheckUiSafeBudsUi isPlaying={isPlaying} setIsPlaying={setIsPlaying} audioRef={audioRef} />{" "}
             </Grid>
           </Grid>
         )}

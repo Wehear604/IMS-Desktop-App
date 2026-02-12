@@ -893,7 +893,7 @@ const SafeBudsFotUpload = () => {
                 </Box>
               ) : (
                 <>
-                  <Box
+                  {/* <Box
                     onClick={removeFile}
                     sx={{
                       position: "absolute",
@@ -903,7 +903,7 @@ const SafeBudsFotUpload = () => {
                     }}
                   >
                     <CloseIcon />
-                  </Box>
+                  </Box> */}
                   <Box textAlign="center">
                     <img src={FOT} alt="fot" />
                     <Typography fontWeight={600}>{file.name}</Typography>
