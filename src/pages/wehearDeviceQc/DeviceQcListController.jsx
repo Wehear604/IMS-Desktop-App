@@ -314,7 +314,8 @@ const DeviceQcListController = ({
               </CenteredBox>
             ) : (
               <>
-                <SafebudsMainUi />
+                <DeviceConnectUi />
+                {/* <SafebudsMainUi /> */}
                 {/* <ProductDetailsQcUi
                   setBox={setFields}
                   box={fields}

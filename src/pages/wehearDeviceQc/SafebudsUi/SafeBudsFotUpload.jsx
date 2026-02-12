@@ -682,94 +682,94 @@ const SafeBudsFotUpload = ({ setStep, step }) => {
   }, []);
 
   return (
-    // <CustomDialog
-    //   id={"deviceAudioMicCheck"}
-    //   title={"Safe Buds FOT Upload"}
-    //   onSubmit={(e) => Start(e)}
-    //   confirmText={isUploading ? "Uploading..." : "Start OTA"}
-    //   disabledSubmit={isUploading}
-    //   disableDirectClose={isUploading}
-    //   onClose={() => {
-    //     BLE_STORE.BTEdisconnect = true;
-    //   }}
-    // >
-    <>
-      {isUploading ? (
-        <Box display="flex" gap={4} mt={4}>
-          {/* LEFT SIDE */}
-          <Box
-            display="flex"
-            flexDirection="column"
-            alignItems="center"
-            justifyContent="center"
-            minWidth={220}
-          >
-            {/* DONUT PROGRESS */}
+    <CustomDialog
+      id={"deviceAudioMicCheck"}
+      title={"Safe Buds FOT Upload"}
+      onSubmit={(e) => Start(e)}
+      confirmText={isUploading ? "Uploading..." : "Start OTA"}
+      disabledSubmit={isUploading}
+      disableDirectClose={isUploading}
+      onClose={() => {
+        BLE_STORE.BTEdisconnect = true;
+      }}
+    >
+      <>
+        {isUploading ? (
+          <Box display="flex" gap={4} mt={4}>
+            {/* LEFT SIDE */}
             <Box
-              position="relative"
-              width={120}
-              height={120}
               display="flex"
+              flexDirection="column"
               alignItems="center"
               justifyContent="center"
+              minWidth={220}
             >
-              {/* Background Ring */}
-              <CircularProgress
-                variant="determinate"
-                value={100}
-                size={120}
-                thickness={6}
-                sx={{
-                  color: "#E6EEF2",
-                }}
-              />
-
-              {/* Progress Ring */}
-              <CircularProgress
-                variant="determinate"
-                value={progress}
-                size={120}
-                thickness={6}
-                sx={{
-                  color: "#045169",
-                  position: "absolute",
-                  left: 0,
-                }}
-              />
-
-              {/* Center Percentage */}
+              {/* DONUT PROGRESS */}
               <Box
-                position="absolute"
+                position="relative"
+                width={120}
+                height={120}
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
               >
-                <Typography
+                {/* Background Ring */}
+                <CircularProgress
+                  variant="determinate"
+                  value={100}
+                  size={120}
+                  thickness={6}
                   sx={{
-                    fontSize: "20px",
-                    fontWeight: 600,
-                    color: "#000",
+                    color: "#E6EEF2",
                   }}
+                />
+
+                {/* Progress Ring */}
+                <CircularProgress
+                  variant="determinate"
+                  value={progress}
+                  size={120}
+                  thickness={6}
+                  sx={{
+                    color: "#045169",
+                    position: "absolute",
+                    left: 0,
+                  }}
+                />
+
+                {/* Center Percentage */}
+                <Box
+                  position="absolute"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
                 >
-                  {progress}%
-                </Typography>
+                  <Typography
+                    sx={{
+                      fontSize: "20px",
+                      fontWeight: 600,
+                      color: "#000",
+                    }}
+                  >
+                    {progress}%
+                  </Typography>
+                </Box>
               </Box>
-            </Box>
 
-            {/* Uploading Text */}
-            <Typography
-              sx={{
-                mt: 2,
-                fontSize: "16px",
-                fontWeight: 500,
-                color: "#000",
-              }}
-            >
-              Uploading...
-            </Typography>
+              {/* Uploading Text */}
+              <Typography
+                sx={{
+                  mt: 2,
+                  fontSize: "16px",
+                  fontWeight: 500,
+                  color: "#000",
+                }}
+              >
+                Uploading...
+              </Typography>
 
-            {/* Cancel Button */}
-            {/* <Button
+              {/* Cancel Button */}
+              {/* <Button
                 variant="outlined"
                 sx={{
                   mt: 2,
@@ -781,105 +781,105 @@ const SafeBudsFotUpload = ({ setStep, step }) => {
               >
                 Cancel
               </Button> */}
-          </Box>
-
-          {/* RIGHT SIDE: LOGS */}
-          <Paper
-            sx={{
-              flex: 1,
-              p: 3,
-              borderRadius: "20px",
-              backgroundColor: "#F3F3F3",
-            }}
-          >
-            <Typography
-              sx={{
-                fontWeight: 600,
-                mb: 1,
-                textAlign: "center",
-              }}
-            >
-              LOGS
-            </Typography>
-
-            <Box
-              ref={logRef}
-              sx={{
-                maxHeight: 300,
-                overflow: "auto",
-                fontFamily: "monospace",
-                fontSize: 13,
-                whiteSpace: "pre-wrap",
-                color: "#333",
-              }}
-            >
-              {logs}
             </Box>
-          </Paper>
-        </Box>
-      ) : (
-        <>
-          <Box
-            display={"flex"}
-            justifyContent={"space-between"}
-            alignItems={"center"}
-          >
-            {" "}
-            <Box>
-              {" "}
-              <Typography variant="h5" sx={{ color: "black" }}>
-                {" "}
-                Upload SafeBuds FOT File{" "}
-              </Typography>{" "}
-            </Box>{" "}
-            <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
-              {" "}
+
+            {/* RIGHT SIDE: LOGS */}
+            <Paper
+              sx={{
+                flex: 1,
+                p: 3,
+                borderRadius: "20px",
+                backgroundColor: "#F3F3F3",
+              }}
+            >
               <Typography
-                variant="h5"
                 sx={{
-                  color: "#045169",
-                  backgroundColor: "#F7F7F7",
-                  padding: 2,
-                  width: "100%",
-                  borderRadius: "10px",
+                  fontWeight: 600,
+                  mb: 1,
+                  textAlign: "center",
                 }}
               >
-                {" "}
-                {status}{" "}
-              </Typography>{" "}
-            </Box>{" "}
-          </Box>
-          <Box
-            sx={{
-              border: "2px dashed #4AA3B5",
-              borderRadius: "16px",
-              padding: "40px 24px",
-              backgroundColor: !file ? "#fff" : "#F1FAFD",
-              mt: 2,
-              position: "relative",
-            }}
-          >
-            {!file ? (
-              <Box textAlign="center">
-                <DescriptionOutlinedIcon sx={{ fontSize: 48, mb: 2 }} />
-                <Typography fontSize={22} fontWeight={600}>
-                  Drag And Drop Your Files
-                </Typography>
-                <Typography fontSize={14} color="gray" mb={3}>
-                  FOT format
-                </Typography>
-                <Button component="label" variant="outlined">
-                  Select File
-                  <VisuallyHiddenInput
-                    type="file"
-                    accept=".fot"
-                    onChange={handleFileChange}
-                  />
-                </Button>
+                LOGS
+              </Typography>
+
+              <Box
+                ref={logRef}
+                sx={{
+                  maxHeight: 300,
+                  overflow: "auto",
+                  fontFamily: "monospace",
+                  fontSize: 13,
+                  whiteSpace: "pre-wrap",
+                  color: "#333",
+                }}
+              >
+                {logs}
               </Box>
-            ) : (
-              <>
-                {/* <Box
+            </Paper>
+          </Box>
+        ) : (
+          <>
+            <Box
+              display={"flex"}
+              justifyContent={"space-between"}
+              alignItems={"center"}
+            >
+              {" "}
+              <Box>
+                {" "}
+                <Typography variant="h5" sx={{ color: "black" }}>
+                  {" "}
+                  Upload SafeBuds FOT File{" "}
+                </Typography>{" "}
+              </Box>{" "}
+              <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
+                {" "}
+                <Typography
+                  variant="h5"
+                  sx={{
+                    color: "#045169",
+                    backgroundColor: "#F7F7F7",
+                    padding: 2,
+                    width: "100%",
+                    borderRadius: "10px",
+                  }}
+                >
+                  {" "}
+                  {status}{" "}
+                </Typography>{" "}
+              </Box>{" "}
+            </Box>
+            <Box
+              sx={{
+                border: "2px dashed #4AA3B5",
+                borderRadius: "16px",
+                padding: "40px 24px",
+                backgroundColor: !file ? "#fff" : "#F1FAFD",
+                mt: 2,
+                position: "relative",
+              }}
+            >
+              {!file ? (
+                <Box textAlign="center">
+                  <DescriptionOutlinedIcon sx={{ fontSize: 48, mb: 2 }} />
+                  <Typography fontSize={22} fontWeight={600}>
+                    Drag And Drop Your Files
+                  </Typography>
+                  <Typography fontSize={14} color="gray" mb={3}>
+                    FOT format
+                  </Typography>
+                  <Button component="label" variant="outlined">
+                    Select File
+                    <VisuallyHiddenInput
+                      type="file"
+                      accept=".fot"
+                      onChange={handleFileChange}
+                    />
+                  </Button>
+                </Box>
+              ) : (
+                <>
+                  {/* <Box
                   onClick={removeFile}
                   sx={{
                     position: "absolute",
@@ -890,43 +890,43 @@ const SafeBudsFotUpload = ({ setStep, step }) => {
                 >
                   <CloseIcon />
                 </Box> */}
-                <Box textAlign="center">
-                  <img src={FOT} alt="fot" />
-                  <Typography fontWeight={600}>{file.name}</Typography>
-                </Box>
-              </>
-            )}
-          </Box>
-        </>
-      )}
+                  <Box textAlign="center">
+                    <img src={FOT} alt="fot" />
+                    <Typography fontWeight={600}>{file.name}</Typography>
+                  </Box>
+                </>
+              )}
+            </Box>
+          </>
+        )}
 
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "flex-end",
-          width: "100%",
-        }}
-      >
-        {" "}
-        <Button
-          variant="contained"
+        <Box
           sx={{
-            mt: 4,
-            borderRadius: "10px",
-            px: 4,
-            textTransform: "none",
-            fontSize: "16px",
+            display: "flex",
+            justifyContent: "flex-end",
+            width: "100%",
           }}
-          onClick={(e) => Start(e)}
-          disabled={!buffer || isUploading}
         >
-          <Typography variant="h5">Start OTA</Typography>
-        </Button>
-      </Box>
+          {" "}
+          <Button
+            variant="contained"
+            sx={{
+              mt: 4,
+              borderRadius: "10px",
+              px: 4,
+              textTransform: "none",
+              fontSize: "16px",
+            }}
+            onClick={(e) => Start(e)}
+            disabled={!buffer || isUploading}
+          >
+            <Typography variant="h5">Start OTA</Typography>
+          </Button>
+        </Box>
 
-      {/* <UploadButtonSafeBuds /> */}
-    </>
-    // </CustomDialog>
+        {/* <UploadButtonSafeBuds /> */}
+      </>
+    </CustomDialog>
   );
 };
 
