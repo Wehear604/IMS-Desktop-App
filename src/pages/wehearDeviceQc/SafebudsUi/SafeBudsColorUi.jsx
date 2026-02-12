@@ -28,7 +28,7 @@ const SafeBudsColorUi = () => {
           minWidth: { sm: "150px" },
         }}
       >
-        Device Color
+        Device Color :
       </Typography>
 
       {settings?.productColor_data?.result?.length === 0 ? (

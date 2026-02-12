@@ -67,8 +67,8 @@ import SafeBudsFotUpload from "./SafeBudsFotUpload";
 import SafeBudsConnectDeviceModule from "../../components/bluetooth/SafeBudsConnectDeviceModule";
 import SafeBudsUi from "./safebuds/SafeBudsUi";
 import { SafeBudsVersionRead } from "../../store/actions/deviceQcAction";
-import { SetStepAction } from "../../store/actions/stepAction";
 import SafebudsMainUi from "./SafebudsUi/SafebudsMainUi";
+import { SetStepAction } from "../../store/actions/stepAction";
 
 const Header = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
@@ -121,9 +121,13 @@ const ConnectButton = ({
   const AudioAndMicCheck = () => {
     if (device.device_type == DEVICES.SAFE_BUDS && !device?.fotfile1) {
       // dispatch(SafeBudsVersionRead({ type: "SafeBudsVersionRead" }));
-      dispatch(SetStepAction(1));
       dispatch(
-        openModal(<SafeBudsFotUpload />, "sm", true, "deviceAudioMicCheck"),
+        openModal(
+          <SafeBudsFotUpload fotfile={fotfile} />,
+          "sm",
+          true,
+          "deviceAudioMicCheck"
+        )
       );
     } else {
       dispatch(SafeBudsVersionRead({ type: "SafeBudsVersionRead" }));
@@ -228,7 +232,10 @@ const DeviceConnectUi = () => {
   const [selected, setSelected] = useState("");
   const { device } = useSelector((state) => state);
   const dispatch = useDispatch();
-
+  console.log(
+    "device?.device_type === DEVICES.SAFE_BUDS && !device?.fotfile",
+    device?.fotfile
+  );
   const devices = [
     { side: "L", label: "BTE", value: LISTENING_SIDE.LEFT },
     { side: "R", label: "BTE", value: LISTENING_SIDE.RIGHT },
@@ -357,13 +364,13 @@ const DeviceConnectUi = () => {
 
   return (
     <>
-      {/* <Header sx={{ m: 4 }} variant="h4">
+      <Header sx={{ m: 4 }} variant="h4">
         Device Dashboard
       </Header>
-      <Divider orientation="horizontal" /> */}
+      <Divider orientation="horizontal" />
       <Box
         sx={{
-          minHeight: "60vh",
+          minHeight: "70vh",
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-evenly",
@@ -492,8 +499,8 @@ const DeviceConnectUi = () => {
                 connectDevice(
                   deviceInfo,
                   device?.device_side,
-                  device?.device_type,
-                ),
+                  device?.device_type
+                )
               );
             }}
             Component={ConnectButton}
@@ -522,8 +529,8 @@ const DeviceConnectUi = () => {
                 connectDevice(
                   deviceInfo,
                   device?.device_side,
-                  device?.device_type,
-                ),
+                  device?.device_type
+                )
               );
             }}
             Component={ConnectButton}
@@ -551,8 +558,8 @@ const DeviceConnectUi = () => {
                 connectDevice(
                   deviceInfo,
                   device?.device_side,
-                  device?.device_type,
-                ),
+                  device?.device_type
+                )
               );
             }}
             Component={ConnectButton}
@@ -570,6 +577,7 @@ const DeviceConnectUi = () => {
             }}
           />
         )}
+
       </Box>
     </>
   );

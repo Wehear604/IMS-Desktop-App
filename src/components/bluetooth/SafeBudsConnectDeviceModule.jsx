@@ -43,6 +43,7 @@ import {
 import ReadBLEName from "../../pages/wehearDeviceQc/safebuds/ReadBLEName";
 import { fetchQcMacCheckByIdApi } from "../../apis/qcmac.api";
 import { callApiAction } from "../../store/actions/commonAction";
+import { runClassicCheck } from "../../utils/classicSocket";
 // import WriteSafeBudsDataToDevice from "./WriteSafeBudsDataToDevice";
 
 const modalStyle = {
@@ -496,6 +497,12 @@ const SafeBudsConnectDeviceModule = ({
           }),
         async (response) => {
           getMacId.current = response;
+          if (getMacId.current?.version === "V2") {
+                runClassicCheck({
+                  mac: deviceId,
+                  name: "safe",
+                });
+              }
         },
         (err) => {
           console.log("first err", err);

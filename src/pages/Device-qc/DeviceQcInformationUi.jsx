@@ -66,10 +66,16 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                 label: "Box Contains :",
                 isArray: true,
                 value: fields?.box_Contains?.length
-                  ? toTitleCase(fields.box_Contains
-                      .flatMap((item) => Object.keys(item))
-                      .map((key) => key.replace(/_/g, " "))
-                      .join(", "))
+                  ? toTitleCase(
+                      fields.box_Contains
+                        .flatMap((item) =>
+                          Object.entries(item)
+                            .filter(([_, val]) => val === true) // ✅ only true
+                            .map(([key]) => key),
+                        )
+                        .map((key) => key.replace(/_/g, " "))
+                        .join(", "),
+                    )
                   : ["NA"],
               },
               {
@@ -215,70 +221,70 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                       justifyContent: "space-evenly",
                       width: "100%",
                     }}
-                    >
-                  <Chip
-                    label={fields?.left?.audio ? "Passed" : "Failed"}
-                    size="small"
-                    sx={{
-                      backgroundColor: fields?.left?.audio
-                        ? "success.main"
-                        : "error.main",
-                      color: "#fff",
-                      fontWeight: 500,
-                      textTransform: "capitalize",
-                    }}
-                  />
-                  <Divider orientation="vertical" flexItem />
-                  <Chip
-                    label={fields?.right?.audio ? "Passed" : "Failed"}
-                    size="small"
-                    sx={{
-                      backgroundColor: fields?.right?.audio
-                        ? "success.main"
-                        : "error.main",
-                      color: "#fff",
-                      fontWeight: 500,
-                      textTransform: "capitalize",
-                    }}
-                  />
+                  >
+                    <Chip
+                      label={fields?.left?.audio ? "Passed" : "Failed"}
+                      size="small"
+                      sx={{
+                        backgroundColor: fields?.left?.audio
+                          ? "success.main"
+                          : "error.main",
+                        color: "#fff",
+                        fontWeight: 500,
+                        textTransform: "capitalize",
+                      }}
+                    />
+                    <Divider orientation="vertical" flexItem />
+                    <Chip
+                      label={fields?.right?.audio ? "Passed" : "Failed"}
+                      size="small"
+                      sx={{
+                        backgroundColor: fields?.right?.audio
+                          ? "success.main"
+                          : "error.main",
+                        color: "#fff",
+                        fontWeight: 500,
+                        textTransform: "capitalize",
+                      }}
+                    />
                   </Box>
                 ),
               },
               {
                 label: "Device Charging Test :",
                 value: (
-                    <Box
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-evenly",
+                      width: "100%",
+                    }}
+                  >
+                    <Chip
+                      label={fields?.left?.charging ? "Passed" : "Failed"}
+                      size="small"
                       sx={{
-                        display: "flex",
-                        justifyContent: "space-evenly",
-                        width: "100%",
+                        backgroundColor: fields?.left?.charging
+                          ? "success.main"
+                          : "error.main",
+                        color: "#fff",
+                        fontWeight: 500,
+                        textTransform: "capitalize",
                       }}
-                    >
-                  <Chip
-                    label={fields?.left?.charging ? "Passed" : "Failed"}
-                    size="small"
-                    sx={{
-                      backgroundColor: fields?.left?.charging
-                        ? "success.main"
-                        : "error.main",
-                      color: "#fff",
-                      fontWeight: 500,
-                      textTransform: "capitalize",
-                    }}
-                  />
-                  <Divider orientation="vertical" flexItem />
-                  <Chip
-                    label={fields?.right?.charging ? "Passed" : "Failed"}
-                    size="small"
-                    sx={{
-                      backgroundColor: fields?.right?.charging
-                        ? "success.main"
-                        : "error.main",
-                      color: "#fff",
-                      fontWeight: 500,
-                      textTransform: "capitalize",
-                    }}
-                  />
+                    />
+                    <Divider orientation="vertical" flexItem />
+                    <Chip
+                      label={fields?.right?.charging ? "Passed" : "Failed"}
+                      size="small"
+                      sx={{
+                        backgroundColor: fields?.right?.charging
+                          ? "success.main"
+                          : "error.main",
+                        color: "#fff",
+                        fontWeight: 500,
+                        textTransform: "capitalize",
+                      }}
+                    />
                   </Box>
                 ),
               },
@@ -286,40 +292,39 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                 isField: fields?.device !== DEVICES.SAFE_BUDS,
                 label: "Device Mic Test :",
                 value: (
-                    <Box
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-evenly",
+                      width: "100%",
+                    }}
+                  >
+                    <Chip
+                      label={fields?.left?.mic ? "Passed" : "Failed"}
+                      size="small"
                       sx={{
-                        display: "flex",
-                        justifyContent: "space-evenly",
-                        width: "100%",
+                        backgroundColor: fields?.left?.mic
+                          ? "success.main"
+                          : "error.main",
+                        color: "#fff",
+                        fontWeight: 500,
+                        textTransform: "capitalize",
                       }}
-                    >
-                  <Chip
-                    label={fields?.left?.mic ? "Passed" : "Failed"}
-                    size="small"
-                    sx={{
-                      backgroundColor: fields?.left?.mic
-                        ? "success.main"
-                        : "error.main",
-                      color: "#fff",
-                      fontWeight: 500,
-                      textTransform: "capitalize",
-                    }}
-                  />
-                  <Divider orientation="vertical" flexItem />
-                  <Chip
-                    label={fields?.right?.mic ? "Passed" : "Failed"}
-                    size="small"
-                    sx={{
-                      backgroundColor: fields?.right?.mic
-                        ? "success.main"
-                        : "error.main",
-                      color: "#fff",
-                      fontWeight: 500,
-                      textTransform: "capitalize",
-                    }}
-                  />
+                    />
+                    <Divider orientation="vertical" flexItem />
+                    <Chip
+                      label={fields?.right?.mic ? "Passed" : "Failed"}
+                      size="small"
+                      sx={{
+                        backgroundColor: fields?.right?.mic
+                          ? "success.main"
+                          : "error.main",
+                        color: "#fff",
+                        fontWeight: 500,
+                        textTransform: "capitalize",
+                      }}
+                    />
                   </Box>
-
                 ),
               },
               {
@@ -332,69 +337,71 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                       width: "100%",
                     }}
                   >
-                  <Chip
-                    label={fields?.left?.body?.body1 ? "Passed" : "Damaged"}
-                    size="small"
-                    sx={{
-                      backgroundColor: fields?.left?.body?.body1
-                        ? "success.main"
-                        : "error.main",
-                      color: "#fff",
-                      fontWeight: 500,
-                      textTransform: "capitalize",
-                    }}
-                  />
-                  <Divider orientation="vertical" flexItem />
-                  <Chip
-                    label={fields?.right?.body?.body1 ? "Passed" : "Damaged"}
-                    size="small"
-                    sx={{
-                      backgroundColor: fields?.right?.body?.body1
-                        ? "success.main"
-                        : "error.main",
-                      color: "#fff",
-                      fontWeight: 500,
-                      textTransform: "capitalize",
-                    }}
-                  />
+                    <Chip
+                      label={fields?.left?.body?.body1 ? "Passed" : "Damaged"}
+                      size="small"
+                      sx={{
+                        backgroundColor: fields?.left?.body?.body1
+                          ? "success.main"
+                          : "error.main",
+                        color: "#fff",
+                        fontWeight: 500,
+                        textTransform: "capitalize",
+                      }}
+                    />
+                    <Divider orientation="vertical" flexItem />
+                    <Chip
+                      label={fields?.right?.body?.body1 ? "Passed" : "Damaged"}
+                      size="small"
+                      sx={{
+                        backgroundColor: fields?.right?.body?.body1
+                          ? "success.main"
+                          : "error.main",
+                        color: "#fff",
+                        fontWeight: 500,
+                        textTransform: "capitalize",
+                      }}
+                    />
                   </Box>
                 ),
               },
               {
                 label: "Device is not Scratched :",
                 value: (
-                    <Box
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-evenly",
+                      width: "100%",
+                    }}
+                  >
+                    <Chip
+                      label={fields?.left?.body?.body2 ? "Passed" : "Scratched"}
+                      size="small"
                       sx={{
-                        display: "flex",
-                        justifyContent: "space-evenly",
-                        width: "100%",
+                        backgroundColor: fields?.left?.body?.body2
+                          ? "success.main"
+                          : "error.main",
+                        color: "#fff",
+                        fontWeight: 500,
+                        textTransform: "capitalize",
                       }}
-                    >
-                  <Chip
-                    label={fields?.left?.body?.body2 ? "Passed" : "Scratched"}
-                    size="small"
-                    sx={{
-                      backgroundColor: fields?.left?.body?.body2
-                        ? "success.main"
-                        : "error.main",
-                      color: "#fff",
-                      fontWeight: 500,
-                      textTransform: "capitalize",
-                    }}
-                  />
-                  <Divider orientation="vertical" flexItem />
-                  <Chip
-                    label={fields?.right?.body?.body2 ? "Passed" : "Scratched"}
-                    size="small"
-                    sx={{
-                      backgroundColor: fields?.right?.body?.body2
-                        ? "success.main"
-                        : "error.main",
-                      color: "#fff",
-                      fontWeight: 500,
-                      textTransform: "capitalize",  
-                    }}
-                  />
+                    />
+                    <Divider orientation="vertical" flexItem />
+                    <Chip
+                      label={
+                        fields?.right?.body?.body2 ? "Passed" : "Scratched"
+                      }
+                      size="small"
+                      sx={{
+                        backgroundColor: fields?.right?.body?.body2
+                          ? "success.main"
+                          : "error.main",
+                        color: "#fff",
+                        fontWeight: 500,
+                        textTransform: "capitalize",
+                      }}
+                    />
                   </Box>
                 ),
               },
@@ -408,81 +415,85 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                       width: "100%",
                     }}
                   >
-                  <Chip
-                    label={
-                      fields?.left?.volume?.volumeIncrease ? "Passed" : "Failed"
-                    }
-                    size="small"
-                    sx={{
-                      backgroundColor: fields?.left?.volume?.volumeIncrease
-                        ? "success.main"
-                        : "error.main",
-                      color: "#fff",
-                      fontWeight: 500,
-                      textTransform: "capitalize",
-                    }}
-                  />
-                  <Divider orientation="vertical" flexItem />
-                  <Chip
-                    label={
-                      fields?.right?.volume?.volumeIncrease
-                        ? "Passed"
-                        : "Failed"
-                    }
-                    size="small"
-                    sx={{
-                      backgroundColor: fields?.right?.volume?.volumeIncrease
-                        ? "success.main"
-                        : "error.main",
-                      color: "#fff",
-                      fontWeight: 500,
-                      textTransform: "capitalize",
-                    }}
-                  />
+                    <Chip
+                      label={
+                        fields?.left?.volume?.volumeIncrease
+                          ? "Passed"
+                          : "Failed"
+                      }
+                      size="small"
+                      sx={{
+                        backgroundColor: fields?.left?.volume?.volumeIncrease
+                          ? "success.main"
+                          : "error.main",
+                        color: "#fff",
+                        fontWeight: 500,
+                        textTransform: "capitalize",
+                      }}
+                    />
+                    <Divider orientation="vertical" flexItem />
+                    <Chip
+                      label={
+                        fields?.right?.volume?.volumeIncrease
+                          ? "Passed"
+                          : "Failed"
+                      }
+                      size="small"
+                      sx={{
+                        backgroundColor: fields?.right?.volume?.volumeIncrease
+                          ? "success.main"
+                          : "error.main",
+                        color: "#fff",
+                        fontWeight: 500,
+                        textTransform: "capitalize",
+                      }}
+                    />
                   </Box>
                 ),
               },
               {
                 label: "Device Volume Decreased :",
                 value: (
-                    <Box
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-evenly",
+                      width: "100%",
+                    }}
+                  >
+                    <Chip
+                      label={
+                        fields?.left?.volume?.volumeDecrease
+                          ? "Passed"
+                          : "Failed"
+                      }
+                      size="small"
                       sx={{
-                        display: "flex",
-                        justifyContent: "space-evenly",
-                        width: "100%",
+                        backgroundColor: fields?.left?.volume?.volumeDecrease
+                          ? "success.main"
+                          : "error.main",
+                        color: "#fff",
+                        fontWeight: 500,
+                        textTransform: "capitalize",
                       }}
-                    >
-                  <Chip
-                    label={
-                      fields?.left?.volume?.volumeDecrease ? "Passed" : "Failed"
-                    }
-                    size="small"
-                    sx={{
-                      backgroundColor: fields?.left?.volume?.volumeDecrease
-                        ? "success.main"
-                        : "error.main",
-                      color: "#fff",
-                      fontWeight: 500,
-                      textTransform: "capitalize",
-                    }}
-                  />
-                  <Divider orientation="vertical" flexItem />
-                  <Chip
-                    label={
-                      fields?.right?.volume?.volumeDecrease
-                        ? "Passed"
-                        : "Failed"
-                    }
-                    size="small"
-                    sx={{
-                      backgroundColor: fields?.right?.volume?.volumeDecrease
-                        ? "success.main"
-                        : "error.main",
-                      color: "#fff",
-                      fontWeight: 500,
-                      textTransform: "capitalize",
-                    }}
-                  />
+                    />
+                    <Divider orientation="vertical" flexItem />
+                    <Chip
+                      label={
+                        fields?.right?.volume?.volumeDecrease
+                          ? "Passed"
+                          : "Failed"
+                      }
+                      size="small"
+                      sx={{
+                        backgroundColor: fields?.right?.volume?.volumeDecrease
+                          ? "success.main"
+                          : "error.main",
+                        color: "#fff",
+                        fontWeight: 500,
+                        textTransform: "capitalize",
+                      }}
+                    />
                   </Box>
                 ),
               },
@@ -496,145 +507,161 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                       width: "100%",
                     }}
                   >
-                  <Chip
-                    label={fields?.left?.mode.includes(1) ? "Passed" : "Failed"}
-                    size="small"
-                    sx={{
-                      backgroundColor: fields?.left?.mode.includes(1)
-                        ? "success.main"
-                        : "error.main",
-                      color: "#fff",
-                      fontWeight: 500,
-                      textTransform: "capitalize",
-                    }}
-                  />
-                  <Divider orientation="vertical" flexItem />
-                  <Chip
-                    label={fields?.right?.mode.includes(1) ? "Passed" : "Failed"}
-                    size="small"
-                    sx={{
-                      backgroundColor: fields?.right?.mode.includes(1)
-                        ? "success.main"
-                        : "error.main",
-                      color: "#fff",
-                      fontWeight: 500,
-                      textTransform: "capitalize",
-                    }}
-                  />
+                    <Chip
+                      label={
+                        fields?.left?.mode.includes(1) ? "Passed" : "Failed"
+                      }
+                      size="small"
+                      sx={{
+                        backgroundColor: fields?.left?.mode.includes(1)
+                          ? "success.main"
+                          : "error.main",
+                        color: "#fff",
+                        fontWeight: 500,
+                        textTransform: "capitalize",
+                      }}
+                    />
+                    <Divider orientation="vertical" flexItem />
+                    <Chip
+                      label={
+                        fields?.right?.mode.includes(1) ? "Passed" : "Failed"
+                      }
+                      size="small"
+                      sx={{
+                        backgroundColor: fields?.right?.mode.includes(1)
+                          ? "success.main"
+                          : "error.main",
+                        color: "#fff",
+                        fontWeight: 500,
+                        textTransform: "capitalize",
+                      }}
+                    />
                   </Box>
                 ),
               },
               {
                 label: "Double Touch :",
                 value: (
-                    <Box
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-evenly",
+                      width: "100%",
+                    }}
+                  >
+                    <Chip
+                      label={
+                        fields?.left?.mode.includes(2) ? "Passed" : "Failed"
+                      }
+                      size="small"
                       sx={{
-                        display: "flex",
-                        justifyContent: "space-evenly",
-                        width: "100%",
+                        backgroundColor: fields?.left?.mode.includes(2)
+                          ? "success.main"
+                          : "error.main",
+                        color: "#fff",
+                        fontWeight: 500,
+                        textTransform: "capitalize",
                       }}
-                    >
-                  <Chip
-                    label={fields?.left?.mode.includes(2) ? "Passed" : "Failed"}
-                    size="small"
-                    sx={{
-                      backgroundColor: fields?.left?.mode.includes(2)
-                        ? "success.main"
-                        : "error.main",
-                      color: "#fff",
-                      fontWeight: 500,
-                      textTransform: "capitalize",
-                    }}
-                  />
-                                    <Divider orientation="vertical" flexItem />
-                  <Chip
-                    label={fields?.right?.mode.includes(2) ? "Passed" : "Failed"}
-                    size="small"
-                    sx={{
-                      backgroundColor: fields?.right?.mode.includes(2)
-                        ? "success.main"
-                        : "error.main",
-                      color: "#fff",
-                      fontWeight: 500,
-                      textTransform: "capitalize",
-                    }}
-                  />
+                    />
+                    <Divider orientation="vertical" flexItem />
+                    <Chip
+                      label={
+                        fields?.right?.mode.includes(2) ? "Passed" : "Failed"
+                      }
+                      size="small"
+                      sx={{
+                        backgroundColor: fields?.right?.mode.includes(2)
+                          ? "success.main"
+                          : "error.main",
+                        color: "#fff",
+                        fontWeight: 500,
+                        textTransform: "capitalize",
+                      }}
+                    />
                   </Box>
                 ),
               },
               {
                 label: "Triple Touch :",
                 value: (
-                    <Box
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-evenly",
+                      width: "100%",
+                    }}
+                  >
+                    <Chip
+                      label={
+                        fields?.left?.mode.includes(3) ? "Passed" : "Failed"
+                      }
+                      size="small"
                       sx={{
-                        display: "flex",
-                        justifyContent: "space-evenly",
-                        width: "100%",
+                        backgroundColor: fields?.left?.mode.includes(3)
+                          ? "success.main"
+                          : "error.main",
+                        color: "#fff",
+                        fontWeight: 500,
+                        textTransform: "capitalize",
                       }}
-                    >
-                  <Chip
-                    label={fields?.left?.mode.includes(3) ? "Passed" : "Failed"}
-                    size="small"
-                    sx={{
-                      backgroundColor: fields?.left?.mode.includes(3)
-                        ? "success.main"
-                        : "error.main",
-                      color: "#fff",
-                      fontWeight: 500,
-                      textTransform: "capitalize",
-                    }}
-                  />
-                                    <Divider orientation="vertical" flexItem />
-                  <Chip
-                    label={fields?.right?.mode.includes(3) ? "Passed" : "Failed"}
-                    size="small"
-                    sx={{
-                      backgroundColor: fields?.right?.mode.includes(3)
-                        ? "success.main"
-                        : "error.main",
-                      color: "#fff",
-                      fontWeight: 500,
-                      textTransform: "capitalize",
-                    }}
-                  />
+                    />
+                    <Divider orientation="vertical" flexItem />
+                    <Chip
+                      label={
+                        fields?.right?.mode.includes(3) ? "Passed" : "Failed"
+                      }
+                      size="small"
+                      sx={{
+                        backgroundColor: fields?.right?.mode.includes(3)
+                          ? "success.main"
+                          : "error.main",
+                        color: "#fff",
+                        fontWeight: 500,
+                        textTransform: "capitalize",
+                      }}
+                    />
                   </Box>
                 ),
               },
               {
                 label: "Long Press :",
                 value: (
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-evenly",
-                          width: "100%",
-                        }}
-                      >
-                  <Chip
-                    label={fields?.left?.mode.includes(4) ? "Passed" : "Failed"}
-                    size="small"
+                  <Box
                     sx={{
-                      backgroundColor: fields?.left?.mode.includes(4)
-                        ? "success.main"
-                        : "error.main",
-                      color: "#fff",
-                      fontWeight: 500,
-                      textTransform: "capitalize",
+                      display: "flex",
+                      justifyContent: "space-evenly",
+                      width: "100%",
                     }}
-                  />
-                  <Divider orientation="vertical" flexItem />
-                  <Chip
-                    label={fields?.right?.mode.includes(4) ? "Passed" : "Failed"}
-                    size="small"
-                    sx={{
-                      backgroundColor: fields?.right?.mode.includes(4)
-                        ? "success.main"
-                        : "error.main",
-                      color: "#fff",
-                      fontWeight: 500,
-                      textTransform: "capitalize",
-                    }}
-                  />
+                  >
+                    <Chip
+                      label={
+                        fields?.left?.mode.includes(4) ? "Passed" : "Failed"
+                      }
+                      size="small"
+                      sx={{
+                        backgroundColor: fields?.left?.mode.includes(4)
+                          ? "success.main"
+                          : "error.main",
+                        color: "#fff",
+                        fontWeight: 500,
+                        textTransform: "capitalize",
+                      }}
+                    />
+                    <Divider orientation="vertical" flexItem />
+                    <Chip
+                      label={
+                        fields?.right?.mode.includes(4) ? "Passed" : "Failed"
+                      }
+                      size="small"
+                      sx={{
+                        backgroundColor: fields?.right?.mode.includes(4)
+                          ? "success.main"
+                          : "error.main",
+                        color: "#fff",
+                        fontWeight: 500,
+                        textTransform: "capitalize",
+                      }}
+                    />
                   </Box>
                 ),
               },

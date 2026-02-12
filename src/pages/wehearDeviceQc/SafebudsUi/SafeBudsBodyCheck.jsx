@@ -29,14 +29,13 @@ const SafeBudsBodyCheck = ({ fields, setFields }) => {
           title="Body checked for scratches"
         />
       </Box>
-      <Divider />
 
       {/* CHARGING CHECK */}
-      <Box width="100%" mt={2}>
+      {/* <Box width="100%" mt={2}>
         <Typography variant="h3" fontWeight={700} mb={2}>
           Charging
         </Typography>
-      </Box>
+      </Box> */}
 
       <Box ml={2}>
         <StepCard

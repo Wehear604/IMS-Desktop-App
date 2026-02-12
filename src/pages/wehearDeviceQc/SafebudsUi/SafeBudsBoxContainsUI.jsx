@@ -3,6 +3,7 @@ import React, { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { DEVICES } from "../../../utils/constants";
 import { DeviceBoxDetailsAction } from "../../../store/actions/deviceDataAction";
+import { toTitleCase, toTitleSpaceCase } from "../../../utils/main";
 
 const SafeBudsBoxContainsUI = () => {
   const dispatch = useDispatch();
@@ -39,7 +40,7 @@ const SafeBudsBoxContainsUI = () => {
             minWidth: { sm: "150px" },
           }}
         >
-          Box Contains
+          Box Contains :
         </Typography>
         <Box sx={{ width: "100%" }}>
           {deviceDataStore.box_Contains.map((item) => {
@@ -64,7 +65,7 @@ const SafeBudsBoxContainsUI = () => {
                       size="small"
                     />
                   }
-                  label={key}
+                  label={toTitleSpaceCase(key)}
                 />
               </Box>
             );

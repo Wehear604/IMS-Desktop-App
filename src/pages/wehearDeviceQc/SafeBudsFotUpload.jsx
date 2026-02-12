@@ -14,6 +14,9 @@ import { useDispatch, useSelector } from "react-redux";
 import fotfile from "../../assets/blefiles/fw5000_latest.fot";
 import { callApiAction } from "../../store/actions/commonAction";
 import { CreateQcMacCheckApi } from "../../apis/qcmac.api";
+import safeBudsGif from "../../assets/images/Safe Buds Video Final C.mp4";
+import { closeModal, openModal } from "../../store/actions/modalAction";
+
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
   clipPath: "inset(50%)",
@@ -606,8 +609,40 @@ const SafeBudsFotUpload = () => {
   }, [progress, dispatch]);
 
   useEffect(() => {
+    let timer;
+
     if (progress === 100) {
       setIsUploading(false);
+
+      dispatch(
+        openModal(
+          <CustomDialog id="safeBuds" title="Step to follow after FOT Upload">
+            <video
+              src={safeBudsGif}
+              autoPlay
+              muted
+              playsInline
+              controls={false}
+              style={{ width: "100%", borderRadius: 8 }}
+              onEnded={() => {
+                dispatch(closeModal("safeBuds"));
+              }}
+            />
+
+            <Typography
+              variant="h6"
+              mt={2}
+              sx={{ fontFamily: "League Spartan" }}
+            >
+              <b>NOTE:-</b> Please ensure to follow this step after uploading
+              the FOT file:
+            </Typography>
+          </CustomDialog>,
+          "xs",
+          false,
+          "safeBuds",
+        ),
+      );
 
       dispatch(
         callApiAction(
@@ -625,8 +660,15 @@ const SafeBudsFotUpload = () => {
           },
         ),
       );
+
+      // const timer = setTimeout(() => {
+      //   console.log("object timeout");
+      //   dispatch(closeModal("safeBuds"));
+      // }, 7000);
+
+      // return () => clearTimeout(timer);
     }
-  }, [progress]);
+  }, [progress, dispatch]);
 
   useEffect(() => {
     const loadDefaultFile = async () => {

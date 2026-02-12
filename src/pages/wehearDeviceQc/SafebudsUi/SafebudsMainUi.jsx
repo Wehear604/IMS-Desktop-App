@@ -39,16 +39,16 @@ import {
 } from "../../../store/actions/deviceDataAction";
 import { callSnackBar } from "../../../store/actions/snackbarAction";
 import { BLE_STORE } from "../../../utils/bleStore";
+import useValidate from "../../../store/hooks/useValidator";
+import { callApiAction } from "../../../store/actions/commonAction";
 
 const SafebudsMainUi = () => {
   const dispatch = useDispatch();
   const { device, deviceDataStore, step, deviceQc } = useSelector(
     (state) => state,
   );
-  console.log("first step", step.step == 2, step);
-  // const [step, setStep] = useState(0);
-  console.log("object device", device);
-  console.log("object deviceDataStore", deviceDataStore);
+  const validate = useValidate();
+  const [loading, setLoading] = useState(false);
 
   const [fields, setFields] = useState({
     body1: false,
@@ -62,8 +62,16 @@ const SafebudsMainUi = () => {
     dispatch(SafebudsDeviceCurrentVolume());
   }, []);
 
+  const tapcheck = (number) => {
+    if (!device?.device_side) return false;
+
+    return device?.device_side === LISTENING_SIDE.LEFT
+      ? deviceQc.modeLeft?.includes(number)
+      : deviceQc.modeRight?.includes(number);
+  };
+
   const isStepValid = () => {
-    if (step.step === 0) {
+    if (step.step === 2) {
       return tapcheck(1) && tapcheck(2) && tapcheck(3) && tapcheck(4);
     }
     return true;
@@ -103,9 +111,9 @@ const SafebudsMainUi = () => {
       result: false,
       mic: device?.isMic,
     },
-    box_Contains: [],
-    deviceColor: null,
-    boxId: "0000000000",
+    box_Contains: deviceDataStore.box_Contains ?? [],
+    deviceColor: deviceDataStore.deviceColor ?? "69521eea409668adad3cf8e2",
+    boxId: deviceDataStore.boxId ?? "0000000000",
     device: device?.device_type,
   };
 
@@ -130,51 +138,74 @@ const SafebudsMainUi = () => {
     );
   };
 
-  const onComplete = async () => {
-    const validationResponse = validate(validationSchemaForCreate);
-
-    if (validationResponse === true) {
-      setLoading(true);
-      dispatch(
-        callApiAction(
-          async () =>
-            await createDeviceQcApi({
-              ...deviceDataStore,
-              macBeforeOta: device.mac,
-            }),
-          async (response) => {
-            setLoading(false);
-            BLE_STORE.BTEdisconnect = true;
-            dispatch(SetStepAction(0));
-            dispatch(closeModal("deviceAudioMicCheck"));
-            dispatch(
-              callSnackBar(
-                "Device QC Created Successfully",
-                SNACK_BAR_VARIETNS.suceess,
-              ),
-            );
-            dispatch(resetDeviceDataStore());
-          },
-          (err) => {
-            dispatch(callSnackBar(err, SNACK_BAR_VARIETNS.error));
-          },
-        ),
-      );
-    } else {
-      dispatch(callSnackBar(validationResponse, SNACK_BAR_VARIETNS.warning));
-    }
+  const onComplete = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    dispatch(
+      callApiAction(
+        async () =>
+          await createDeviceQcApi({
+            ...data,
+            left: {
+              ...data.left,
+              result: true,
+            },
+            right: { ...data.right, result: true },
+            macBeforeOta: device.mac,
+          }),
+        async (response) => {
+          setLoading(false);
+          BLE_STORE.BTEdisconnect = true;
+          dispatch(SetStepAction(0));
+          dispatch(closeModal("deviceAudioMicCheck"));
+          dispatch(
+            callSnackBar(
+              "Device QC Created Successfully",
+              SNACK_BAR_VARIETNS.suceess,
+            ),
+          );
+          dispatch(resetDeviceDataStore());
+        },
+        (err) => {
+          dispatch(callSnackBar(err, SNACK_BAR_VARIETNS.error));
+        },
+      ),
+    );
   };
 
   const handleNext = (e) => {
     e.preventDefault();
     dispatch(SetStepAction(step.step + 1));
   };
+console.log("data check",        device.is_Audio_play ,
+        deviceQc.volumeIncrease ,
+        fields.body1 ,
+        fields.body2 ,
+        fields.charging ,
+        device.isMic);
+  const disableNext = () => {
+    if (step.step === 2) {
+      return !isStepValid();
+    } else if (step.step === 3) {
+      return !(
+        device.is_Audio_play &&
+        deviceQc.volumeIncrease &&
+        fields.body1 &&
+        fields.body2 &&
+        fields.charging &&
+        device.isMic
+      );
+    } else if (step.step === 4) {
+      return !(deviceDataStore.deviceColor && deviceDataStore.boxId);
+    }
+    return false;
+  };
   return (
     <CustomDialog
       // err={fields?.err}
       title="SafeBuds QC Checklist"
       id="deviceAudioMicCheck"
-      onSubmit={(e) => (step === 3 ? onComplete(e) : handleNext(e))}
+      onSubmit={(e) => (step.step === 4 ? onComplete(e) : handleNext(e))}
       onClose={() => {
         BLE_STORE.BTEdisconnect = true;
         dispatch(closeModal("deviceAudioMicCheck"));
@@ -186,11 +217,11 @@ const SafebudsMainUi = () => {
       }}
       isReject={true}
       closeText="Reject Qc"
-      confirmText={step === 3 ? `Finish` : "Next"}
-      disabledSubmit={isStepValid() === false}
+      confirmText={step.step === 4 ? `Finish` : "Next"}
+      disabledSubmit={disableNext()}
     >
-      <Box sx={{ p: 4 }}>
-        <Stepper activeStep={step.step} alternativeLabel>
+      <Box sx={{ p: 1 }}>
+        <Stepper sx={{ p: 2 }} activeStep={step.step} alternativeLabel>
           <Step>
             <StepLabel>Device Connection</StepLabel>
           </Step>
@@ -198,7 +229,7 @@ const SafebudsMainUi = () => {
             <StepLabel>Upload FOT</StepLabel>
           </Step>
           <Step>
-            <StepLabel>Functioning Test</StepLabel>
+            <StepLabel>Touch Check</StepLabel>
           </Step>
           <Step>
             <StepLabel>Audio and Mic Test</StepLabel>
@@ -208,7 +239,7 @@ const SafebudsMainUi = () => {
           </Step>
         </Stepper>
 
-        <Divider sx={{ my: 4 }} />
+        <Divider sx={{}} />
         {!device.fotfile1 && step.step === 1 && <SafeBudsFotUpload />}
         {step.step == 2 && (
           <Box p={6}>
@@ -217,17 +248,17 @@ const SafebudsMainUi = () => {
         )}
         {step.step === 3 && (
           <Grid container>
-            <Grid item xs={12} md={5.9} p={2}>
+            <Grid item xs={12} md={5.9} mt={2} pr={2}>
               <Box>
                 <AudioCheckSafeBudsUi />
               </Box>
               <Divider />
-              <Box mt={4}>
+              <Box mt={2} pr={2}>
                 <SafeBudsBodyCheck setFields={setFields} fields={fields} />
               </Box>
             </Grid>
             <Divider orientation="vertical" flexItem />
-            <Grid mb={4} item xs={12} md={5.9} p={6}>
+            <Grid item xs={12} md={5.9} mt={2} p={2}>
               <MicCheckUiSafeBudsUi />{" "}
             </Grid>
           </Grid>

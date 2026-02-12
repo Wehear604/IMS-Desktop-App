@@ -180,188 +180,196 @@ const MicCheckUiSafeBudsUi = () => {
 
   return (
     <>
-      <Box>
+      <Box ml={4}>
         <Typography variant="h3" fontWeight={700} mb={2}>
           Mic Check
         </Typography>
       </Box>
-      <Card
-        sx={{
-          maxWidth: 520,
-          // m: "24px auto",
-          borderRadius: 4,
-          background:
-            "linear-gradient(140deg, #0b1225 0%, #0f1c38 60%, #0a1023 100%)",
-          color: "#e5e9ff",
-        }}
-        elevation={8}
-      >
-        <CardContent>
-          <Stack direction="row" justifyContent="space-between">
-            <Box>
-              <Typography sx={{ fontSize: 11, opacity: 0.7 }}>
-                SAFEBUDS QC
-              </Typography>
-              <Typography variant="h6">Microphone Monitor</Typography>
-            </Box>
+      <Box sx={{display:"flex", justifyContent:"center", flexDirection:"column", alignItems:"center"}}>
+        <Card
+          sx={{
+            maxWidth: 580,
+            // m: "24px auto",
+            borderRadius: 4,
+            background:
+              "linear-gradient(140deg, #0b1225 0%, #0f1c38 60%, #0a1023 100%)",
+            color: "#e5e9ff",
+          }}
+          elevation={8}
+        >
+          <CardContent>
+            <Stack direction="row" justifyContent="space-between">
+              <Box>
+                <Typography sx={{ fontSize: 11, opacity: 0.7 }}>
+                  SAFEBUDS QC
+                </Typography>
+                <Typography variant="h6">Microphone Monitor</Typography>
+              </Box>
 
-            <Chip
-              label={`${currentPercent}%`}
+              <Chip
+                label={`${currentPercent}%`}
+                sx={{
+                  fontWeight: 600,
+                  color: "#0a1225",
+                  background:
+                    "linear-gradient(120deg, #b9f3ff, #8ad5ff, #b7a9ff)",
+                }}
+              />
+            </Stack>
+
+            {/* Mic selector */}
+            <FormControl size="small" fullWidth sx={{ mt: 2 }}>
+              <InputLabel>Microphone</InputLabel>
+              <Select
+                label="Microphone"
+                value={selectedMic}
+                onChange={(e) => setSelectedMic(e.target.value)}
+                disabled={isRunning}
+              >
+                {devices.map((d) => (
+                  <MenuItem key={d.deviceId} value={d.deviceId}>
+                    {d.label || "Microphone"}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            {/* Start / Stop */}
+            {/* Start / Stop Controls */}
+            <Stack
+              direction="row"
+              spacing={2}
               sx={{
-                fontWeight: 600,
-                color: "#0a1225",
-                background:
-                  "linear-gradient(120deg, #b9f3ff, #8ad5ff, #b7a9ff)",
+                mt: 2,
+                p: 1.2,
+                borderRadius: 3,
+                background: "rgba(255,255,255,0.04)",
+                boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.06)",
               }}
-            />
-          </Stack>
-
-          {/* Mic selector */}
-          <FormControl size="small" fullWidth sx={{ mt: 2 }}>
-            <InputLabel>Microphone</InputLabel>
-            <Select
-              label="Microphone"
-              value={selectedMic}
-              onChange={(e) => setSelectedMic(e.target.value)}
-              disabled={isRunning}
             >
-              {devices.map((d) => (
-                <MenuItem key={d.deviceId} value={d.deviceId}>
-                  {d.label || "Microphone"}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          {/* Start / Stop */}
-          {/* Start / Stop Controls */}
-          <Stack
-            direction="row"
-            spacing={2}
-            sx={{
-              mt: 2,
-              p: 1.2,
-              borderRadius: 3,
-              background: "rgba(255,255,255,0.04)",
-              boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.06)",
-            }}
-          >
-            {/* START */}
-            <Box
-              onClick={!isRunning ? startMonitoring : undefined}
-              sx={{
-                flex: 1,
-                cursor: isRunning ? "default" : "pointer",
-                borderRadius: 999,
-                py: 1.3,
-                textAlign: "center",
-                fontWeight: 700,
-                letterSpacing: 0.5,
-                color: isRunning ? "#9fb3c8" : "#08121f",
-                background: isRunning
-                  ? "linear-gradient(145deg, #2a3244, #1a2130)"
-                  : "linear-gradient(135deg, #7ae4ff, #5bb6ff, #9f8bff)",
-                boxShadow: isRunning
-                  ? "none"
-                  : "0 0 18px rgba(120,200,255,0.55)",
-                transition: "all 0.25s ease",
-                "&:hover": {
-                  transform: isRunning ? "none" : "translateY(-1px)",
+              {/* START */}
+              <Box
+                onClick={!isRunning ? startMonitoring : undefined}
+                sx={{
+                  flex: 1,
+                  cursor: isRunning ? "default" : "pointer",
+                  borderRadius: 999,
+                  py: 1.3,
+                  textAlign: "center",
+                  fontWeight: 700,
+                  letterSpacing: 0.5,
+                  color: isRunning ? "#9fb3c8" : "#08121f",
+                  background: isRunning
+                    ? "linear-gradient(145deg, #2a3244, #1a2130)"
+                    : "linear-gradient(135deg, #7ae4ff, #5bb6ff, #9f8bff)",
                   boxShadow: isRunning
                     ? "none"
-                    : "0 0 28px rgba(120,200,255,0.75)",
-                },
-              }}
-            >
-              {isRunning ? "RUNNING" : "START"}
-            </Box>
+                    : "0 0 18px rgba(120,200,255,0.55)",
+                  transition: "all 0.25s ease",
+                  "&:hover": {
+                    transform: isRunning ? "none" : "translateY(-1px)",
+                    boxShadow: isRunning
+                      ? "none"
+                      : "0 0 28px rgba(120,200,255,0.75)",
+                  },
+                }}
+              >
+                {isRunning ? "RUNNING" : "START"}
+              </Box>
 
-            {/* STOP */}
-            <Box
-              onClick={isRunning ? stopMonitoring : undefined}
-              sx={{
-                flex: 1,
-                cursor: isRunning ? "pointer" : "default",
-                borderRadius: 999,
-                py: 1.3,
-                textAlign: "center",
-                fontWeight: 700,
-                letterSpacing: 0.5,
-                color: isRunning ? "#2a0a0a" : "#9b6b6b",
-                background: isRunning
-                  ? "linear-gradient(135deg, #ff9a9a, #ff6b6b)"
-                  : "linear-gradient(145deg, #2a1a1a, #1a1010)",
-                boxShadow: isRunning
-                  ? "0 0 16px rgba(255,120,120,0.45)"
-                  : "none",
-                transition: "all 0.25s ease",
-                "&:hover": {
-                  transform: isRunning ? "translateY(-1px)" : "none",
+              {/* STOP */}
+              <Box
+                onClick={isRunning ? stopMonitoring : undefined}
+                sx={{
+                  flex: 1,
+                  cursor: isRunning ? "pointer" : "default",
+                  borderRadius: 999,
+                  py: 1.3,
+                  textAlign: "center",
+                  fontWeight: 700,
+                  letterSpacing: 0.5,
+                  color: isRunning ? "#2a0a0a" : "#9b6b6b",
+                  background: isRunning
+                    ? "linear-gradient(135deg, #ff9a9a, #ff6b6b)"
+                    : "linear-gradient(145deg, #2a1a1a, #1a1010)",
                   boxShadow: isRunning
-                    ? "0 0 26px rgba(255,120,120,0.7)"
+                    ? "0 0 16px rgba(255,120,120,0.45)"
                     : "none",
-                },
+                  transition: "all 0.25s ease",
+                  "&:hover": {
+                    transform: isRunning ? "translateY(-1px)" : "none",
+                    boxShadow: isRunning
+                      ? "0 0 26px rgba(255,120,120,0.7)"
+                      : "none",
+                  },
+                }}
+              >
+                STOP
+              </Box>
+            </Stack>
+
+            {/* Canvas */}
+            <Box
+              sx={{
+                mt: 2,
+                borderRadius: 3,
+                overflow: "hidden",
+                background: "rgba(255,255,255,0.06)",
+                p: 1,
               }}
             >
-              STOP
-            </Box>
-          </Stack>
-
-          {/* Canvas */}
-          <Box
-            sx={{
-              mt: 2,
-              borderRadius: 3,
-              overflow: "hidden",
-              background: "rgba(255,255,255,0.06)",
-              p: 1,
-            }}
-          >
-            <canvas
-              ref={canvasRef}
-              width={460}
-              height={140}
-              style={{ width: "100%", display: "block" }}
-            />
-          </Box>
-
-          {/* Metrics */}
-          <Stack direction="row" justifyContent="space-between" sx={{ mt: 2 }}>
-            <Box>
-              <Typography sx={{ fontSize: 11, opacity: 0.6 }}>
-                CURRENT
-              </Typography>
-              <Typography sx={{ fontSize: 18, fontWeight: 600 }}>
-                {currentPercent}%
-              </Typography>
+              <canvas
+                ref={canvasRef}
+                width={460}
+                height={100}
+                style={{ width: "100%", display: "block" }}
+              />
             </Box>
 
-            <Box>
-              <Typography sx={{ fontSize: 11, opacity: 0.6 }}>PEAK</Typography>
-              <Typography sx={{ fontSize: 18, fontWeight: 600 }}>
-                {peakPercent}%
-              </Typography>
-            </Box>
-          </Stack>
-        </CardContent>
-      </Card>
-      <Box
-        sx={{
-          width: "100%",
-          display: "flex",
-          justifyContent: "center",
-          mt: 4,
-        }}
-      >
-        <StepCard
-          isChecked={true}
-          checked={device.isMic}
-          title={
-            device.isMic
-              ? "Microphone Functionality Verified"
-              : "Microphone Functionality Not Verified"
-          }
-        />
+            {/* Metrics */}
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              sx={{ mt: 2 }}
+            >
+              <Box>
+                <Typography sx={{ fontSize: 11, opacity: 0.6 }}>
+                  CURRENT
+                </Typography>
+                <Typography sx={{ fontSize: 18, fontWeight: 600 }}>
+                  {currentPercent}%
+                </Typography>
+              </Box>
+
+              <Box>
+                <Typography sx={{ fontSize: 11, opacity: 0.6 }}>
+                  PEAK
+                </Typography>
+                <Typography sx={{ fontSize: 18, fontWeight: 600 }}>
+                  {peakPercent}%
+                </Typography>
+              </Box>
+            </Stack>
+          </CardContent>
+        </Card>
+        <Box
+          sx={{
+            width: "90%",
+            display: "flex",
+            justifyContent: "center",
+            mt: 4,
+          }}
+        >
+          <StepCard
+            isChecked={true}
+            checked={device.isMic}
+            title={
+              device.isMic
+                ? "Microphone Functionality Verified"
+                : "Microphone Functionality Not Verified"
+            }
+          />
+        </Box>
       </Box>
     </>
   );
