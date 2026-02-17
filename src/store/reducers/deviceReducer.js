@@ -1,4 +1,5 @@
 import { actions } from "../../utils/constants";
+import { cleanValue } from "../../utils/main";
 
 const initialState = {
   device_type: null,
@@ -16,9 +17,12 @@ const initialState = {
   },
   fotfile: false,
   fotfile1: false,
+  version: null,
+  latestVersion: null
 };
 
 const deviceReducer = (state = initialState, action) => {
+  console.log("action", action);
   switch (action.type) {
     case actions.SET_DEVICE_SELECTED:
       return { ...state, device_type: action.device_type };
@@ -42,7 +46,13 @@ const deviceReducer = (state = initialState, action) => {
       return {
         ...state,
         mac: action.mac,
-        version: action.version,
+        // version: action.version,
+      };
+    case actions.SET_DEVICE_VERSION:
+      return {
+        ...state,
+        version: cleanValue(action?.versions ? action?.versions : state?.version),
+        latestVersion: cleanValue(action?.latestVersion ? action?.latestVersion : state?.latestVersion)
       };
 
     case actions.IS_AUDIO_CHECK:
@@ -59,6 +69,8 @@ const deviceReducer = (state = initialState, action) => {
         fotfile: state.fotfile,
         fotfile1: state.fotfile1,
         mac: state.mac,
+        version: cleanValue(action?.versions ? action?.versions : state?.version),
+        latestVersion: cleanValue(action?.latestVersion ? action?.latestVersion : state?.latestVersion)
       };
     case actions.SET_FOT_FILES_VERSION:
       return { ...state, fotfile1: true };

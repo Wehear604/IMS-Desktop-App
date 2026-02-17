@@ -17,6 +17,7 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.7.2",
+    "child_process": "^1.0.2",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.13",
     "engine.io-client": "^6.6.4",

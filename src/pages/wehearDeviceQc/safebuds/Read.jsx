@@ -30,7 +30,7 @@ const processQueue = async () => {
   if (isProcessing || commandQueue.length === 0) return;
 
   isProcessing = true;
-  const { command, side, deviceObj, type, dispatch, resolve, reject } =
+  const { command, side, deviceObj, type, dispatch, getState,resolve, reject } =
     commandQueue.shift();
 
   try {
@@ -50,10 +50,10 @@ const processQueue = async () => {
 
     const service = await device.gatt.getPrimaryService(serviceUuid);
     const characteristicWrite = await service.getCharacteristic(
-      CHARACTERISTIC_UUID_WRITE
+      CHARACTERISTIC_UUID_WRITE,
     );
     const characteristicRead = await service.getCharacteristic(
-      CHARACTERISTIC_UUID_READ
+      CHARACTERISTIC_UUID_READ,
     );
 
     if (type === "Tap") {
@@ -71,48 +71,51 @@ const processQueue = async () => {
             bytes[1] === 0x01
               ? "Left"
               : bytes[1] === 0x02
-              ? "Right"
-              : "Unknown",
+                ? "Right"
+                : "Unknown",
           event:
             bytes[2] === 0x01
               ? "Single Tap"
               : bytes[2] === 0x02
-              ? "Double Tap"
-              : bytes[2] === 0x03
-              ? "Triple Tap"
-              : bytes[2] === 0x04
-              ? "Long Press"
-              : "Unknown",
+                ? "Double Tap"
+                : bytes[2] === 0x03
+                  ? "Triple Tap"
+                  : bytes[2] === 0x04
+                    ? "Long Press"
+                    : "Unknown",
           action:
             bytes[3] === 0x01
               ? "Play/Pause"
               : bytes[3] === 0x02
-              ? "Voice Assistant"
-              : bytes[3] === 0x03
-              ? "Volume Up"
-              : bytes[3] === 0x04
-              ? "Volume Down"
-              : bytes[3] === 0x05
-              ? "Next Track"
-              : bytes[3] === 0x06
-              ? "Previous Track"
-              : "No Action",
+                ? "Voice Assistant"
+                : bytes[3] === 0x03
+                  ? "Volume Up"
+                  : bytes[3] === 0x04
+                    ? "Volume Down"
+                    : bytes[3] === 0x05
+                      ? "Next Track"
+                      : bytes[3] === 0x06
+                        ? "Previous Track"
+                        : "No Action",
         };
-
-        console.log("Tap Notification:", decoded);
-        dispatch({
-          type: actions.SET_SAFE_BUDS_TAP,
-          mode: tapChanges(decoded?.event),
-          tapSide:
-            decoded.device === "Left"
-              ? LISTENING_SIDE.LEFT
-              : LISTENING_SIDE.RIGHT,
-        });
+        const state = getState();
+        const deviceSide = state.device.device_side== LISTENING_SIDE.LEFT?"Left":"Right";
+        console.log("side",deviceSide, state);
+        if (deviceSide === decoded.device) {
+          dispatch({
+            type: actions.SET_SAFE_BUDS_TAP,
+            mode: tapChanges(decoded?.event),
+            tapSide:
+              decoded.device === "Left"
+                ? LISTENING_SIDE.LEFT
+                : LISTENING_SIDE.RIGHT,
+          });
+        }
       };
 
       characteristicRead.addEventListener(
         "characteristicvaluechanged",
-        onValueChanged
+        onValueChanged,
       );
 
       resolve(true);
@@ -128,7 +131,7 @@ const processQueue = async () => {
   }
 };
 
-const Read = (command, side, deviceObj, type, dispatch) => {
+const Read = (command, side, deviceObj, type, dispatch,getState) => {
   return new Promise((resolve, reject) => {
     commandQueue.push({
       command,
@@ -136,6 +139,7 @@ const Read = (command, side, deviceObj, type, dispatch) => {
       deviceObj,
       type,
       dispatch,
+      getState,
       resolve,
       reject,
     });

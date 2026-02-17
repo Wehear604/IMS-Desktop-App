@@ -16,6 +16,7 @@ import {
   MODES,
   VOLUME_COMMANDS_REVERSE,
 } from "../../utils/constants";
+import { DeviceVersionAction } from "./deviceDataAction";
 
 const gattLock = (() => {
   let busy = false;
@@ -129,7 +130,7 @@ export const RicDeviceCurrentVolume = (side) => {
   };
 };
 
-export const readRicVolumeLevel = (side, deviceObj, onSuccess = () => {}) => {
+export const readRicVolumeLevel = (side, deviceObj, onSuccess = () => { }) => {
   return async (dispatch) => {
     try {
       const command =
@@ -411,15 +412,15 @@ export const SafeBudsBLEDeviceName = ({ type }) => {
 };
 
 export const SafeBudsTap = ({ type }) => {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
     try {
       const command = null;
       const response = await Read(
         command,
-        "both",
+        deviceSide == LISTENING_SIDE.LEFT ? "Left" : "Right",
         BLE_STORE.deviceObj,
         type,
-        dispatch,
+        dispatch, getState
       );
 
       console.log("response1", response);
@@ -429,7 +430,7 @@ export const SafeBudsTap = ({ type }) => {
   };
 };
 
-export const SafeBudsVersionRead = ({ type, isVersionRead = true }) => {
+export const SafeBudsVersionRead = ({ type, isVersionRead = true, latestVersion = "" }) => {
   return async (dispatch) => {
     try {
       const command = 0x60;
@@ -440,9 +441,11 @@ export const SafeBudsVersionRead = ({ type, isVersionRead = true }) => {
         type,
         dispatch,
       );
-      console.log("version response", response);
+      console.log("version response", latestVersion);
       if (isVersionRead) {
-        dispatch(SafeBudsVersionUpdate({ type: "ble" }));
+        dispatch(SafeBudsVersionUpdate({ type: "ble", currentVersion: latestVersion }));
+      } else {
+        dispatch(DeviceVersionAction(response, latestVersion))
       }
       return response;
     } catch (err) {
@@ -530,7 +533,7 @@ export const SafebudsDeviceQCResultCheck = (result, device_side) => {
   };
 };
 
-export const SafeBudsVersionUpdate = ({ type }) => {
+export const SafeBudsVersionUpdate = ({ type, currentVersion }) => {
   return async (dispatch) => {
     try {
       const command = "0x60";
@@ -540,9 +543,13 @@ export const SafeBudsVersionUpdate = ({ type }) => {
         "both",
         BLE_STORE.deviceObj,
         type,
+        currentVersion
       );
 
       console.log("response3", response);
+      
+      // dispatch(DeviceVersionAction(response, currentVersion))
+    
       dispatch(SafeBudsDeviceName({ type: "NameChange" }));
     } catch (err) {
       console.error("RicDeviceCurrentVolume read failed", err);

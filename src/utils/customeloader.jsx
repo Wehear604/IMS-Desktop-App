@@ -13,7 +13,7 @@ const VersionCheckingLoader = ({ open }) => {
       <Stack spacing={2} alignItems="center">
         <CircularProgress color="inherit" />
         <Typography variant="h6">
-          Version Checking...
+          Checking device version...
         </Typography>
       </Stack>
     </Backdrop>

@@ -9,7 +9,7 @@ const initialState = {
 const settingsReducer = (state = initialState, action) => {
   switch (action.type) {
     case actions.FETCH_DATA_PRODUCT_COLOR_LODING:
-      return { ...state, productColor_loading: true, productColor_data: [] };
+      return { ...state, productColor_loading: true };
     case actions.FETCH_DATA_PRODUCT_COLOR_DATA:
       return {
         ...state,

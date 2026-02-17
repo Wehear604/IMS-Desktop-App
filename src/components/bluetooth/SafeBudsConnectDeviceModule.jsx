@@ -29,6 +29,7 @@ import { callSnackBar } from "../../store/actions/snackbarAction";
 import {
   DeviceIsConnectingAction,
   DeviceMACAction,
+  DeviceVersionAction,
   disconnectAction,
   SetDeviceFOT,
   SetDevicVersionFOT,
@@ -46,6 +47,7 @@ import { callApiAction } from "../../store/actions/commonAction";
 import { runClassicCheck } from "../../utils/classicSocket";
 import { CenteredBox } from "../layouts/OneViewBox";
 import VersionCheckingLoader from "../../utils/customeloader";
+import { SetStepAction } from "../../store/actions/stepAction";
 // import WriteSafeBudsDataToDevice from "./WriteSafeBudsDataToDevice";
 
 const modalStyle = {
@@ -307,8 +309,26 @@ const SafeBudsConnectDeviceModule = ({
         BLE_STORE.writeFun = null;
         BLE_STORE.disconnectFun = null;
       };
-
-      if (getMacId.current?.version !== "V2") {
+      console.log(
+        " getMacId.current?.currentversion",
+        getMacId.current?.currentversion,
+      );
+      const currentVersion = await dispatch(
+        SafeBudsVersionRead({
+          type: "SafeBudsVersionRead",
+          isVersionRead: false,
+          latestVersion: getMacId.current?.currentversion,
+        }),
+      );
+      // dispatch(
+      //   DeviceVersionAction(currentVersion, getMacId.current?.currentversion),
+      // );
+      const checkistrue =
+        Number(currentVersion[1]) < Number(getMacId.current?.currentversion[1])
+          ? getMacId.current?.version !== getMacId.current?.currentversion
+          : Number(currentVersion[1]) <
+            Number(getMacId.current?.currentversion[1]);
+      if (checkistrue) {
         try {
           try {
             if (BLE_STORE.deviceObj?.gatt?.connected) {
@@ -325,6 +345,8 @@ const SafeBudsConnectDeviceModule = ({
           if (window.electronAPI) {
             window.electronAPI.selectBluetoothDevice(targetId);
           }
+
+          dispatch(SetStepAction(0));
 
           const serviceUuid = "0000ff12-0000-1000-8000-00805f9b34fb";
           const UUID_SVC = "0000ff12-0000-1000-8000-00805f9b34fb";
@@ -426,9 +448,10 @@ const SafeBudsConnectDeviceModule = ({
             BLE_STORE.writeFun = null;
             BLE_STORE.disconnectFun = null;
           };
-setLoading1(false);
+          setLoading1(false);
           onConnectWithDevice(data, currentDeviceInfo);
         } catch (error) {
+          BLE_STORE.BTEdisconnect = true;
           console.error("Error:", error);
           setLoadingMessage("Failed: " + (error?.message || String(error)));
           setLoading(false);
@@ -437,12 +460,18 @@ setLoading1(false);
           else setRightDeviceConnected(false);
         }
       } else {
-              setLoading(false);
-              setLoading1(false);
+        setLoading(false);
+        setLoading1(false);
+        if (device.fotfile1) {
+          dispatch(SetStepAction(2));
+        } else {
+          dispatch(SetStepAction(0));
+        }
         dispatch(SetDevicVersionFOT());
         onConnectWithDevice(data, currentDeviceInfo);
       }
     } catch (error) {
+      BLE_STORE.BTEdisconnect = true;
       console.error("Error:", error);
       setLoadingMessage(
         "Failed to connect: " + (error?.message || String(error)),
@@ -501,12 +530,10 @@ setLoading1(false);
           }),
         async (response) => {
           getMacId.current = response;
-          if (getMacId.current?.version === "V2") {
-                runClassicCheck({
-                  mac: deviceId,
-                  name: "safe",
-                });
-              }
+          runClassicCheck({
+            mac: deviceId,
+            name: "safe",
+          });
         },
         (err) => {
           console.log("first err", err);
@@ -532,7 +559,7 @@ setLoading1(false);
 
   return (
     <>
-    <VersionCheckingLoader open={loading1} />
+      <VersionCheckingLoader open={loading1} />
       <Component
         loading={loading}
         connected={side === "Left" ? leftDeviceConnected : rightDeviceConnected}
@@ -540,54 +567,52 @@ setLoading1(false);
         disconnect={() => disconnect(side)}
         deviceSide={fitting?.device_side}
       />
-      {
-        !loading1 && (  <Modal open={loading} onClose={handleCancelSelect}>
-        <Box sx={modalStyle}>
-          <Typography variant="h6" component="h2" sx={{ mb: 2 }}>
-            Select a Bluetooth Device
-          </Typography>
-          <List sx={{ maxHeight: 300, overflow: "auto" }}>
-            {deviceList.length === 0 && (
-              <ListItem>
-                <ListItemText primary="Searching..." />
-              </ListItem>
-            )}
-            {deviceList.map((device) => {
-              const isLoading = selectingDeviceId === device.deviceId;
-              return (
-                <ListItemButton
-                  key={device.deviceId}
-                  onClick={() => handleDeviceSelected(device.deviceId)}
-                  disabled={!!selectingDeviceId}
-                >
-                  <ListItemIcon>
-                    {isLoading ? (
-                      <CircularProgress size={24} />
-                    ) : (
-                      <BluetoothIcon />
-                    )}
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={device.deviceName || "Unknown Device"}
-                    secondary={device.deviceId}
-                  />
-                </ListItemButton>
-              );
-            })}
-          </List>
-          <Button
-            onClick={handleCancelSelect}
-            color="error"
-            sx={{ mt: 2 }}
-            disabled={!!selectingDeviceId}
-          >
-            Cancel
-          </Button>
-        </Box>
-      </Modal>)
-      }
-    
-    
+      {!loading1 && (
+        <Modal open={loading} onClose={handleCancelSelect}>
+          <Box sx={modalStyle}>
+            <Typography variant="h6" component="h2" sx={{ mb: 2 }}>
+              Select a Bluetooth Device
+            </Typography>
+            <List sx={{ maxHeight: 300, overflow: "auto" }}>
+              {deviceList.length === 0 && (
+                <ListItem>
+                  <ListItemText primary="Searching..." />
+                </ListItem>
+              )}
+              {deviceList.map((device) => {
+                const isLoading = selectingDeviceId === device.deviceId;
+                return (
+                  <ListItemButton
+                    key={device.deviceId}
+                    onClick={() => handleDeviceSelected(device.deviceId)}
+                    disabled={!!selectingDeviceId}
+                  >
+                    <ListItemIcon>
+                      {isLoading ? (
+                        <CircularProgress size={24} />
+                      ) : (
+                        <BluetoothIcon />
+                      )}
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={device.deviceName || "Unknown Device"}
+                      secondary={device.deviceId}
+                    />
+                  </ListItemButton>
+                );
+              })}
+            </List>
+            <Button
+              onClick={handleCancelSelect}
+              color="error"
+              sx={{ mt: 2 }}
+              disabled={!!selectingDeviceId}
+            >
+              Cancel
+            </Button>
+          </Box>
+        </Modal>
+      )}
     </>
   );
 };

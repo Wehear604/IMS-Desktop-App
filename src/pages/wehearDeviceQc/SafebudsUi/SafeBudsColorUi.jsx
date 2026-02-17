@@ -1,3 +1,4 @@
+import React, { useEffect } from "react";
 import {
   Box,
   FormControlLabel,
@@ -5,20 +6,32 @@ import {
   RadioGroup,
   Typography,
 } from "@mui/material";
-import React from "react";
-import { toTitleCase } from "../../../utils/main";
 import { useDispatch, useSelector } from "react-redux";
+import { toTitleCase } from "../../../utils/main";
 import { DeviceColorAction } from "../../../store/actions/deviceDataAction";
+import { fetchProductColorAction } from "../../../store/actions/setting.Action";
 
 const SafeBudsColorUi = () => {
   const dispatch = useDispatch();
+
   const { deviceDataStore, settings } = useSelector((state) => state);
+
+  const colors = settings?.productColor_data?.result || [];
+  const isLoading = settings?.productColor_loading;
+
+  useEffect(() => {
+    if (!settings?.productColor_data?.result?.length) {
+      dispatch(fetchProductColorAction());
+    }
+  }, [dispatch]);
+
   return (
     <Box
       sx={{
         display: "flex",
         flexDirection: { xs: "column", sm: "row" },
         gap: 2,
+        width: "100%",
       }}
     >
       <Typography
@@ -31,30 +44,23 @@ const SafeBudsColorUi = () => {
         Device Color :
       </Typography>
 
-      {settings?.productColor_data?.result?.length === 0 ? (
+      {isLoading ? (
+        <Typography>Loading colors...</Typography>
+      ) : colors.length === 0 ? (
         <Typography>No colors available</Typography>
       ) : (
         <RadioGroup
-          value={deviceDataStore?.deviceColor}
+          value={deviceDataStore?.deviceColor || ""}
           onChange={(e) => dispatch(DeviceColorAction(e.target.value))}
           sx={{ width: "100%" }}
         >
-          {settings?.productColor_data?.result?.map((item) => (
-            <Box
+          {colors.map((item) => (
+            <FormControlLabel
               key={item?._id}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                mb: 1,
-              }}
-            >
-              <FormControlLabel
-                value={item?._id}
-                control={<Radio />}
-                label={toTitleCase(item?.name)}
-              />
-            </Box>
+              value={item?._id}
+              control={<Radio />}
+              label={toTitleCase(item?.name)}
+            />
           ))}
         </RadioGroup>
       )}

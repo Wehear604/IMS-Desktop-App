@@ -15,8 +15,7 @@ import { SafebudsDeviceAudioCheck } from "../../../store/actions/deviceQcAction"
 import { useDispatch, useSelector } from "react-redux";
 import StepCard from "../../../components/StepCard";
 
-
-const MicCheckUiSafeBudsUi = ({isPlaying, setIsPlaying, audioRef}) => {
+const MicCheckUiSafeBudsUi = ({ isPlaying, setIsPlaying, audioRef }) => {
   const dispatch = useDispatch();
   const { device, deviceQc } = useSelector((state) => state);
   const canvasRef = useRef(null);
@@ -90,7 +89,7 @@ const MicCheckUiSafeBudsUi = ({isPlaying, setIsPlaying, audioRef}) => {
 
   const startMonitoring = async () => {
     if (!selectedMic || isRunning) return;
-    if(isPlaying) {
+    if (isPlaying) {
       audioRef.current.pause();
       setIsPlaying(false);
     }
@@ -180,6 +179,11 @@ const MicCheckUiSafeBudsUi = ({isPlaying, setIsPlaying, audioRef}) => {
   useEffect(() => {
     if (peakPercent > 10) {
       dispatch(SafebudsDeviceAudioCheck());
+      const timer = setTimeout(() => {
+        stopMonitoring();
+      }, 2000);
+
+      return () => clearTimeout(timer);
     }
   }, [peakPercent]);
 
@@ -190,7 +194,14 @@ const MicCheckUiSafeBudsUi = ({isPlaying, setIsPlaying, audioRef}) => {
           Mic Check
         </Typography>
       </Box>
-      <Box sx={{display:"flex", justifyContent:"center", flexDirection:"column", alignItems:"center"}}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
         <Card
           sx={{
             maxWidth: 580,

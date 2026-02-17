@@ -4,6 +4,7 @@ const loudness = require("loudness");
 let bluetoothPinCallback = null;
 let selectBluetoothCallback = null;
 let cachedDeviceToSelect = null;
+const { exec } = require("child_process");
 
 // Auto reload during development
 if (process.env.NODE_ENV === "development") {
@@ -102,6 +103,12 @@ function createWindow() {
     },
   );
 
+ipcMain.handle("check-safe-buds-connected", async () => {
+  return await isSafeBudsConnected();
+});
+
+
+
   ipcMain.on("bluetooth-device-selected", (event, deviceId) => {
     console.log("React requested device:", deviceId);
 
@@ -122,7 +129,7 @@ function createWindow() {
     if (selectBluetoothCallback) {
       selectBluetoothCallback(""); // Cancel
       selectBluetoothCallback = null;
-    }
+    } 
     cachedDeviceToSelect = null;
   });
 
@@ -157,11 +164,14 @@ function createWindow() {
     );
   } else {
     win.loadURL("http://localhost:3000");
+
     win.webContents.openDevTools();
     console.log("Loading development server: http://localhost:3000");
   }
 }
 
+ 
+  
 // -----------------------------------------------------
 //   ELECTRON APP EVENTS
 // -----------------------------------------------------

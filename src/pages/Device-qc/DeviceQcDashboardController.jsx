@@ -1,7 +1,7 @@
 import React, { memo, useEffect, useMemo, useState } from "react";
 import DeviceQcDashboardUi from "./DeviceQcDashboardUi";
 import { fetchDeviceApi, fetchDeviceCountsApi } from "../../apis/deviceQc.api";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { callApiAction } from "../../store/actions/commonAction";
 import { Box, Chip, IconButton, Typography } from "@mui/material";
 import {
@@ -15,9 +15,12 @@ import { openModal } from "../../store/actions/modalAction";
 import { DEVICES, QC_BUTTON_FILTER } from "../../utils/constants";
 import ProductDetailsQcUi from "../wehearDeviceQc/ProductDetailsQcUi";
 import DeviceQcListController from "../wehearDeviceQc/DeviceQcListController";
+import SafebudsMainUi from "../wehearDeviceQc/SafebudsUi/SafebudsMainUi";
+import { SetStepAction } from "../../store/actions/stepAction";
 
 const ActionComponent = memo(({ params, setParams, buttonStatus }) => {
   const dispatch = useDispatch();
+  const {step} = useSelector((state) => state);
 
   const onInfo = () => {
     dispatch(
@@ -30,23 +33,22 @@ const ActionComponent = memo(({ params, setParams, buttonStatus }) => {
     );
   };
 
-  const onEdit = () => {
-    dispatch(
-      openModal(
-        <DeviceQcListController
-          id={params._id}
-          initialStep={2}
-          isUpdate={true}
-          // callBack={(response, updatedData) => {
-          //   setParams({ ...params, ...updatedData });
-          // }}
-        />,
-        "sm",
-        false,
-        "update-product-qc"
-      )
-    );
-  };
+const onEdit = () => {
+  dispatch(SetStepAction(4));
+
+  dispatch(
+    openModal(
+      <SafebudsMainUi
+        id={params._id}
+        isUpdate={true}
+      />,
+      "sm",
+      false,
+      "deviceAudioMicCheck"
+    )
+  );
+};
+
 
   return (
     <Box sx={{ width: "100%", alignItems: "flex-start", display: "flex" }}>

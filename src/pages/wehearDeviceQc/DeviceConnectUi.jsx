@@ -11,6 +11,9 @@ import {
   Chip,
   Divider,
   Button,
+  Stepper,
+  Step,
+  StepLabel,
 } from "@mui/material";
 import { styled } from "@mui/system";
 
@@ -121,17 +124,19 @@ const ConnectButton = ({
   const AudioAndMicCheck = () => {
     if (device.device_type == DEVICES.SAFE_BUDS && !device?.fotfile1) {
       // dispatch(SafeBudsVersionRead({ type: "SafeBudsVersionRead" }));
+      dispatch(SetStepAction(0));
       dispatch(
         openModal(
           <SafeBudsFotUpload fotfile={fotfile} />,
           "sm",
           true,
-          "deviceAudioMicCheck"
-        )
+          "deviceAudioMicCheck",
+        ),
       );
     } else {
-      dispatch(SafeBudsVersionRead({ type: "SafeBudsVersionRead" }));
-      dispatch(SetStepAction(2));
+      dispatch(SafeBudsVersionRead({  type: "SafeBudsVersionRead",
+          isVersionRead: true,
+          latestVersion: device.latestVersion, }));
       dispatch(
         openModal(<SafebudsMainUi />, "lg", true, "deviceAudioMicCheck"),
       );
@@ -230,11 +235,11 @@ const ConnectButton = ({
 
 const DeviceConnectUi = () => {
   const [selected, setSelected] = useState("");
-  const { device } = useSelector((state) => state);
+  const { device, step } = useSelector((state) => state);
   const dispatch = useDispatch();
   console.log(
     "device?.device_type === DEVICES.SAFE_BUDS && !device?.fotfile",
-    device?.fotfile
+    device?.fotfile,
   );
   const devices = [
     { side: "L", label: "BTE", value: LISTENING_SIDE.LEFT },
@@ -368,6 +373,24 @@ const DeviceConnectUi = () => {
         Device Dashboard
       </Header>
       <Divider orientation="horizontal" />
+
+      <Stepper sx={{ p: 2 }} activeStep={step.step} alternativeLabel>
+        <Step>
+          <StepLabel>Device Version</StepLabel>
+        </Step>
+        <Step>
+          <StepLabel>Upload FOT</StepLabel>
+        </Step>
+        <Step>
+          <StepLabel>Touch Check</StepLabel>
+        </Step>
+        <Step>
+          <StepLabel>Audio and Mic Test</StepLabel>
+        </Step>
+        <Step>
+          <StepLabel>Packaging Details</StepLabel>
+        </Step>
+      </Stepper>
       <Box
         sx={{
           minHeight: "70vh",
@@ -499,8 +522,8 @@ const DeviceConnectUi = () => {
                 connectDevice(
                   deviceInfo,
                   device?.device_side,
-                  device?.device_type
-                )
+                  device?.device_type,
+                ),
               );
             }}
             Component={ConnectButton}
@@ -529,8 +552,8 @@ const DeviceConnectUi = () => {
                 connectDevice(
                   deviceInfo,
                   device?.device_side,
-                  device?.device_type
-                )
+                  device?.device_type,
+                ),
               );
             }}
             Component={ConnectButton}
@@ -558,8 +581,8 @@ const DeviceConnectUi = () => {
                 connectDevice(
                   deviceInfo,
                   device?.device_side,
-                  device?.device_type
-                )
+                  device?.device_type,
+                ),
               );
             }}
             Component={ConnectButton}
@@ -577,7 +600,6 @@ const DeviceConnectUi = () => {
             }}
           />
         )}
-
       </Box>
     </>
   );

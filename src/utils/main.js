@@ -56,6 +56,16 @@ export const toTitleCase = (str) => {
   return null;
 };
 
+export const cleanValue = (value) => {
+  if (value === null || value === undefined) return "";
+
+  return String(value)
+    .replace(/[\u0000-\u001F\u007F-\u009F]/g, "")
+    .replace(/[^a-zA-Z0-9]/g, "")
+    .trim();
+};
+
+
 export const toTitleSpaceCase = (str) => {
   if (str)
     return str.replace(/_/g, " ").replace(/\w\S*/g, function (txt) {

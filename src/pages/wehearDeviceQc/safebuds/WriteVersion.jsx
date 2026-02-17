@@ -13,7 +13,7 @@ const processQueue = async () => {
   if (isProcessing || commandQueue.length === 0) return;
 
   isProcessing = true;
-  const { command, side, deviceObj, type, resolve, reject } =
+  const { command, side, deviceObj, type, currentVersion, resolve, reject } =
     commandQueue.shift();
 
   try {
@@ -68,12 +68,14 @@ const processQueue = async () => {
       await characteristic.writeValue(new Uint8Array(bytes));
     }
 
-    const version = "V2";
+    const version =currentVersion ;
+    console.log("version of latest",version);
+
     const { versionUpdateCommand } = buildNameCommands1(version);
 
     await sendHexCommand(characteristicWrite, versionUpdateCommand);
 
-    resolve("WRITE_SUCCESS");
+    resolve(version);
   } catch (error) {
     console.error(`Error reading data from ${side} device:`, error);
     reject(error);
@@ -83,10 +85,18 @@ const processQueue = async () => {
   }
 };
 
-const WriteVersion = (command, side, deviceObj, type) => {
+const WriteVersion = (command, side, deviceObj, type, currentVersion) => {
   console.log("deviceObj", deviceObj);
   return new Promise((resolve, reject) => {
-    commandQueue.push({ command, side, deviceObj, type, resolve, reject });
+    commandQueue.push({
+      command,
+      side,
+      deviceObj,
+      type,
+      currentVersion,
+      resolve,
+      reject,
+    });
     processQueue();
   });
 };

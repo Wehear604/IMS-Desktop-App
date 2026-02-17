@@ -12,6 +12,9 @@ export const DeviceSideAction = (device_side) => {
 export const DeviceMACAction = (mac) => {
   return { type: actions.SET_DEVICE_MAC, mac };
 };
+export const DeviceVersionAction = (versions, latestVersion) => {
+  return { type: actions.SET_DEVICE_VERSION, versions, latestVersion };
+};
 
 export const DeviceIsConnectingAction = (isConnecting) => {
   return { type: actions.SET_DEVICE_CONNECT, isConnecting };
