@@ -100,7 +100,7 @@ const SafeBudsConnectDeviceModule = ({
   const [selectingDeviceId, setSelectingDeviceId] = useState(null);
   const selectingDeviceId1 = useRef(null);
   const getMacId = useRef(null);
-  const { device } = useSelector((state) => state);
+  const  devicedata  = useSelector((state) => state.device);
 
   const dispatch = useDispatch();
 
@@ -462,9 +462,12 @@ const SafeBudsConnectDeviceModule = ({
       } else {
         setLoading(false);
         setLoading1(false);
-        if (device.fotfile1) {
+        if (devicedata.fotfile1) {
+          console.log("object fotfile1", devicedata?.fotfile1);
           dispatch(SetStepAction(2));
         } else {
+          console.log("object step check", devicedata);
+
           dispatch(SetStepAction(0));
         }
         dispatch(SetDevicVersionFOT());
