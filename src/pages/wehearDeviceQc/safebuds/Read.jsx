@@ -102,6 +102,7 @@ const processQueue = async () => {
         const deviceSide = state.device.device_side== LISTENING_SIDE.LEFT?"Left":"Right";
         console.log("side",deviceSide, state);
         if (deviceSide === decoded.device) {
+          console.log("object decoded", decoded);
           dispatch({
             type: actions.SET_SAFE_BUDS_TAP,
             mode: tapChanges(decoded?.event),

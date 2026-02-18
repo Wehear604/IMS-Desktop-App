@@ -6,8 +6,10 @@ import {
   Grid,
   Chip,
 } from "@mui/material";
+import bluetoothIcon from "../../../assets/images/bluetoothIcon.svg";
 import { useSelector } from "react-redux";
-import { cleanValue } from "../../../utils/main";
+import { cleanValue, findObjectKeyByValue } from "../../../utils/main";
+import { DEVICES_NAME, LISTENING_SIDE } from "../../../utils/constants";
 
 const DeviceVersionUi = () => {
   const { device } = useSelector((state) => state);
@@ -19,7 +21,7 @@ const DeviceVersionUi = () => {
 
   const items = [
     {
-      title: "Current Version",
+      title: "Device Version",
       value: currentVersion,
       color: isUpdated ? "#16A34A" : "#DC2626",
       bg: "linear-gradient(135deg, #ffffff, #f8fafc)",
@@ -33,6 +35,10 @@ const DeviceVersionUi = () => {
       status: "Latest",
     },
   ];
+
+    const sideLabel =
+      findObjectKeyByValue(device?.device_side, LISTENING_SIDE) ?? "";
+    const deviceTitle = DEVICES_NAME[device?.device_type] ?? "Unknown Device";
 
   return (
     <Box
@@ -49,7 +55,7 @@ const DeviceVersionUi = () => {
         variant="h4"
         sx={{
           fontWeight: 700,
-          mb: 5,
+          // mb: 5,
           background: "linear-gradient(90deg, #045169, #0E7490)",
           WebkitBackgroundClip: "text",
           WebkitTextFillColor: "transparent",
@@ -57,6 +63,21 @@ const DeviceVersionUi = () => {
       >
         Device Version Information
       </Typography>
+
+              <Box mb={4} textAlign="center">
+                <Typography variant="h4" fontWeight={700}>
+                  Device Connected{" "}
+                  <img
+                    src={bluetoothIcon}
+                    alt="Bluetooth"
+                    style={{ marginLeft: 6 }}
+                  />
+                </Typography>
+                <Typography variant="h5" sx={{ color: "#DDD" }}>
+                  {deviceTitle}
+                </Typography>
+                <Typography variant="h6">{device?.mac}</Typography>
+              </Box>
 
       {/* Centered Container */}
       <Box

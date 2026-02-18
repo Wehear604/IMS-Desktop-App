@@ -73,7 +73,8 @@ const SafebudsMainUi = ({ isUpdate, id }) => {
   });
 
   useEffect(() => {
-    dispatch(SafeBudsTap({ type: "Tap", side: device?.device_side }));
+    dispatch(SafeBudsTap({ type: "Tap", deviceSide: device?.device_side }));
+    console.log("object tap check ");
     dispatch(ChangeButtonSide(LISTENING_SIDE.LEFT));
     dispatch(SafebudsDeviceCurrentVolume());
   }, []);
@@ -81,13 +82,11 @@ const SafebudsMainUi = ({ isUpdate, id }) => {
   const tapcheck = (number) => {
     if (!device?.device_side) return false;
 
-    return device?.device_side === LISTENING_SIDE.LEFT
-      ? deviceQc.modeLeft?.includes(number)
-      : deviceQc.modeRight?.includes(number);
+    return  deviceQc.modeLeft?.includes(number) && deviceQc.modeRight?.includes(number);
   };
 
   const isStepValid = () => {
-    if (step.step === 2) {
+    if (step.step === 2 ) {
       return tapcheck(1) && tapcheck(2) && tapcheck(3) && tapcheck(4);
     }
     return true;

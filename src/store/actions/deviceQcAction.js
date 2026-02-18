@@ -411,7 +411,7 @@ export const SafeBudsBLEDeviceName = ({ type }) => {
   };
 };
 
-export const SafeBudsTap = ({ type }) => {
+export const SafeBudsTap = ({ type, deviceSide }) => {
   return async (dispatch, getState) => {
     try {
       const command = null;

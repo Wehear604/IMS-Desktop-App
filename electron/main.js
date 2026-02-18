@@ -4,7 +4,6 @@ const loudness = require("loudness");
 let bluetoothPinCallback = null;
 let selectBluetoothCallback = null;
 let cachedDeviceToSelect = null;
-const { exec } = require("child_process");
 
 // Auto reload during development
 if (process.env.NODE_ENV === "development") {

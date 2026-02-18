@@ -11,13 +11,27 @@ import StepCard from "../../../components/StepCard";
 const TapQCSafebudsUi = () => {
   const dispatch = useDispatch();
   const { device, deviceQc } = useSelector((state) => state);
-  const tapcheck = (number) => {
-    if (!device?.device_side) return false;
+  // const tapcheck = (number) => {
+  //   if (!device?.device_side) return false;
 
-    return device?.device_side === LISTENING_SIDE.LEFT
-      ? deviceQc.modeLeft?.includes(number)
-      : deviceQc.modeRight?.includes(number);
-  };
+  //   return device?.device_side === LISTENING_SIDE.LEFT
+  //     ? deviceQc.modeLeft?.includes(number)
+  //     : deviceQc.modeRight?.includes(number);
+  // };
+
+const tapcheck = (number) => {
+  if (!device?.device_side) return false;
+
+  const currentModes =
+    device.device_side === LISTENING_SIDE.LEFT
+      ? deviceQc.modeLeft || []
+      : deviceQc.modeRight || [];
+
+  return currentModes.some(
+    (val) => Number(val) === Number(number)
+  );
+};
+
 
   useEffect(() => {
     if ([1, 2, 3, 4].every((val) => deviceQc.modeRight?.includes(val))) {
@@ -25,7 +39,9 @@ const TapQCSafebudsUi = () => {
     } else if ([1, 2, 3, 4].every((val) => deviceQc.modeLeft?.includes(val))) {
       dispatch(ChangeButtonSide(LISTENING_SIDE.RIGHT));
     }
+    console.log("object deviceQc", deviceQc);
   }, [deviceQc.modeLeft, deviceQc.modeRight]);
+
   return (
     <>
       <ButtonGroup sx={{ width: "100%", mb: 2 }}>
