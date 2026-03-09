@@ -7,8 +7,6 @@
   "author": "Rudren Patel",
   "main": "electron/main.js",
   "dependencies": {
-    "@ckeditor/ckeditor5-build-classic": "^41.4.2",
-    "@ckeditor/ckeditor5-react": "^11.0.0",
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
     "@mui/icons-material": "^5.16.4",
@@ -19,11 +17,14 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.7.2",
+    "child_process": "^1.0.2",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.13",
+    "engine.io-client": "^6.6.4",
     "file-saver": "^2.0.5",
     "html2canvas": "^1.4.1",
     "js-file-download": "^0.4.12",
+    "loudness": "^0.4.2",
     "moment": "^2.30.1",
     "notistack": "^3.0.1",
     "react": "^18.3.1",
@@ -39,48 +40,48 @@
     "react-scripts": "5.0.1",
     "recharts": "^3.1.2",
     "redux-thunk": "^3.1.0",
+    "socket.io-client": "^4.8.3",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "cross-env BROWSER=none react-scripts start",
-    "build": "react-scripts build",
+    "build": "cross-env PUBLIC_URL=./ react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "electron": "electron .",
     "dev:electron": "nodemon --watch electron --exec electron .",
     "dev": "concurrently \"npm start\" \"npm run dev:electron\"",
-    "dist": "npm run build && electron-builder"
+    "dist": "npm run build && electron-builder --win --x64",
+    "postinstall": "electron-builder install-app-deps --arch=x64"
   },
-"build": {
-  "appId": "com.company.inventory",
-  "productName": "Inventory Management System",
-  "directories": {
-    "output": "dist"
-  },
-  "files": [
-    "build/**/*",
-    "electron/**/*",
-    "package.json"
-  ],
-  "extraMetadata": {
-    "main": "electron/main.js"
-  },
-  "win": {
-    "icon": "public/ims.png",
-    "target": [
-      "nsis"
-    ]
-  },
-  "nsis": {
-    "oneClick": false,
-    "allowToChangeInstallationDirectory": true
-  }
-},
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+  "build": {
+    "appId": "com.company.inventory",
+    "productName": "Inventory Management System",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "build/**/*",
+      "electron/**/*",
+      "!**/node_modules/*/{test,__tests__,example,docs}/**",
+      "package.json"
+    ],
+    "asar": true,
+    "npmRebuild": false,
+    "nodeGypRebuild": false,
+    "extraMetadata": {
+      "main": "electron/main.js"
+    },
+    "win": {
+      "icon": "public/ims.png",
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
   },
   "browserslist": {
     "production": [
@@ -95,9 +96,9 @@
     ]
   },
   "devDependencies": {
-    "concurrently": "^8.2.2",
-    "cross-env": "^7.0.3",
-    "electron": "^39.2.1",
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
+    "electron": "^39.2.3",
     "electron-builder": "^26.0.12",
     "nodemon": "^3.1.11"
   }

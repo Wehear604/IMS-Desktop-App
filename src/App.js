@@ -1,5 +1,6 @@
 import {
   createBrowserRouter,
+  createHashRouter,
   Navigate,
   Route,
   RouterProvider,
@@ -43,7 +44,7 @@ function App() {
     }
   }, []);
 
-  const router = createBrowserRouter(routes(user));
+  const router = createHashRouter(routes(user));
   useEffect(() => {
     if (snackBar.message) {
       enqueueSnackbar(snackBar.message, { variant: snackBar.variant });

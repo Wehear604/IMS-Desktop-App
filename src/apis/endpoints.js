@@ -3,7 +3,7 @@ let domain = "";
 
 switch (mode) {
   case "ip":
-    domain = "http://10.10.83.8:8000/";
+    domain = "http://192.168.29.247:8000/";
     break;
   case "local":
     domain = "http://localhost:8000/";
@@ -221,4 +221,18 @@ export default {
   locationMasterFetchById: `${domain}api/locationMaster/by-id`,
 
   purchaseRequestCreate: `${domain}api/v1/purchaseRequest/`,
-}
+
+  createDeviceQc: `${domain}api/qc-device/create`,
+  fetchDeviceQc: `${domain}api/qc-device/fetch`,
+  fetchByIdDeviceQc: `${domain}api/qc-device/fetch-by-id`,
+  fetchDeviceCounts: `${domain}api/qc-device/fetch-count-device-wise`,
+
+  createDeviceQc: `${domain}api/qc-device/create`,
+  fetchDeviceQc: `${domain}api/qc-device/fetch`,
+  fetchByIdDeviceQc: `${domain}api/qc-device/fetch-by-id`,
+  fetchDeviceCounts: `${domain}api/qc-device/fetch-count-device-wise`,
+  updateDeviceQc: `${domain}api/qc-device/update`,
+
+  createLogsDeviceQc: `${domain}api/qc-device/create-logs`,
+  getLogsDeviceQc: `${domain}api/qc-device/get-log`,
+};

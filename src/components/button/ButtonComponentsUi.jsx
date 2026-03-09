@@ -44,7 +44,7 @@ const ButtonComponentsUi = ({
             sx={{
               display: "flex",
               height: "15vh",
-              justifyContent: "space-between",
+              justifyContent: "center",
               alignItems: "center",
               padding: "16px",
               flexDirection: "column"
@@ -61,7 +61,7 @@ const ButtonComponentsUi = ({
               {Title}
             </Typography>
 
-            {count && <Typography
+            {(count || count === 0) && <Typography
               variant={isSmallScreen ? "h4" : "h1"}
               sx={{
                 fontWeight: "bold",
@@ -94,9 +94,9 @@ const ButtonComponentsUi = ({
               color: STATUSWiseData ? "#fff" : "#255766",
             }}
           >
-            {Title}  &nbsp; {CountButtonGroup &&
+            {Title} {CountButtonGroup &&
               <>
-                ( &nbsp;{formatNumberCustomPattern(CountButtonGroup)}&nbsp; )
+                ({formatNumberCustomPattern(CountButtonGroup)})
               </>
             }
           </Typography>

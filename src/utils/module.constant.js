@@ -35,6 +35,7 @@ const MODULES = {
     LOCATION_MASTER: 34,
     DEVICE_QC: 35,
     PURCHASE_REQUEST: 36,
+    DEVICE_QC_DASHBOARD: 37,
 };
 
 export default MODULES
