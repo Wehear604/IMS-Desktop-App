@@ -33,24 +33,15 @@ import {
   BteDeviceCurrentVolume,
   BteDeviceMode,
   BteDeviceVolume,
-  getITEOptimaData,
-  getITEPrimeMode,
-  getITEPrimeVolume,
-  readRic8Volume,
-  readRicMode,
-  readRicVolumeLevel,
-  RicDeviceCurrentVolume,
 } from "../../store/actions/deviceQcAction";
 import {
   DeviceStoreAction,
+  disconnectAction,
   resetDeviceDataStore,
 } from "../../store/actions/deviceDataAction";
 import { closeModal } from "../../store/actions/modalAction";
 import { callSnackBar } from "../../store/actions/snackbarAction";
 
-//--------------------------------------------
-// REUSABLE STEPCARD COMPONENT
-//--------------------------------------------
 const StepCard = ({
   isChecked,
   checked,
@@ -95,17 +86,9 @@ const StepCard = ({
   </Card>
 );
 
-//--------------------------------------------
-// MAIN COMPONENT
-//--------------------------------------------
 const DeviceAudioMicCheckUi = () => {
-  const { device, deviceQc } = useSelector((state) => state);
+  const { device, deviceQc, deviceDataStore } = useSelector((state) => state);
   const dispatch = useDispatch();
-
-  //-----------------------------
-  // AUDIO REF (LAZY INSTANTIATION)
-  //-----------------------------
-  const audioRef = useRef(null); // SAFE: does NOT break BLE
 
   const [step, setStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -115,41 +98,33 @@ const DeviceAudioMicCheckUi = () => {
   const mounted = useRef(true);
   const stepRef = useRef(step);
   const deviceRef = useRef(device);
-
   const [fields, setFields] = useState({
     body1: false,
     body2: false,
     charging: false,
   });
-
-  const toggle = (key) => () =>
+  const toggle = (key) => () => {
     setFields((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
   useEffect(() => {
     stepRef.current = step;
   }, [step]);
-
   useEffect(() => {
     deviceRef.current = device;
   }, [device]);
 
-  //--------------------------------------------
-  // MODE CHECK FOR STEP 2
-  //--------------------------------------------
   const modecheck = useCallback(
     (number) => {
       if (!deviceRef.current?.device_side) return false;
-
       return deviceRef.current?.device_side === LISTENING_SIDE.LEFT
-        ? deviceQc.modeLeft?.includes(number)
-        : deviceQc.modeRight?.includes(number);
+        ? Array.isArray(deviceQc.modeLeft) && deviceQc.modeLeft.includes(number)
+        : Array.isArray(deviceQc.modeRight) &&
+            deviceQc.modeRight.includes(number);
     },
-    [deviceQc.modeLeft, deviceQc.modeRight]
+    [deviceQc.modeLeft, deviceQc.modeRight],
   );
 
-  //--------------------------------------------
-  // DEVICE QC LOGIC
-  //--------------------------------------------
   const deviceQcFun = async () => {
     const step = stepRef.current;
     const dev = deviceRef.current;
@@ -198,28 +173,39 @@ const DeviceAudioMicCheckUi = () => {
     if (isReading.current) return;
     isReading.current = true;
 
+    if (readInterval.current) {
+      clearInterval(readInterval.current);
+      readInterval.current = null;
+    }
+
     readInterval.current = setInterval(() => {
       if (!mounted.current) return;
-      deviceQcFun();
+      try {
+        deviceQcFun();
+      } catch (err) {}
     }, 1500);
-  }, []);
+  }, [dispatch]);
 
   const stopReading = useCallback(() => {
     isReading.current = false;
-    clearInterval(readInterval.current);
+    if (readInterval.current) {
+      clearInterval(readInterval.current);
+      readInterval.current = null;
+    }
   }, []);
 
-  //--------------------------------------------
-  // START/STOP INTERVAL BASED ON STEP
-  //--------------------------------------------
   useEffect(() => {
-    if ((step === 1 || step === 2) && deviceQc.start) startReading();
-    else stopReading();
-  }, [step, deviceQc.start]);
+    setIsPlaying(Boolean(device?.is_Audio_play));
+  }, [device?.is_Audio_play]);
 
-  //--------------------------------------------
-  // INIT READS
-  //--------------------------------------------
+  useEffect(() => {
+    if ((step === 1 || step === 2) && deviceQc.start) {
+      startReading();
+    } else {
+      stopReading();
+    }
+  }, [step, deviceQc.start, startReading, stopReading]);
+
   useEffect(() => {
     mounted.current = true;
 
@@ -252,119 +238,27 @@ const DeviceAudioMicCheckUi = () => {
     return () => {
       mounted.current = false;
       stopReading();
-
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-      }
     };
   }, [device]);
 
-  //--------------------------------------------
-  // NEXT BUTTON
-  //--------------------------------------------
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     sendPauseCommand(dispatch);
-
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-
     setIsPlaying(false);
     setStep((s) => Math.min(s + 1, 3));
-  };
-
-  //--------------------------------------------
-  // PLAY/PAUSE LOGIC (FIXED & WORKING)
-  //--------------------------------------------
-  const handlePlayPause = () => {
-    const hasDevice = Boolean(device?.device_type);
-
-    if (isPlaying) {
-      setIsPlaying(false);
-
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-      }
-
-      if (hasDevice) sendPauseCommand(dispatch);
-      return;
-    }
-
-    setIsPlaying(true);
-
-    if (hasDevice) {
-      sendPlayCommand(
-        dispatch,
-        device?.device_type,
-        device?.device_side,
-        LISTENING_SIDE,
-        30
-      );
-    } else {
-      if (!audioRef.current) audioRef.current = new Audio(audioUrl);
-      audioRef.current
-        .play()
-        .catch((err) => console.error("MP3 play error:", err));
-    }
-  };
-
-  //--------------------------------------------
-  // STEP SUBMIT DISABLED STATE
-  //--------------------------------------------
-  const disabledSubmit = (() => {
-    if (step === 0) return !Boolean(device?.is_Audio_play);
-
-    if (step === 1)
-      return device?.device_type === DEVICES.BTE_OPTIMA ||
-        device?.device_type === DEVICES.BTE_PRIME ||
-        device?.device_type === DEVICES.RIC_OPTIMA_8
-        ? !(deviceQc?.volumeIncrease && deviceQc?.volumeDecrease)
-        : !deviceQc?.volumeDecrease;
-
-    if (step === 2) {
-      const modes =
-        device?.device_side === LISTENING_SIDE.LEFT
-          ? deviceQc.modeLeft
-          : deviceQc.modeRight;
-
-      return !(
-        Array.isArray(modes) &&
-        modes.length ===
-          (device?.device_type === DEVICES.BTE_OPTIMA ||
-          device?.device_type === DEVICES.BTE_PRIME ||
-          device?.device_type === DEVICES.RIC_OPTIMA_8
-            ? 4
-            : 3)
-      );
-    }
-
-    if (step === 3) return !(fields.body1 && fields.body2 && fields.charging);
-
-    return true;
-  })();
-
-  //--------------------------------------------
-  // FINAL COMPLETE QC SUBMIT
-  //--------------------------------------------
+  }, [dispatch]);
+  const deviceTitle = DEVICES_NAME[device?.device_type] ?? "Unknown device";
   const sideLabel =
     findObjectKeyByValue(device?.device_side, LISTENING_SIDE) ?? "";
-  const deviceTitle = DEVICES_NAME[device?.device_type] ?? "Unknown Device";
 
-  //--------------------------------------------
-  // STEP 3 COMPLETE HANDLER
-  //--------------------------------------------
-  const onComplete = () => {
+  const onComplete = useCallback(() => {
     if (
       device?.device_type &&
       device?.device_side &&
-      (deviceQc.device_side === LISTENING_SIDE.LEFT
-        ? deviceQc.modeLeft
-        : deviceQc.modeRight) &&
-      deviceQc.volumeIncrease &&
-      deviceQc.volumeDecrease &&
+      (deviceQc?.device_side === LISTENING_SIDE.LEFT
+        ? deviceQc?.modeLeft
+        : deviceQc?.modeRight) &&
+      deviceQc?.volumeIncrease &&
+      deviceQc?.volumeDecrease &&
       fields.body1 &&
       fields.body2 &&
       fields.charging &&
@@ -379,16 +273,18 @@ const DeviceAudioMicCheckUi = () => {
             ? deviceQc.modeLeft
             : deviceQc.modeRight,
           {
-            volumeIncrease: deviceQc.volumeIncrease,
-            volumeDecrease: deviceQc.volumeDecrease,
+            volumeIncrease: deviceQc?.volumeIncrease,
+            volumeDecrease: deviceQc?.volumeDecrease,
           },
-          { body1: fields.body1, body2: fields.body2 },
+          {
+            body1: fields.body1,
+            body2: fields.body2,
+          },
           fields.charging,
           device?.is_Audio_play,
-          device?.mac
-        )
+          device?.mac,
+        ),
       );
-
       dispatch(closeModal("deviceAudioMicCheck"));
 
       if (
@@ -402,37 +298,47 @@ const DeviceAudioMicCheckUi = () => {
       }
 
       dispatch(resetDeviceDataStore());
-
       dispatch(
         callSnackBar(
           `${sideLabel} Side Device QC Completed Successfully.`,
-          SNACK_BAR_VARIETNS.suceess
-        )
+          SNACK_BAR_VARIETNS.suceess,
+        ),
       );
     } else {
       dispatch(
         callSnackBar(
           `Please complete all steps ${sideLabel} before finishing the QC.`,
-          SNACK_BAR_VARIETNS.error
-        )
+          SNACK_BAR_VARIETNS.error,
+        ),
       );
     }
-  };
+  }, [dispatch, device, deviceQc, fields]);
 
+  console.log("object deviceDataStore", deviceDataStore);
 
-  //--------------------------------------------
-  // RETURN JSX (ALL 4 STEPS INCLUDED)
-  //--------------------------------------------
+  const disabledSubmit = (() => {
+    if (step === 0) return !Boolean(device?.is_Audio_play);
+    if (step === 1)
+      return !(deviceQc?.volumeIncrease && deviceQc?.volumeDecrease);
+    if (step === 2) {
+      const modes =
+        device?.device_side === LISTENING_SIDE.LEFT
+          ? deviceQc?.modeLeft
+          : deviceQc?.modeRight;
+      return !(Array.isArray(modes) && modes.length === 4);
+    }
+    if (step === 3) {
+      return !(fields.body1 && fields.body2 && fields.charging);
+    }
+    return true;
+  })();
+
   return (
     <CustomDialog
       id={step === 0 ? "deviceAudioMicCheck" : undefined}
       disabledSubmit={disabledSubmit}
       onSubmit={step === 3 ? onComplete : handleNext}
       onClose={() => {
-        if (audioRef.current) {
-          audioRef.current.pause();
-          audioRef.current.currentTime = 0;
-        }
         sendPauseCommand(dispatch);
         dispatch(closeModal("deviceAudioMicCheck"));
         dispatch(resetDeviceDataStore());
@@ -449,19 +355,25 @@ const DeviceAudioMicCheckUi = () => {
           bgcolor: "background.default",
         }}
       >
-        {/* HEADER */}
-        <Box textAlign="center">
-          <Typography variant="h4" fontWeight={700}>
+        <Box
+          display={"flex"}
+          flexDirection={"column"}
+          alignItems={"center"}
+          justifyContent={"center"}
+        >
+          <Typography variant="h4" sx={{ fontWeight: 700 }}>
             Device Connected{" "}
             <img
               src={bluetoothIcon}
-              alt="Bluetooth"
+              alt="Bluetooth Icon"
               style={{ marginLeft: 8 }}
             />
           </Typography>
+
           <Typography variant="h5" sx={{ color: "#DDD" }}>
             {deviceTitle} {sideLabel}
           </Typography>
+
           <Typography variant="h6">{device?.mac}</Typography>
         </Box>
 
@@ -475,7 +387,11 @@ const DeviceAudioMicCheckUi = () => {
             action={
               <Button
                 variant="contained"
-                onClick={handlePlayPause}
+                onClick={() =>
+                  isPlaying
+                    ? (setIsPlaying(false), sendPauseCommand(dispatch))
+                    : (setIsPlaying(true), sendPlayCommand(dispatch))
+                }
                 startIcon={isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
                 sx={{
                   bgcolor: "#0d5966",
@@ -487,7 +403,6 @@ const DeviceAudioMicCheckUi = () => {
           />
         )}
 
-        {/* STEP 1 - VOLUME */}
         {step === 1 && (
           <Box>
             {(device?.device_type === DEVICES.BTE_OPTIMA ||
@@ -514,20 +429,21 @@ const DeviceAudioMicCheckUi = () => {
                     ? "Volume Level Decreased"
                     : "Decrease Volume"
                   : deviceQc.volumeDecrease
-                  ? "Volume Level Set"
-                  : "Set Volume Level"
+                    ? "Volume Level Set"
+                    : "Set Volume Level"
               }
             />
           </Box>
         )}
 
-        {/* STEP 2 - MODES */}
         {step === 2 && (
           <Box>
             <StepCard
               isChecked={true}
               checked={modecheck(0)}
-              title={modecheck(0) ? "First Mode Tested" : "Test First Mode"}
+              title={
+                modecheck(0) ? "First Mode Has Been tested." : "Test First Mode"
+              }
             />
             <StepCard
               isChecked={true}

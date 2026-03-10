@@ -146,6 +146,10 @@ const ConnectButton = ({
           openModal(<SafebudsMainUi />, "lg", true, "deviceAudioMicCheck"),
         );
       }
+    } else {
+      dispatch(
+        openModal(<DeviceAudioMicCheckUi />, "sm", true, "deviceAudioMicCheck"),
+      );
     }
   };
 
