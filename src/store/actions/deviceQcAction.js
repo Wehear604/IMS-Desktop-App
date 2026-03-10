@@ -130,7 +130,7 @@ export const RicDeviceCurrentVolume = (side) => {
   };
 };
 
-export const readRicVolumeLevel = (side, deviceObj, onSuccess = () => { }) => {
+export const readRicVolumeLevel = (side, deviceObj, onSuccess = () => {}) => {
   return async (dispatch) => {
     try {
       const command =
@@ -420,7 +420,8 @@ export const SafeBudsTap = ({ type, deviceSide }) => {
         deviceSide == LISTENING_SIDE.LEFT ? "Left" : "Right",
         BLE_STORE.deviceObj,
         type,
-        dispatch, getState
+        dispatch,
+        getState,
       );
 
       console.log("response1", response);
@@ -430,7 +431,11 @@ export const SafeBudsTap = ({ type, deviceSide }) => {
   };
 };
 
-export const SafeBudsVersionRead = ({ type, isVersionRead = true, latestVersion = "" }) => {
+export const SafeBudsVersionRead = ({
+  type,
+  isVersionRead = true,
+  latestVersion = "",
+}) => {
   return async (dispatch) => {
     try {
       const command = 0x60;
@@ -443,9 +448,11 @@ export const SafeBudsVersionRead = ({ type, isVersionRead = true, latestVersion 
       );
       console.log("version response", latestVersion);
       if (isVersionRead) {
-        dispatch(SafeBudsVersionUpdate({ type: "ble", currentVersion: latestVersion }));
+        dispatch(
+          SafeBudsVersionUpdate({ type: "ble", currentVersion: latestVersion }),
+        );
       } else {
-        dispatch(DeviceVersionAction(response, latestVersion))
+        dispatch(DeviceVersionAction(response, latestVersion));
       }
       return response;
     } catch (err) {
@@ -543,13 +550,13 @@ export const SafeBudsVersionUpdate = ({ type, currentVersion }) => {
         "both",
         BLE_STORE.deviceObj,
         type,
-        currentVersion
+        currentVersion,
       );
 
       console.log("response3", response);
-      
-      // dispatch(DeviceVersionAction(response, currentVersion))
-    
+
+      dispatch(DeviceVersionAction(response, currentVersion));
+
       dispatch(SafeBudsDeviceName({ type: "NameChange" }));
     } catch (err) {
       console.error("RicDeviceCurrentVolume read failed", err);

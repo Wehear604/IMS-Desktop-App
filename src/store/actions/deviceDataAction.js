@@ -124,6 +124,6 @@ export const CloseDeviceDataStore = () => {
 export const SetDeviceFOT = () => {
   return { type: actions.SET_FOT_FILES };
 };
-export const SetDevicVersionFOT = () => {
-  return { type: actions.SET_FOT_FILES_VERSION };
+export const SetDevicVersionFOT = (fot) => {
+  return { type: actions.SET_FOT_FILES_VERSION, fot };
 };

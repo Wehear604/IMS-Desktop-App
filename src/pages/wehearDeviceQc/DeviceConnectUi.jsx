@@ -122,24 +122,30 @@ const ConnectButton = ({
   let b = false;
 
   const AudioAndMicCheck = () => {
-    if (device.device_type == DEVICES.SAFE_BUDS && !device?.fotfile1) {
-      // dispatch(SafeBudsVersionRead({ type: "SafeBudsVersionRead" }));
-      dispatch(SetStepAction(0));
-      dispatch(
-        openModal(
-          <SafeBudsFotUpload fotfile={fotfile} />,
-          "sm",
-          true,
-          "deviceAudioMicCheck",
-        ),
-      );
-    } else {
-      dispatch(SafeBudsVersionRead({  type: "SafeBudsVersionRead",
-          isVersionRead: true,
-          latestVersion: device.latestVersion, }));
-      dispatch(
-        openModal(<SafebudsMainUi />, "lg", true, "deviceAudioMicCheck"),
-      );
+    if (device.device_type == DEVICES.SAFE_BUDS) {
+      if (device.device_type == DEVICES.SAFE_BUDS && !device?.fotfile1) {
+        // dispatch(SafeBudsVersionRead({ type: "SafeBudsVersionRead" }));
+        dispatch(SetStepAction(0));
+        dispatch(
+          openModal(
+            <SafeBudsFotUpload fotfile={fotfile} />,
+            "sm",
+            true,
+            "deviceAudioMicCheck",
+          ),
+        );
+      } else {
+        dispatch(
+          SafeBudsVersionRead({
+            type: "SafeBudsVersionRead",
+            isVersionRead: true,
+            latestVersion: device.latestVersion,
+          }),
+        );
+        dispatch(
+          openModal(<SafebudsMainUi />, "lg", true, "deviceAudioMicCheck"),
+        );
+      }
     }
   };
 

@@ -100,7 +100,7 @@ const SafeBudsConnectDeviceModule = ({
   const [selectingDeviceId, setSelectingDeviceId] = useState(null);
   const selectingDeviceId1 = useRef(null);
   const getMacId = useRef(null);
-  const  devicedata  = useSelector((state) => state.device);
+  const devicedata = useSelector((state) => state.device);
 
   const dispatch = useDispatch();
 
@@ -209,26 +209,31 @@ const SafeBudsConnectDeviceModule = ({
       const characteristicUuidReadWrite =
         CHARACTERISTIC_UUID_READ_WRITE[fitting.device_type];
 
-      const filterData = {};
-      const filter = {
-        manufacturerData: [
-          {
-            companyIdentifier:
-              parseInt(MANUFACTURER_IDENTIFIER[fitting.device_type]) ?? null,
-          },
-        ],
-      };
-      if (fitting.device_type === DEVICES.ITE_PRIME) {
-        filterData.filters = [
-          {
-            namePrefix: "ITE",
-          },
-        ];
-      } else if (filter.manufacturerData[0].companyIdentifier) {
-        filterData.filters = [filter];
-      } else {
-        filterData.acceptAllDevices = true;
+      const filters = [];
+      const manufacturerIdA = parseInt(MANUFACTURER_IDENTIFIER[50]);
+      const manufacturerIdC = parseInt(
+        MANUFACTURER_IDENTIFIER[DEVICES.SAFE_BUDS],
+      );
+      const manufacturerIdB = parseInt(
+        MANUFACTURER_IDENTIFIER[fitting.device_type],
+      );
+
+      if (!Number.isNaN(manufacturerIdA)) {
+        filters.push({
+          manufacturerData: [{ companyIdentifier: manufacturerIdA }],
+        });
       }
+      if (!Number.isNaN(manufacturerIdB)) {
+        filters.push({
+          manufacturerData: [{ companyIdentifier: manufacturerIdB }],
+        });
+        filters.push({
+          manufacturerData: [{ companyIdentifier: manufacturerIdC }],
+        });
+      }
+
+      const filterData =
+        filters.length > 0 ? { filters } : { acceptAllDevices: true };
 
       const device = await navigator.bluetooth.requestDevice({
         ...filterData,
@@ -326,8 +331,10 @@ const SafeBudsConnectDeviceModule = ({
       const checkistrue =
         Number(currentVersion[1]) < Number(getMacId.current?.currentversion[1])
           ? getMacId.current?.version !== getMacId.current?.currentversion
-          : Number(currentVersion[1]) <
-            Number(getMacId.current?.currentversion[1]);
+          : Number(currentVersion[1])
+            ? Number(currentVersion[1]) <
+              Number(getMacId.current?.currentversion[1])
+            : getMacId.current?.version !== getMacId.current?.currentversion;
       if (checkistrue) {
         try {
           try {
@@ -345,6 +352,7 @@ const SafeBudsConnectDeviceModule = ({
           if (window.electronAPI) {
             window.electronAPI.selectBluetoothDevice(targetId);
           }
+          dispatch(SetDevicVersionFOT(false));
 
           dispatch(SetStepAction(0));
 
@@ -355,6 +363,7 @@ const SafeBudsConnectDeviceModule = ({
 
           const filters = [];
           const manufacturerIdA = parseInt(MANUFACTURER_IDENTIFIER[50]);
+          const manufacturerIdC = parseInt(MANUFACTURER_IDENTIFIER[51]);
           const manufacturerIdB = parseInt(
             MANUFACTURER_IDENTIFIER[fitting.device_type],
           );
@@ -367,6 +376,9 @@ const SafeBudsConnectDeviceModule = ({
           if (!Number.isNaN(manufacturerIdB)) {
             filters.push({
               manufacturerData: [{ companyIdentifier: manufacturerIdB }],
+            });
+            filters.push({
+              manufacturerData: [{ companyIdentifier: manufacturerIdC }],
             });
           }
 
@@ -470,7 +482,7 @@ const SafeBudsConnectDeviceModule = ({
 
           dispatch(SetStepAction(0));
         }
-        dispatch(SetDevicVersionFOT());
+        dispatch(SetDevicVersionFOT(true));
         onConnectWithDevice(data, currentDeviceInfo);
       }
     } catch (error) {

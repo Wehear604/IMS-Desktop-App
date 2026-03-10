@@ -18,7 +18,7 @@ const initialState = {
   fotfile: false,
   fotfile1: false,
   version: null,
-  latestVersion: null
+  latestVersion: null,
 };
 
 const deviceReducer = (state = initialState, action) => {
@@ -51,8 +51,12 @@ const deviceReducer = (state = initialState, action) => {
     case actions.SET_DEVICE_VERSION:
       return {
         ...state,
-        version: cleanValue(action?.versions ? action?.versions : state?.version),
-        latestVersion: cleanValue(action?.latestVersion ? action?.latestVersion : state?.latestVersion)
+        version: cleanValue(
+          action?.versions ? action?.versions : state?.version,
+        ),
+        latestVersion: cleanValue(
+          action?.latestVersion ? action?.latestVersion : state?.latestVersion,
+        ),
       };
 
     case actions.IS_AUDIO_CHECK:
@@ -69,11 +73,15 @@ const deviceReducer = (state = initialState, action) => {
         fotfile: state.fotfile,
         fotfile1: state.fotfile1,
         mac: state.mac,
-        version: cleanValue(action?.versions ? action?.versions : state?.version),
-        latestVersion: cleanValue(action?.latestVersion ? action?.latestVersion : state?.latestVersion)
+        version: cleanValue(
+          action?.versions ? action?.versions : state?.version,
+        ),
+        latestVersion: cleanValue(
+          action?.latestVersion ? action?.latestVersion : state?.latestVersion,
+        ),
       };
     case actions.SET_FOT_FILES_VERSION:
-      return { ...state, fotfile1: true };
+      return { ...state, fotfile1: action.fot };
     case actions.SET_FOT_FILES:
       return {
         ...initialState,
