@@ -26,38 +26,10 @@ const BoxContainsUI = ({ fields }) => {
   const dispatch = useDispatch();
   const data = {
     left: {
-      device_type: deviceDataStore?.left?.device_type,
-      mode: deviceDataStore?.left?.modeLeft,
-      volume: {
-        volumeIncrease: deviceDataStore?.left?.volume?.volumeIncrease,
-        volumeDecrease: deviceDataStore?.left?.volume?.volumeIncrease,
-      },
-      body: {
-        body1: deviceDataStore?.left?.body?.body1,
-        body2: deviceDataStore?.left?.body?.body2,
-      },
-      charging: deviceDataStore?.left?.charging,
-      audio: deviceDataStore?.is_Audio_play,
-      mac: deviceDataStore?.mac,
-      result: true,
-      mic: deviceDataStore?.isMic,
+     ...deviceDataStore?.left,
     },
     right: {
-      device_type: deviceDataStore?.right?.device_type,
-      mode: deviceDataStore?.right?.modeLeft,
-      volume: {
-        volumeIncrease: deviceDataStore?.right?.volume?.volumeIncrease,
-        volumeDecrease: deviceDataStore?.right?.volume?.volumeIncrease,
-      },
-      body: {
-        body1: deviceDataStore?.right?.body?.body1,
-        body2: deviceDataStore?.right?.body?.body2,
-      },
-      charging: deviceDataStore?.right?.charging,
-      audio: deviceDataStore?.is_Audio_play,
-      mac: deviceDataStore?.mac,
-      result: true,
-      mic: deviceDataStore?.isMic,
+   ...deviceDataStore?.right,
     },
     box_Contains: deviceDataStore.box_Contains ?? [],
     deviceColor: deviceDataStore.deviceColor ?? "69521eea409668adad3cf8e2",
