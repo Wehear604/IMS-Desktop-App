@@ -1,6 +1,12 @@
 const { app, BrowserWindow, ipcMain, session } = require("electron/main");
 const path = require("node:path");
 const loudness = require("loudness");
+const { autoUpdater } = require("electron-updater");
+
+// Configure autoUpdater
+autoUpdater.autoDownload = true;
+autoUpdater.autoInstallOnAppQuit = true;
+
 let bluetoothPinCallback = null;
 let selectBluetoothCallback = null;
 let cachedDeviceToSelect = null;
@@ -165,7 +171,38 @@ function createWindow() {
     win.webContents.openDevTools();
     console.log("Loading development server: http://localhost:3000");
   }
+
+  // --- Auto Update Logic ---
+  autoUpdater.on("checking-for-update", () => {
+    console.log("Checking for update...");
+  });
+  autoUpdater.on("update-available", (info) => {
+    console.log("Update available. Downloading...");
+    win.webContents.send("update_available");
+  });
+  autoUpdater.on("update-not-available", (info) => {
+    console.log("Update not available.");
+  });
+  autoUpdater.on("error", (err) => {
+    console.log("Error in auto-updater. " + err);
+  });
+  autoUpdater.on("download-progress", (progressObj) => {
+    let log_message = "Download speed: " + progressObj.bytesPerSecond;
+    log_message = log_message + " - Downloaded " + progressObj.percent + "%";
+    log_message = log_message + " (" + progressObj.transferred + "/" + progressObj.total + ")";
+    console.log(log_message);
+  });
+  autoUpdater.on("update-downloaded", (info) => {
+    console.log("Update downloaded; will install on quit");
+    win.webContents.send("update_downloaded");
+  });
+
+  autoUpdater.checkForUpdatesAndNotify();
 }
+
+ipcMain.on("restart_app", () => {
+  autoUpdater.quitAndInstall();
+});
 // -----------------------------------------------------
 //   ELECTRON APP EVENTS
 // -----------------------------------------------------

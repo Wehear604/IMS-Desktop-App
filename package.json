@@ -76,11 +76,21 @@
       "icon": "public/ims.png",
       "target": [
         "nsis"
+      ],
+      "publish": [
+        {
+          "provider": "generic",
+          "url": "https://your-update-server.com/updates"
+        }
       ]
     },
     "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "oneClick": true,
+      "allowToChangeInstallationDirectory": false,
+      "deleteAppDataOnUninstall": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "IMS"
     }
   },
   "browserslist": {
@@ -100,6 +110,7 @@
     "cross-env": "^10.1.0",
     "electron": "^39.2.3",
     "electron-builder": "^26.0.12",
+    "electron-updater": "^6.8.3",
     "nodemon": "^3.1.11"
   }
 }
