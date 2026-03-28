@@ -1,90 +1,41 @@
-import {
-  createBrowserRouter,
-  createHashRouter,
-  Navigate,
-  Route,
-  RouterProvider,
-  Routes,
-} from "react-router-dom";
-import { useSelector } from "react-redux";
-
-import { accessToken } from "./utils/main";
-import { useDispatch } from "react-redux";
-import { fetchUserDetails } from "./store/actions/userReducerAction";
-import { memo, useEffect, useMemo, useState } from "react";
-import { center } from "./assets/css/theme/common";
-import { CircularProgress } from "@mui/material";
-import routes from "./routes";
-// import "../src/assets/fonts/azonix-cufonfonts-webfont/style.css";
-import { useSnackbar } from "notistack";
-import OneViewBox from "./components/layouts/OneViewBox";
+import React, { useState, useEffect } from 'react';
 
 function App() {
-  const { enqueueSnackbar } = useSnackbar();
-
-  const [loading, setLoading] = useState(true);
-  const { user, snackBar } = useSelector((state) => state);
-  const dispatch = useDispatch();
+  const [time, setTime] = useState(new Date().toLocaleTimeString());
+  const [version, setVersion] = useState('Loading...');
+  const [updateStatus, setUpdateStatus] = useState('');
 
   useEffect(() => {
-    if (accessToken.get()) {
-      dispatch(
-        fetchUserDetails(
-          undefined,
-          (res) => {
-            setLoading(false);
-          },
-          (err) => {
-            setLoading(false);
-          }
-        )
-      );
+    const timer = setInterval(() => setTime(new Date().toLocaleTimeString()), 1000);
+    
+    if (window.electronAPI) {
+      window.electronAPI.getVersion().then(v => setVersion(v));
+      
+      window.electronAPI.onUpdateAvailable(() => setUpdateStatus('Update available! Downloading in background...'));
+      window.electronAPI.onUpdateDownloaded(() => {
+          setUpdateStatus('Update downloaded! Restarting...');
+          setTimeout(() => {
+              window.electronAPI.restartApp();
+          }, 3000);
+      });
     } else {
-      setLoading(false);
+       setVersion('Local Web version');
     }
+    return () => clearInterval(timer);
   }, []);
 
-  const router = createHashRouter(routes(user));
-  useEffect(() => {
-    if (snackBar.message) {
-      enqueueSnackbar(snackBar.message, { variant: snackBar.variant });
-    }
-  }, [snackBar.id]);
-
-  if (loading) {
-    return (
-      <OneViewBox sx={{ ...center }}>
-        <CircularProgress size={50} />{" "}
-      </OneViewBox>
-    );
-  }
   return (
-    <RouterProvider
-      router={router}
-      fallbackElement={
-        <OneViewBox sx={{ ...center }}>
-          <CircularProgress size={50} />{" "}
-        </OneViewBox>
-      }
-    />
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', fontFamily: 'sans-serif', backgroundColor: '#f0f0f0' }}>
+      <h1 style={{ fontSize: '3rem', color: '#333' }}>IMS Version Test</h1>
+      <h2 style={{ fontSize: '2rem', color: '#666' }}>Current Version: {version}</h2>
+      <h3 style={{ fontSize: '2rem', color: '#007BFF' }}>Time: {time}</h3>
+      {updateStatus && (
+        <div style={{ marginTop: '20px', padding: '15px 30px', backgroundColor: '#d4edda', color: '#155724', borderRadius: '5px', border: '1px solid #c3e6cb', fontSize: '1.2rem' }}>
+          {updateStatus}
+        </div>
+      )}
+    </div>
   );
-  
 }
 
-export default memo(App);
-
-
-
-
-
-
-// src/App.js
-
-// import React from 'react';
-// import SignIn from '../src/pages/signin/signinui';
-
-// function App() {
-//   return <SignIn />;
-// }
-
-// export default App;
+export default App;

@@ -159,6 +159,10 @@ function createWindow() {
     }
   });
 
+  ipcMain.handle("app-version", () => {
+    return app.getVersion();
+  });
+
   if (false) {
     win.loadFile(path.join(__dirname, "..", "build", "index.html"));
     console.log(

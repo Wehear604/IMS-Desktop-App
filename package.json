@@ -79,14 +79,16 @@
       ],
       "publish": [
         {
-          "provider": "generic",
-          "url": "https://your-update-server.com/updates"
+          "provider": "github",
+          "owner": "Wehear604",
+          "repo": "IMS-Desktop-App"
         }
       ]
     },
     "nsis": {
       "oneClick": true,
       "allowToChangeInstallationDirectory": false,
+      "perMachine": false,
       "deleteAppDataOnUninstall": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
