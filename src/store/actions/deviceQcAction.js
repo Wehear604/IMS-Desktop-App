@@ -199,10 +199,7 @@ export const readRicMode = (side, deviceObj) => {
       }
       console.log("object modeeeeeeeeeeeeee", mode);
       dispatch({
-        type:
-          side === LISTENING_SIDE.RIGHT
-            ? actions.CHANGE_RIC_MODE_RIGHT
-            : actions.CHANGE_RIC_MODE_LEFT,
+        type: actions.SET_BTE_MODE,
         mode,
       });
     } catch (error) {

@@ -320,7 +320,7 @@ export const DEVICES = {
   RIC_OPTIMA_8: 8,
   ITE_OPTIMA: 9,
   // POWER_BTE: 10,
-  RIC_32: 11,
+  // RIC_32: 11,
   ITE_PRIME: 12,
   // NECKBAND: 13,
 
