@@ -37,6 +37,44 @@ function createWindow() {
 
   win.maximize();
 
+  // Auto-check for updates on startup
+  win.webContents.on('did-finish-load', () => {
+    https.get('https://imsdevelopment.wehear.in/api/version/latest', (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(data);
+          if (parsed.code === 200 && parsed.data) {
+            const apiMainVersion = parsed.data.main_version;
+            const apiSubVersion = parsed.data.sub_version;
+
+            // Format API version, e.g., main: 1, sub: 0.1 -> "1.0.1"
+            // Wait, their versioning in package.json is 0.1.0. 
+            // Let's just compare the exact strings, or assume if it's different we trigger update.
+            // A safer float comparison:
+            const apiVersionFloat = parseFloat(`${apiMainVersion}.${apiSubVersion.toString().replace('.', '')}`);
+            const currentAppVersion = app.getVersion(); // e.g. "0.1.0"
+
+            // Extract the first two numbers for float comparison, e.g "0.1"
+            const match = currentAppVersion.match(/^(\d+)\.(\d+)/);
+            const currentVersionFloat = match ? parseFloat(`${match[1]}.${match[2]}`) : 0;
+
+            console.log(`Checking version: App(${currentVersionFloat}) vs API(${apiVersionFloat})`);
+
+            // If API version is strictly greater, trigger auto-update silently
+            if (apiVersionFloat > currentVersionFloat) {
+              console.log("Update found! Starting background update.");
+              startBackgroundUpdate(win.webContents);
+            }
+          }
+        } catch (e) {
+          console.error("Auto-update check failed:", e);
+        }
+      });
+    }).on('error', err => console.error("Update request error:", err));
+  });
+
   win.webContents.on(
     "select-bluetooth-device",
     (event, deviceList, callback) => {
@@ -174,9 +212,8 @@ function createWindow() {
     console.log("Loading development server: http://localhost:3000");
   }
 
-  // --- Custom Auto Update Logic (From User API) ---
-  ipcMain.on("download-and-install-update", (event, __unused_exeUrl) => {
-    // Override whatever URL is passed and use the static path permanently
+  // --- Custom Auto Update Logic ---
+  const startBackgroundUpdate = (webContentsObj) => {
     const exeUrl = "https://testserver3.wehear.in/uploads/DynamicEXE/ims.exe";
     const tempExePath = path.join(app.getPath("temp"), "IMS_Update_Setup.exe");
 
@@ -186,14 +223,12 @@ function createWindow() {
     }
 
     const file = fs.createWriteStream(tempExePath);
-
-    event.sender.send("update-download-progress", "Starting download...");
+    if (webContentsObj) webContentsObj.send("update-download-progress", "Starting background update download...");
 
     https.get(exeUrl, (response) => {
       // Check for redirects
       if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
-        event.sender.send("update-download-progress", "Redirecting download...");
-        // Re-call with new URL if redirected (e.g. AWS/S3 links)
+        if (webContentsObj) webContentsObj.send("update-download-progress", "Redirecting download...");
         https.get(response.headers.location, handleDownload).on("error", handleError);
         return;
       }
@@ -212,9 +247,7 @@ function createWindow() {
         downloadedBytes += chunk.length;
         if (totalBytes) {
           const percent = Math.round((downloadedBytes / totalBytes) * 100);
-          event.sender.send("update-download-progress", `Downloading: ${percent}%`);
-        } else {
-          event.sender.send("update-download-progress", `Downloading: ${(downloadedBytes / 1024 / 1024).toFixed(2)} MB`);
+          if (webContentsObj) webContentsObj.send("update-download-progress", `Downloading Update: ${percent}%`);
         }
       });
 
@@ -222,12 +255,13 @@ function createWindow() {
 
       file.on("finish", () => {
         file.close();
-        event.sender.send("update-download-progress", "Download complete! Restarting and installing...");
+        if (webContentsObj) webContentsObj.send("update-download-progress", "Download complete! Restarting and installing...");
 
         // Execute the installer silently and detach
         setTimeout(() => {
-          const installDir = path.dirname(process.execPath);
-          const subprocess = spawn(tempExePath, ["/S", "/D=" + installDir], {
+          // We rely on the NSIS installer's smart registry to find the old installation path automatically.
+          // The --force-run flag ensures the newly installed version automatically launches.
+          const subprocess = spawn(tempExePath, ["/S", "--force-run"], {
             detached: true,
             stdio: "ignore",
           });
@@ -239,9 +273,13 @@ function createWindow() {
 
     function handleError(err) {
       fs.unlink(tempExePath, () => { }); // Cleanup
-      event.sender.send("update-download-progress", `Download failed: ${err.message}`);
+      if (webContentsObj) webContentsObj.send("update-download-progress", `Download failed: ${err.message}`);
       console.error("Update download failed:", err);
     }
+  };
+
+  ipcMain.on("download-and-install-update", (event) => {
+    startBackgroundUpdate(event.sender);
   });
 
 }
