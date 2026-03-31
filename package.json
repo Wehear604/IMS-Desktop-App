@@ -1,7 +1,7 @@
 {
   "name": "inventory-management-frontend",
   "homepage": "./",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Desktop Inventory Management System",
   "author": "Rudren Patel",
@@ -55,6 +55,7 @@
     "postinstall": "electron-builder install-app-deps --arch=x64"
   },
   "build": {
+    "extends": null,
     "appId": "com.company.inventory",
     "productName": "Inventory Management System",
     "directories": {
@@ -76,20 +77,13 @@
       "icon": "public/ims.png",
       "target": [
         "nsis"
-      ],
-      "publish": [
-        {
-          "provider": "github",
-          "owner": "Wehear604",
-          "repo": "IMS-Desktop-App"
-        }
       ]
     },
     "nsis": {
       "oneClick": true,
       "allowToChangeInstallationDirectory": false,
       "perMachine": false,
-      "deleteAppDataOnUninstall": true,
+      "deleteAppDataOnUninstall": false,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "IMS"
@@ -112,7 +106,6 @@
     "cross-env": "^10.1.0",
     "electron": "^39.2.3",
     "electron-builder": "^26.0.12",
-    "electron-updater": "^6.8.3",
     "nodemon": "^3.1.11"
   }
 }

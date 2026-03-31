@@ -3,9 +3,10 @@ const { contextBridge, ipcRenderer } = require("electron/renderer");
 contextBridge.exposeInMainWorld("electronAPI", {
   getVolume: () => ipcRenderer.invoke("get-system-volume"),
   getVersion: () => ipcRenderer.invoke("app-version"),
-  onUpdateAvailable: (callback) => ipcRenderer.on("update_available", () => callback()),
-  onUpdateDownloaded: (callback) => ipcRenderer.on("update_downloaded", () => callback()),
-  restartApp: () => ipcRenderer.send("restart_app"),
+
+  // Custom Updater Methods
+  downloadAndInstallUpdate: (url) => ipcRenderer.send("download-and-install-update", url),
+  onUpdateProgress: (callback) => ipcRenderer.on("update-download-progress", (_event, msg) => callback(msg)),
 
   // --- Send to Main ---
   selectBluetoothDevice: (deviceId) =>

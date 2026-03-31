@@ -1,11 +1,9 @@
 const { app, BrowserWindow, ipcMain, session } = require("electron/main");
 const path = require("node:path");
 const loudness = require("loudness");
-const { autoUpdater } = require("electron-updater");
-
-// Configure autoUpdater
-autoUpdater.autoDownload = true;
-autoUpdater.autoInstallOnAppQuit = true;
+const fs = require('fs');
+const https = require('https');
+const { spawn } = require('child_process');
 
 let bluetoothPinCallback = null;
 let selectBluetoothCallback = null;
@@ -163,7 +161,7 @@ function createWindow() {
     return app.getVersion();
   });
 
-  if (false) {
+  if (true) {
     win.loadFile(path.join(__dirname, "..", "build", "index.html"));
     console.log(
       "Forcing static build load from:",
@@ -176,37 +174,78 @@ function createWindow() {
     console.log("Loading development server: http://localhost:3000");
   }
 
-  // --- Auto Update Logic ---
-  autoUpdater.on("checking-for-update", () => {
-    console.log("Checking for update...");
-  });
-  autoUpdater.on("update-available", (info) => {
-    console.log("Update available. Downloading...");
-    win.webContents.send("update_available");
-  });
-  autoUpdater.on("update-not-available", (info) => {
-    console.log("Update not available.");
-  });
-  autoUpdater.on("error", (err) => {
-    console.log("Error in auto-updater. " + err);
-  });
-  autoUpdater.on("download-progress", (progressObj) => {
-    let log_message = "Download speed: " + progressObj.bytesPerSecond;
-    log_message = log_message + " - Downloaded " + progressObj.percent + "%";
-    log_message = log_message + " (" + progressObj.transferred + "/" + progressObj.total + ")";
-    console.log(log_message);
-  });
-  autoUpdater.on("update-downloaded", (info) => {
-    console.log("Update downloaded; will install on quit");
-    win.webContents.send("update_downloaded");
+  // --- Custom Auto Update Logic (From User API) ---
+  ipcMain.on("download-and-install-update", (event, __unused_exeUrl) => {
+    // Override whatever URL is passed and use the static path permanently
+    const exeUrl = "https://testserver3.wehear.in/uploads/DynamicEXE/ims.exe";
+    const tempExePath = path.join(app.getPath("temp"), "IMS_Update_Setup.exe");
+
+    // Ensure we replace the existing file instead of creating new ones
+    if (fs.existsSync(tempExePath)) {
+      try { fs.unlinkSync(tempExePath); } catch (e) { console.error("Could not delete old installer:", e); }
+    }
+
+    const file = fs.createWriteStream(tempExePath);
+
+    event.sender.send("update-download-progress", "Starting download...");
+
+    https.get(exeUrl, (response) => {
+      // Check for redirects
+      if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+        event.sender.send("update-download-progress", "Redirecting download...");
+        // Re-call with new URL if redirected (e.g. AWS/S3 links)
+        https.get(response.headers.location, handleDownload).on("error", handleError);
+        return;
+      }
+      handleDownload(response);
+    }).on("error", handleError);
+
+    function handleDownload(response) {
+      if (response.statusCode !== 200) {
+        return handleError(new Error(`Failed to get file, status code: ${response.statusCode}`));
+      }
+
+      const totalBytes = parseInt(response.headers["content-length"], 10);
+      let downloadedBytes = 0;
+
+      response.on("data", (chunk) => {
+        downloadedBytes += chunk.length;
+        if (totalBytes) {
+          const percent = Math.round((downloadedBytes / totalBytes) * 100);
+          event.sender.send("update-download-progress", `Downloading: ${percent}%`);
+        } else {
+          event.sender.send("update-download-progress", `Downloading: ${(downloadedBytes / 1024 / 1024).toFixed(2)} MB`);
+        }
+      });
+
+      response.pipe(file);
+
+      file.on("finish", () => {
+        file.close();
+        event.sender.send("update-download-progress", "Download complete! Restarting and installing...");
+
+        // Execute the installer silently and detach
+        setTimeout(() => {
+          const installDir = path.dirname(process.execPath);
+          const subprocess = spawn(tempExePath, ["/S", "/D=" + installDir], {
+            detached: true,
+            stdio: "ignore",
+          });
+          subprocess.unref();
+          app.quit(); // Close the current app to allow replacement
+        }, 1500);
+      });
+    }
+
+    function handleError(err) {
+      fs.unlink(tempExePath, () => { }); // Cleanup
+      event.sender.send("update-download-progress", `Download failed: ${err.message}`);
+      console.error("Update download failed:", err);
+    }
   });
 
-  autoUpdater.checkForUpdatesAndNotify();
 }
 
-ipcMain.on("restart_app", () => {
-  autoUpdater.quitAndInstall();
-});
 // -----------------------------------------------------
 //   ELECTRON APP EVENTS
 // -----------------------------------------------------
