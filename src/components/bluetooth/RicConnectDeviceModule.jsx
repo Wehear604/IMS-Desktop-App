@@ -407,10 +407,10 @@ const RicConnectDevice = ({
   // Electron modal handlers
   const handleDeviceSelected = (deviceId) => {
     setSelectingDeviceId(deviceId);
-    if (fitting.device_type === DEVICES.SAFE_BUDS) {
+    if (fitting.device_type === DEVICES.ITE_PRIME) {
       runClassicCheck({
         mac: deviceId,
-        name: "safe",
+        name: "ite",
       });
     }
     dispatch(DeviceMACAction(deviceId));

@@ -450,12 +450,12 @@ const DeviceAudioMicCheckUi = () => {
         {/* STEP 0 - AUDIO */}
         {step === 0 &&
           (device?.device_type === DEVICES.ITE_PRIME ? (
-            // <AudioCheckSafeBudsUi
-            //   isPlaying={isPlaying}
-            //   setIsPlaying={setIsPlaying}
-            //   audioRef={audioRef}
-            // />
-            <></>
+            <AudioCheckSafeBudsUi
+              isPlaying={isPlaying}
+              setIsPlaying={setIsPlaying}
+              audioRef={audioRef}
+            />
+            // <></>
           ) : (
             <StepCard
               isChecked={true}
@@ -544,6 +544,7 @@ const DeviceAudioMicCheckUi = () => {
             />
             {(device?.device_type === DEVICES.BTE_OPTIMA ||
               device?.device_type === DEVICES.BTE_PRIME ||
+              device?.device_type === DEVICES.ITE_PRIME ||
               device?.device_type === DEVICES.RIC_OPTIMA_8) && (
               <StepCard
                 isChecked={true}

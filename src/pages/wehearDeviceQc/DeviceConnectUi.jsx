@@ -25,11 +25,10 @@ import leftRic8 from "../../assets/images/R8 HA all open domes.left.svg";
 import rightRic8 from "../../assets/images/R8 HA all open domes.right.svg";
 import rightITEOptima from "../../assets/images/ITE_OPTIMA_LEFT_BLACK.svg";
 import leftITEOptima from "../../assets/images/ITE_OPTIMA_RIGHT_BLACK.svg";
-import leftItePrime from "../../assets/images/ITE_PRIME_LEFT.svg";
-import rightItePrime from "../../assets/images/ITE_PRIME_RIGHT.svg";
-import rightSideSafeBud from "../../assets/images/rightSideSafeBud.svg";
-import leftSideSafeBud from "../../assets/images/leftSideSafeBud.svg";
-import neckbandBlack from "../../assets/images/neckband.svg";
+
+import itePrimeWhite from "../../assets/images/ITE_PRIME_WHITE.svg";
+// import itePrimeWhite from "../../assets/images/ITE_PRIME_LEFT.svg";
+// import rightItePrime from "../../assets/images/ITE_PRIME_RIGHT.svg";
 import wehearox from "../../assets/images/wehearox.svg";
 import wehear_2_0 from "../../assets/images/wehear 2 0.svg";
 import safeBuds from "../../assets/images/safebuds.svg";
@@ -291,8 +290,8 @@ const DeviceConnectUi = () => {
       case DEVICES.ITE_PRIME:
         return (
           <img
-            style={{ width: 120, height: 120 }}
-            src={leftItePrime}
+            style={{ width: 200, height: 120 }}
+            src={itePrimeWhite}
             alt="ITE Prime"
           />
         );
@@ -357,14 +356,14 @@ const DeviceConnectUi = () => {
             alt="Ric 16"
           />
         );
-      case DEVICES.ITE_PRIME:
-        return (
-          <img
-            style={{ width: 120, height: 120 }}
-            src={rightItePrime}
-            alt="ITE Prime"
-          />
-        );
+      // case DEVICES.ITE_PRIME:
+      //   return (
+      //     <img
+      //       style={{ width: 120, height: 120 }}
+      //       src={rightItePrime}
+      //       alt="ITE Prime"
+      //     />
+      //   );
 
       default:
         return null;
@@ -375,6 +374,7 @@ const DeviceConnectUi = () => {
     DEVICES.SAFE_BUDS,
     DEVICES.WEHEAR_2_0,
     DEVICES.WEHEAR_OX,
+    DEVICES.ITE_PRIME,
   ].includes(device.device_type);
 
   return (
@@ -384,7 +384,7 @@ const DeviceConnectUi = () => {
       </Header>
       <Divider orientation="horizontal" />
 
-      <Stepper sx={{ p: 2 }} activeStep={step.step} alternativeLabel>
+    { device?.device_type === DEVICES.SAFE_BUDS && <Stepper sx={{ p: 2 }} activeStep={step.step} alternativeLabel>
         <Step>
           <StepLabel>Device Version</StepLabel>
         </Step>
@@ -400,7 +400,7 @@ const DeviceConnectUi = () => {
         <Step>
           <StepLabel>Packaging Details</StepLabel>
         </Step>
-      </Stepper>
+      </Stepper>}
       <Box
         sx={{
           minHeight: "70vh",
