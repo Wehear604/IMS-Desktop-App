@@ -61,7 +61,9 @@ const DeviceQcListController = ({
     if (
       step === 1 &&
       deviceDataStore.left.result &&
-      deviceDataStore.right.result
+      deviceDataStore.right.result &&
+      deviceDataStore.left.device_type !== DEVICES.SAFE_BUDS &&
+      deviceDataStore.right.device_type !== DEVICES.SAFE_BUDS
     ) {
       dispatch(
         openModal(
@@ -138,7 +140,7 @@ const DeviceQcListController = ({
   }, []);
 
   useEffect(() => {
-    dispatch(resetDeviceDataStore());
+    dispatch(resetDeviceDataStore(true));
   }, []);
   return (
     <>
@@ -223,6 +225,29 @@ const DeviceQcListController = ({
             ) : (
               <>
                 <DeviceConnectUi />
+                <Box
+                  p={2}
+                  mt={4}
+                  m={2}
+                  sx={{
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "flex-start",
+                  }}
+                >
+                  <Button
+                    variant="contained"
+                    sx={{ width: "8vw" }}
+                    onClick={() => {
+                      dispatch(DeviceSideAction(null));
+                      setStep(step - 1);
+                    }}
+                  >
+                    <Typography variant="h5" sx={{ textTransform: "none" }}>
+                      Back
+                    </Typography>
+                  </Button>
+                </Box>
                 {/* <SafebudsMainUi /> */}
                 {/* <ProductDetailsQcUi
                   setBox={setFields}

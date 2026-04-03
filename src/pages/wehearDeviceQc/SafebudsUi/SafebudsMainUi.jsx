@@ -48,8 +48,6 @@ import { BLE_STORE } from "../../../utils/bleStore";
 import useValidate from "../../../store/hooks/useValidator";
 import { callApiAction } from "../../../store/actions/commonAction";
 import VersionCheckingLoader from "../../../utils/customeloader";
-import { io } from "socket.io-client";
-import { use } from "react";
 import MessageDilog from "../../../components/texts/MessageDilog";
 import DeviceVersionUi from "./DeviceVersionUi";
 
@@ -145,7 +143,7 @@ const SafebudsMainUi = ({ isUpdate, id }) => {
           dispatch(
             callSnackBar("Device QC Rejected", SNACK_BAR_VARIETNS.warning),
           );
-          dispatch(resetDeviceDataStore());
+          dispatch(resetDeviceDataStore(true));
           dispatch(closeModal("deviceAudioMicCheck"));
           dispatch(closeModal("rejectDeviceQc"));
         },
@@ -247,7 +245,7 @@ const SafebudsMainUi = ({ isUpdate, id }) => {
               SNACK_BAR_VARIETNS.suceess,
             ),
           );
-          dispatch(resetDeviceDataStore());
+          dispatch(resetDeviceDataStore(true));
         },
         (err) => {
           dispatch(callSnackBar(err, SNACK_BAR_VARIETNS.error));
@@ -328,7 +326,7 @@ const SafebudsMainUi = ({ isUpdate, id }) => {
         onClose={() => {
           BLE_STORE.BTEdisconnect = true;
           dispatch(closeModal("deviceAudioMicCheck"));
-          dispatch(resetDeviceDataStore());
+          dispatch(resetDeviceDataStore(truncate));
           dispatch(CloseDeviceDataStore());
         }}
         onReject={(e) => {

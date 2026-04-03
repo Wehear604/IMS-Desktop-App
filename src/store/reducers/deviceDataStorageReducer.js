@@ -112,10 +112,13 @@ const deviceDataStorageReducer = (state = initialState, action) => {
           },
         };
       }
-    // case actions.RESET_DEVICE_DATA_STORE:
-    //   return {
-    //     ...initialState,
-    //   };
+    case actions.RESET_DEVICE_DATA_STORE:{
+      if (action.reset) {
+        return {
+          ...initialState,
+        };
+      }
+      return {...state}}
     case actions.SET_DEVICE_COLOR_DETAILS:
       return {
         ...state,

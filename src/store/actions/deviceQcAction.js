@@ -321,61 +321,46 @@ export const getITEPrimeMode = (side, deviceObj) => {
   return async (dispatch) => {
     const command = [0x02, 0x05, 0x00];
     const response = await ReadITEPrimeDataFromDevice(command, side, deviceObj);
-    console.log("object ITE prime response", response);
     const mode = response[4];
     console.log("mode", mode);
     dispatch({
       type: actions.SET_ITE_PRIME_MODE,
       mode,
-      side,
+      device_side: side,
     });
     console.log("object ite mode", mode);
   };
 };
 
-export const getITEPrimeVolume = (side, currentVolume) => {
-  return async (dispatch) => {
+export const getITEPrimeVolume = (side, volume) => {
+  return async (dispatch, getState) => {
+    const state = getState();
     const command = [0x02, 0x0d, 0x00];
-    console.log("object command", command);
     const response = await ReadITEPrimeDataFromDevice(
       command,
       side,
       BLE_STORE.deviceObj,
     );
-    const parts = response;
-    const payload = parts.slice(3);
-    let volume = 0;
-    console.log("payload", payload);
-    let finalVolume = 0;
-    if (side === LISTENING_SIDE.LEFT) {
-      volume = payload[4];
-    } else {
-      volume = payload[22];
-    }
-    if (parseInt(volume) > 127) {
-      finalVolume = volume - 253;
-    } else {
-      finalVolume = volume;
-    }
-
-    if (currentVolume) {
-      dispatch({
-        type: actions.SET_ITE_PRIME_CURRENT_VOLUME,
-        volume,
-        finalVolume,
-        device_side: side,
-      });
-    } else {
-      dispatch({
-        type: actions.SET_ITE_PRIME_VOLUME,
-        side,
-        volume,
-      });
-    }
     console.log("object ite volume", volume);
   };
 };
 
+export const getITEPrimeCurrentVolume = (side, volume) => {
+  return (dispatch, getState) => {
+    const state = getState();
+
+    dispatch({
+      type: !state.deviceQc.start
+        ? actions.SET_ITE_PRIME_CURRENT_VOLUME
+        : actions.SET_ITE_PRIME_VOLUME,
+      volume,
+      side,
+      device_side: side,
+    });
+
+    console.log("ITE volume:", volume);
+  };
+};
 export const SafeBudsDeviceName = ({ type }) => {
   return async (dispatch) => {
     try {
@@ -557,6 +542,20 @@ export const SafeBudsVersionUpdate = ({ type, currentVersion }) => {
       dispatch(SafeBudsDeviceName({ type: "NameChange" }));
     } catch (err) {
       console.error("RicDeviceCurrentVolume read failed", err);
+    }
+  };
+};
+
+export const AllDeviceAudioCheck = (isMic) => {
+  console.log("first isMic", isMic);
+  return async (dispatch) => {
+    try {
+      dispatch({
+        type: actions.FETCH_ISMIC_SAFE_BUDS,
+        isMic: isMic,
+      });
+    } catch (err) {
+      console.error("read failed", err);
     }
   };
 };

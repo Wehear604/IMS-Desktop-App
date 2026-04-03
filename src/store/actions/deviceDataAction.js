@@ -115,8 +115,8 @@ export const DeviceBoxIDAction = (boxId) => {
   };
 };
 
-export const resetDeviceDataStore = () => {
-  return { type: actions.RESET_DEVICE_DATA_STORE };
+export const resetDeviceDataStore = (reset) => {
+  return { type: actions.RESET_DEVICE_DATA_STORE, reset };
 };
 export const CloseDeviceDataStore = () => {
   return { type: actions.SET_QC_TEST_CLOSE_RESULT };

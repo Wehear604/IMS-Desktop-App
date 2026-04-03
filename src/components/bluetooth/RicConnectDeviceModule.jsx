@@ -33,6 +33,10 @@ import {
 } from "../../store/actions/deviceDataAction";
 import WriteRicDataToDevice from "./WriteRicDataToDevice";
 import { runClassicCheck } from "../../utils/classicSocket";
+import {
+  getITEPrimeCurrentVolume,
+  getITEPrimeVolume,
+} from "../../store/actions/deviceQcAction";
 // import WriteSafeBudsDataToDevice from "./WriteSafeBudsDataToDevice";
 
 const modalStyle = {
@@ -82,7 +86,7 @@ const RicConnectDevice = ({
   const [deviceList, setDeviceList] = useState([]);
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [selectingDeviceId, setSelectingDeviceId] = useState(null);
-
+  const arrvolume = [];
   const dispatch = useDispatch();
 
   // Electron API listeners
@@ -199,13 +203,7 @@ const RicConnectDevice = ({
           },
         ],
       };
-      if (fitting.device_type === DEVICES.ITE_PRIME) {
-        filterData.filters = [
-          {
-            namePrefix: "ITE",
-          },
-        ];
-      } else if (filter.manufacturerData[0].companyIdentifier) {
+      if (filter.manufacturerData[0].companyIdentifier) {
         filterData.filters = [filter];
       } else {
         filterData.acceptAllDevices = true;
@@ -270,13 +268,50 @@ const RicConnectDevice = ({
               for (let i = 0; i < value.byteLength; i++) {
                 arr.push(("0" + value.getUint8(i).toString(16)).slice(-2));
               }
+
               const hex = arr.join(" ");
               // console.log("hex notification", hex);
               // Keep `data` serializable and small
               setData((prev) => {
                 const next = [...prev.slice(-49), { ts: Date.now(), hex }];
                 BLE_STORE.hardwareData = next;
-                console.log("object next", next);
+                const value = next[next.length - 1].hex;
+                const bytes = value.split(" ");
+
+                if (
+                  fitting.device_type === DEVICES.ITE_PRIME &&
+                  bytes[0] === "42" &&
+                  bytes[1] === "1d" &&
+                  bytes[2] === "02"
+                ) {
+                  const lastValue = parseInt(bytes.at(-1), 16);
+                  const secondValue = parseInt(bytes.at(-2), 16);
+                  arrvolume.push([lastValue, secondValue]);
+                  function getChange(arr) {
+                    if (arr.length < 2) return null;
+
+                    const prev = arr[arr.length - 2];
+                    const curr = arr[arr.length - 1];
+
+                    for (let i = 0; i < curr.length; i++) {
+                      if (curr[i] !== prev[i]) {
+                        return curr[i]; // return changed value
+                      }
+                    }
+
+                    return null;
+                  }
+                  const result = getChange(arrvolume);
+                  console.log("result", result);
+                  // if (result !== null) {
+                  dispatch(
+                    getITEPrimeCurrentVolume(
+                      LISTENING_SIDE.BOTH,
+                      result !== null ? result : 0,
+                    ),
+                  );
+                  // }
+                }
                 return next;
               });
             } catch (err) {
@@ -407,12 +442,12 @@ const RicConnectDevice = ({
   // Electron modal handlers
   const handleDeviceSelected = (deviceId) => {
     setSelectingDeviceId(deviceId);
-    if (fitting.device_type === DEVICES.ITE_PRIME) {
-      runClassicCheck({
-        mac: deviceId,
-        name: "ite",
-      });
-    }
+    // if (fitting.device_type === DEVICES.ITE_PRIME) {
+    //   runClassicCheck({
+    //     mac: deviceId,
+    //     name: "safe",
+    //   });
+    // }
     dispatch(DeviceMACAction(deviceId));
     if (window.electronAPI) {
       window.electronAPI.selectBluetoothDevice(deviceId);

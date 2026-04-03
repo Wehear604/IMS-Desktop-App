@@ -63,7 +63,7 @@ const BoxContainsUI = ({ fields }) => {
               SNACK_BAR_VARIETNS.suceess,
             ),
           );
-          dispatch(resetDeviceDataStore());
+          dispatch(resetDeviceDataStore(true));
         },
         (err) => {
           dispatch(callSnackBar(err, SNACK_BAR_VARIETNS.error));
@@ -80,10 +80,11 @@ const BoxContainsUI = ({ fields }) => {
       onClose={() => {
         BLE_STORE.BTEdisconnect = true;
         dispatch(closeModal("deviceAudioMicCheck"));
-        dispatch(resetDeviceDataStore());
+        dispatch(resetDeviceDataStore(true));
         dispatch(CloseDeviceDataStore());
       }}
       confirmText={"Finish"}
+      disabledSubmit={!(deviceDataStore?.deviceColor && deviceDataStore?.boxId)}
     >
       <Grid container sx={{ padding: 4 }}>
         <Grid item xs={12} md={4}>

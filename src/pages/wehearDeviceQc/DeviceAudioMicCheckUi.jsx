@@ -30,6 +30,7 @@ import {
   sendPlayCommand,
 } from "../../utils/bleStore";
 import {
+  AllDeviceAudioCheck,
   BteDeviceCurrentVolume,
   BteDeviceMode,
   BteDeviceVolume,
@@ -51,6 +52,9 @@ import { callSnackBar } from "../../store/actions/snackbarAction";
 import AudioCheckSafeBudsUi from "./SafebudsUi/AudioCheckSafeBudsUi";
 import SafebudsMainUi from "./SafebudsUi/SafebudsMainUi";
 import BoxContainsUI from "./AllDevice/BoxContainsUI";
+import MessageDilog from "../../components/texts/MessageDilog";
+import { createDeviceQcApi } from "../../apis/deviceQc.api";
+import { callApiAction } from "../../store/actions/commonAction";
 
 const StepCard = ({
   isChecked,
@@ -273,11 +277,7 @@ const DeviceAudioMicCheckUi = () => {
   const deviceTitle = DEVICES_NAME[device?.device_type] ?? "Unknown device";
   const sideLabel =
     findObjectKeyByValue(device?.device_side, LISTENING_SIDE) ?? "";
-  console.log(
-    "deviceQc?.volumeIncrease || deviceQc?.volumeDecrease",
-    deviceQc?.volumeIncrease,
-    deviceQc?.volumeDecrease,
-  );
+
   const onComplete = useCallback(
     (e) => {
       e.preventDefault();
@@ -291,8 +291,10 @@ const DeviceAudioMicCheckUi = () => {
         fields.body1 &&
         fields.body2 &&
         fields.charging &&
-        device?.is_Audio_play &&
-        device?.mac
+        (device?.device_type === DEVICES.BTE_OPTIMA ||
+          device?.device_type === DEVICES.BTE_PRIME)
+          ? device?.is_Audio_play && device?.isMic
+          : device?.isMic && device?.mac
       ) {
         dispatch(
           DeviceStoreAction(
@@ -312,9 +314,10 @@ const DeviceAudioMicCheckUi = () => {
             fields.charging,
             device?.is_Audio_play,
             device?.mac,
+            device?.isMic,
           ),
         );
-              dispatch(closeModal("deviceAudioMicCheck"));
+        dispatch(closeModal("deviceAudioMicCheck"));
 
         if (
           device?.device_type === DEVICES.RIC_OPTIMA_8 ||
@@ -326,7 +329,7 @@ const DeviceAudioMicCheckUi = () => {
           BLE_STORE.BTEdisconnect = true;
         }
 
-        dispatch(resetDeviceDataStore());
+        dispatch(resetDeviceDataStore(false));
         dispatch(
           callSnackBar(
             `${sideLabel} Side Device QC Completed Successfully.`,
@@ -346,7 +349,8 @@ const DeviceAudioMicCheckUi = () => {
   );
 
   const disabledSubmit = (() => {
-    if (step === 0) return !Boolean(device?.is_Audio_play);
+    if (step === 0)
+      return !Boolean(device?.is_Audio_play) && !Boolean(device.isMic);
     if (step === 1)
       return device?.device_type === DEVICES.RIC_OPTIMA
         ? !(deviceQc?.volumeIncrease || deviceQc?.volumeDecrease)
@@ -399,6 +403,123 @@ const DeviceAudioMicCheckUi = () => {
     }
   };
 
+  const data = {
+    left: {
+      device_type: device?.device_type,
+      mode:
+        deviceDataStore?.left?.mode?.length > 0
+          ? deviceDataStore?.left?.mode
+          : deviceQc.modeLeft,
+      volume: {
+        volumeIncrease: deviceDataStore?.left.volume.volumeIncrease
+          ? deviceDataStore?.left.volume.volumeIncrease
+          : deviceQc.volumeIncrease,
+        volumeDecrease: deviceDataStore?.left.volume.volumeDecrease
+          ? deviceDataStore?.left.volume.volumeDecrease
+          : deviceQc.volumeDecrease,
+      },
+      body: {
+        body1: deviceDataStore?.left.body.body1
+          ? deviceDataStore?.left.body.body1
+          : fields.body1,
+        body2: deviceDataStore?.left.body.body2
+          ? deviceDataStore?.left.body.body2
+          : fields.body2,
+      },
+      charging: deviceDataStore?.left.charging
+        ? deviceDataStore?.left.charging
+        : fields.charging,
+      audio: deviceDataStore?.left.audio
+        ? deviceDataStore?.left.audio
+        : device?.is_Audio_play,
+      mac: deviceDataStore?.left.mac ? deviceDataStore?.left.mac : device?.mac,
+      result: deviceDataStore?.left.result,
+      mic: deviceDataStore?.left.mic
+        ? deviceDataStore?.left.mic
+        : device?.isMic,
+    },
+
+    right: {
+      device_type: device?.device_type,
+      mode:
+        deviceDataStore?.right?.mode?.length > 0
+          ? deviceDataStore?.right?.mode
+          : deviceQc.modeRight,
+      volume: {
+        volumeIncrease: deviceDataStore?.right.volume.volumeIncrease
+          ? deviceDataStore?.right.volume.volumeIncrease
+          : deviceQc.volumeIncrease,
+        volumeDecrease: deviceDataStore?.right.volume.volumeDecrease
+          ? deviceDataStore?.right.volume.volumeDecrease
+          : deviceQc.volumeDecrease,
+      },
+      body: {
+        body1: deviceDataStore?.right.body.body1
+          ? deviceDataStore?.right.body.body1
+          : fields.body1,
+        body2: deviceDataStore?.right.body.body2
+          ? deviceDataStore?.right.body.body2
+          : fields.body2,
+      },
+      charging: deviceDataStore?.right.charging
+        ? deviceDataStore?.right.charging
+        : fields.charging,
+      audio: deviceDataStore?.right.audio
+        ? deviceDataStore?.right.audio
+        : device?.is_Audio_play,
+      mac: deviceDataStore?.right.mac
+        ? deviceDataStore?.right.mac
+        : device?.mac,
+      result: deviceDataStore?.right.result,
+      mic: deviceDataStore?.right.mic
+        ? deviceDataStore?.right.mic
+        : device?.isMic,
+    },
+    box_Contains: deviceDataStore.box_Contains ?? [],
+    deviceColor: deviceDataStore.deviceColor ?? "69521eea409668adad3cf8e2",
+    boxId: deviceDataStore.boxId ?? "0000000000",
+    device: device?.device_type,
+  };
+console.log("first  data ",data)
+  const onSubmit = async (e) => {
+    e?.preventDefault();
+    dispatch(
+      callApiAction(
+        async () => await createDeviceQcApi(data),
+        async (response) => {
+          dispatch(
+            callSnackBar("Device QC Rejected", SNACK_BAR_VARIETNS.warning),
+          );
+          dispatch(resetDeviceDataStore(true));
+          dispatch(closeModal("deviceAudioMicCheck"));
+          dispatch(closeModal("rejectDeviceQc"));
+          BLE_STORE.BTEdisconnect = true;
+        },
+        (err) => {
+          console.log("first", err);
+        },
+      ),
+    );
+  };
+
+  const onRejectClick = (e) => {
+    e?.preventDefault();
+    dispatch(
+      openModal(
+        <MessageDilog
+          title="Reject QC"
+          message="Are you sure you want to reject this device QC?"
+          onSubmit={(e) => onSubmit(e)}
+          confirmText="Reject"
+          modalId="rejectDeviceQc"
+        />,
+        "sm",
+        false,
+        "rejectDeviceQc",
+      ),
+    );
+  };
+
   return (
     <CustomDialog
       id={step === 0 ? "deviceAudioMicCheck" : undefined}
@@ -411,8 +532,20 @@ const DeviceAudioMicCheckUi = () => {
           audioRef.current.currentTime = 0;
         }
         dispatch(closeModal("deviceAudioMicCheck"));
-        dispatch(resetDeviceDataStore());
+        dispatch(resetDeviceDataStore(true));
+        BLE_STORE.BTEdisconnect = true;
       }}
+      onReject={(e) => {
+        // if (step !== 3) {
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+        }
+        onRejectClick(e);
+        // }
+      }}
+      isReject={true}
+      closeText={step === 4 ? "Close" : "Reject Qc"}
       confirmText={step === 3 ? `Complete ${sideLabel} Side QC` : "Next"}
     >
       <Box
@@ -449,110 +582,167 @@ const DeviceAudioMicCheckUi = () => {
 
         {/* STEP 0 - AUDIO */}
         {step === 0 &&
-          (device?.device_type === DEVICES.ITE_PRIME ? (
-            <AudioCheckSafeBudsUi
-              isPlaying={isPlaying}
-              setIsPlaying={setIsPlaying}
-              audioRef={audioRef}
-            />
-            // <></>
-          ) : (
-            <StepCard
-              isChecked={true}
-              checked={Boolean(device?.is_Audio_play)}
-              title="Audio Check"
-              subtitle="Test device audio output"
-              action={
-                <Button
-                  variant="contained"
-                  onClick={() => {
-                    if (
-                      device?.device_type === DEVICES.BTE_OPTIMA ||
-                      device?.device_type === DEVICES.BTE_PRIME
-                    ) {
-                      isPlaying
-                        ? (setIsPlaying(false),
-                          sendPauseCommand(dispatch, device?.device_type))
-                        : (setIsPlaying(true),
-                          sendPlayCommand(dispatch, device?.device_type));
-                    } else {
-                      handlePlayPause();
+          (!(
+            device?.device_type === DEVICES.BTE_OPTIMA ||
+            device?.device_type === DEVICES.BTE_PRIME
+          ) ? (
+            <>
+              <Box width="100%" ml={6}>
+                <Typography variant="h3" fontWeight={700} mb={2}>
+                  Mic Check
+                </Typography>
+              </Box>
+              <StepCard
+                subtitle="Test device Mic output"
+                checkBox={
+                  <Checkbox
+                    checked={device.isMic}
+                    onChange={(e) =>
+                      dispatch(AllDeviceAudioCheck(e.target.checked))
                     }
-                  }}
-                  startIcon={isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
-                  sx={{
-                    bgcolor: "#0d5966",
-                    borderRadius: "25%",
-                    height: "6vh",
-                  }}
-                />
-              }
-            />
+                  />
+                }
+                title="Device Mic check"
+                sx={{
+                  bgcolor: "#041416",
+                  borderRadius: "25%",
+                  height: "6vh",
+                }}
+              />
+            </>
+          ) : (
+            <>
+              <Box width="100%" ml={6}>
+                <Typography variant="h3" fontWeight={700} mb={2}>
+                  Audio And Mic Check
+                </Typography>
+              </Box>
+              <StepCard
+                isChecked={true}
+                checked={Boolean(device?.is_Audio_play)}
+                title="Audio Check"
+                subtitle="Test device audio output"
+                action={
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      if (
+                        device?.device_type === DEVICES.BTE_OPTIMA ||
+                        device?.device_type === DEVICES.BTE_PRIME
+                      ) {
+                        isPlaying
+                          ? (setIsPlaying(false),
+                            sendPauseCommand(dispatch, device?.device_type))
+                          : (setIsPlaying(true),
+                            sendPlayCommand(dispatch, device?.device_type));
+                      } else {
+                        handlePlayPause();
+                      }
+                    }}
+                    startIcon={isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
+                    sx={{
+                      bgcolor: "#0d5966",
+                      borderRadius: "25%",
+                      height: "6vh",
+                    }}
+                  />
+                }
+              />
+              <StepCard
+                checkBox={
+                  <Checkbox
+                    checked={device.isMic}
+                    onChange={(e) =>
+                      dispatch(AllDeviceAudioCheck(e.target.checked))
+                    }
+                  />
+                }
+                title="Device Mic check"
+              />
+            </>
           ))}
 
         {step === 1 && (
-          <Box>
-            {(device?.device_type === DEVICES.BTE_OPTIMA ||
-              device?.device_type === DEVICES.BTE_PRIME ||
-              device?.device_type === DEVICES.RIC_OPTIMA_8) && (
+          <>
+            <Box width="100%" ml={6}>
+              <Typography variant="h3" fontWeight={700} mb={2}>
+                Volume Check
+              </Typography>
+            </Box>
+            <Box>
+              {(device?.device_type === DEVICES.BTE_OPTIMA ||
+                device?.device_type === DEVICES.BTE_PRIME ||
+                device?.device_type === DEVICES.RIC_OPTIMA_8) && (
+                <StepCard
+                  isChecked={true}
+                  checked={deviceQc.volumeIncrease}
+                  title={
+                    deviceQc.volumeIncrease
+                      ? "Volume Level Increased"
+                      : "Increase Volume"
+                  }
+                />
+              )}
               <StepCard
                 isChecked={true}
-                checked={deviceQc.volumeIncrease}
+                checked={deviceQc.volumeDecrease}
                 title={
-                  deviceQc.volumeIncrease
-                    ? "Volume Level Increased"
-                    : "Increase Volume"
+                  device?.device_type === DEVICES.BTE_OPTIMA ||
+                  device?.device_type === DEVICES.BTE_PRIME ||
+                  device?.device_type === DEVICES.RIC_OPTIMA_8
+                    ? deviceQc.volumeDecrease
+                      ? "Volume Level Decreased"
+                      : "Decrease Volume"
+                    : deviceQc.volumeDecrease
+                      ? "Volume Level Set"
+                      : "Set Volume Level"
                 }
               />
-            )}
-            <StepCard
-              isChecked={true}
-              checked={deviceQc.volumeDecrease}
-              title={
-                device?.device_type === DEVICES.BTE_OPTIMA ||
-                device?.device_type === DEVICES.BTE_PRIME ||
-                device?.device_type === DEVICES.RIC_OPTIMA_8
-                  ? deviceQc.volumeDecrease
-                    ? "Volume Level Decreased"
-                    : "Decrease Volume"
-                  : deviceQc.volumeDecrease
-                    ? "Volume Level Set"
-                    : "Set Volume Level"
-              }
-            />
-          </Box>
+            </Box>
+          </>
         )}
 
         {step === 2 && (
-          <Box>
-            <StepCard
-              isChecked={true}
-              checked={modecheck(0)}
-              title={
-                modecheck(0) ? "First Mode Has Been tested." : "Test First Mode"
-              }
-            />
-            <StepCard
-              isChecked={true}
-              checked={modecheck(1)}
-              title={modecheck(1) ? "Second Mode Tested" : "Test Second Mode"}
-            />
-            <StepCard
-              isChecked={true}
-              checked={modecheck(2)}
-              title={modecheck(2) ? "Third Mode Tested" : "Test Third Mode"}
-            />
-            {(device?.device_type === DEVICES.BTE_OPTIMA ||
-              device?.device_type === DEVICES.BTE_PRIME ||
-              device?.device_type === DEVICES.ITE_PRIME ||
-              device?.device_type === DEVICES.RIC_OPTIMA_8) && (
+          <>
+            <Box width="100%" ml={6}>
+              <Typography variant="h3" fontWeight={700} mb={2}>
+                Mode Check
+              </Typography>
+            </Box>
+            <Box>
               <StepCard
                 isChecked={true}
-                checked={modecheck(3)}
-                title={modecheck(3) ? "Fourth Mode Tested" : "Test Fourth Mode"}
+                checked={modecheck(0)}
+                title={
+                  modecheck(0)
+                    ? "First Mode Has Been tested."
+                    : "Test First Mode"
+                }
               />
-            )}
-          </Box>
+              <StepCard
+                isChecked={true}
+                checked={modecheck(1)}
+                title={modecheck(1) ? "Second Mode Tested" : "Test Second Mode"}
+              />
+              <StepCard
+                isChecked={true}
+                checked={modecheck(2)}
+                title={modecheck(2) ? "Third Mode Tested" : "Test Third Mode"}
+              />
+              {(device?.device_type === DEVICES.BTE_OPTIMA ||
+                device?.device_type === DEVICES.BTE_PRIME ||
+                device?.device_type === DEVICES.ITE_PRIME ||
+                device?.device_type === DEVICES.RIC_OPTIMA_8) && (
+                <StepCard
+                  isChecked={true}
+                  checked={modecheck(3)}
+                  title={
+                    modecheck(3) ? "Fourth Mode Tested" : "Test Fourth Mode"
+                  }
+                />
+              )}
+            </Box>
+          </>
         )}
 
         {/* STEP 3 - BODY + CHARGING */}

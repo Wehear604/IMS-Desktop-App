@@ -14,6 +14,7 @@ const initialState = {
 };
 
 const deviceQcReducer = (state = initialState, action) => {
+  console.log("first", state.currentVolume, action.volume);
   switch (action.type) {
     case actions.SET_DEVICE_SIDE:
       return {
@@ -44,11 +45,23 @@ const deviceQcReducer = (state = initialState, action) => {
         ...state,
         modeLeft:
           state.device_side === LISTENING_SIDE.LEFT
-            ? [...new Set([...state.modeLeft, action.mode])]
+            ? [
+                ...new Set(
+                  [...state.modeLeft, action.mode].filter(
+                    (v) => v !== undefined,
+                  ),
+                ),
+              ]
             : state.modeLeft,
         modeRight:
           state.device_side === LISTENING_SIDE.RIGHT
-            ? [...new Set([...state.modeRight, action.mode])]
+            ? [
+                ...new Set(
+                  [...state.modeRight, action.mode].filter(
+                    (v) => v !== undefined,
+                  ),
+                ),
+              ]
             : state.modeRight,
       };
     case actions.SET_BTE_CURRENT_VOLUME:
@@ -154,24 +167,22 @@ const deviceQcReducer = (state = initialState, action) => {
         ...state,
         currentVolume: action.volume,
         start: true,
-        device_side: action.device_side,
+        // device_side: action.device_side,
       };
 
     case actions.SET_ITE_PRIME_VOLUME:
       return {
         ...state,
-        volumeLeft:
-          action.device_side === LISTENING_SIDE.LEFT
-            ? action.volume
-            : state.volumeLeft,
-        volumeRight:
-          action.device_side === LISTENING_SIDE.RIGHT
-            ? action.volume
-            : state.volumeRight,
         volumeIncrease:
-          state.currentVolume < action.volume ? true : state.volumeIncrease,
+          state.currentVolume < action.volume ||
+          state.currentVolume > action.volume
+            ? true
+            : state.volumeIncrease,
         volumeDecrease:
-          state.currentVolume > action.volume ? true : state.volumeDecrease,
+          state.currentVolume < action.volume ||
+          state.currentVolume > action.volume
+            ? true
+            : state.volumeDecrease,
         currentVolume: action.volume,
       };
 
@@ -179,12 +190,24 @@ const deviceQcReducer = (state = initialState, action) => {
       return {
         ...state,
         modeLeft:
-          state.device_side === LISTENING_SIDE.LEFT
-            ? [...new Set([...state.modeLeft, action.mode])]
+          action.device_side === LISTENING_SIDE.LEFT
+            ? [
+                ...new Set(
+                  [...state.modeLeft, action.mode].filter(
+                    (v) => v !== undefined,
+                  ),
+                ),
+              ]
             : state.modeLeft,
         modeRight:
-          state.device_side === LISTENING_SIDE.RIGHT
-            ? [...new Set([...state.modeRight, action.mode])]
+          action.device_side === LISTENING_SIDE.RIGHT
+            ? [
+                ...new Set(
+                  [...state.modeRight, action.mode].filter(
+                    (v) => v !== undefined,
+                  ),
+                ),
+              ]
             : state.modeRight,
       };
 
@@ -206,6 +229,7 @@ const deviceQcReducer = (state = initialState, action) => {
         ...state,
         currentVolume: action.currentVolume,
       };
+
     case actions.FETCH_VOLUME_SAFE_BUDS:
       return {
         ...state,

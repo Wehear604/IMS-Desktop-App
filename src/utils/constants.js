@@ -174,6 +174,7 @@ export const MANUFACTURER_IDENTIFIER = {
   8: "0x0088",
   9: "0x3231",
   11: "0x6C42",
+  12: " 0x07E3",
   15: "0x0F4B",
   50: "0xB822",
   51: "0xFF12", // safeBuds

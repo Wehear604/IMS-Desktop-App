@@ -53,25 +53,18 @@ import {
 } from "../../store/actions/deviceDataAction";
 import RicConnectDevice from "../../components/bluetooth/RicConnectDeviceModule";
 
-import {
-  BLE_STORE,
-  interpolateValue,
-  readCharacteristic,
-} from "../../utils/bleStore";
-import ReadRicDataFromDevice from "./ric/ReadRicDataToDevice";
-import ReadITEDataFromDevice from "./ite/ReadITEDataFromDevice";
-import ReadITEPrimeDataFromDevice from "./ite/ReadITEPrimeDataFromDevice";
 import BleConnectDeviceModule from "../../components/bluetooth/BleConnectDeviceModule";
 import DeviceAudioMicCheckUi from "./DeviceAudioMicCheckUi";
 import { closeModal, openModal } from "../../store/actions/modalAction";
 import { findObjectKeyByValue } from "../../utils/main";
 import SafeBudsFotUpload from "./SafeBudsFotUpload";
 import SafeBudsConnectDeviceModule from "../../components/bluetooth/SafeBudsConnectDeviceModule";
-import SafeBudsUi from "./safebuds/SafeBudsUi";
+// import SafeBudsUi from "./safebuds/SafeBudsUi";
 import { SafeBudsVersionRead } from "../../store/actions/deviceQcAction";
 import SafebudsMainUi from "./SafebudsUi/SafebudsMainUi";
 import { SetStepAction } from "../../store/actions/stepAction";
-
+import ItePrimeDeviceTesting from "./ItePrimeDeviceTesting";
+// import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 const Header = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
   fontWeight: 600,
@@ -84,21 +77,28 @@ const Instruction = styled(Typography)(({ theme }) => ({
 }));
 
 const DeviceCard = styled(Card, {
-  shouldForwardProp: (p) => p !== "selected",
-})(({ selected, theme }) => ({
+  shouldForwardProp: (p) => p !== "selected" && p !== "completed",
+})(({ selected, completed, theme }) => ({
   width: 165,
   height: 200,
   borderRadius: 8,
-  border: selected
-    ? `2px solid ${theme.palette.primary.main}`
-    : `1px solid ${theme.palette.divider}`,
+
+  border: completed
+    ? `2px solid ${theme.palette.success.main}` // ✅ green border
+    : selected
+      ? `2px solid ${theme.palette.primary.main}`
+      : `1px solid ${theme.palette.divider}`,
+
   boxShadow: selected ? "0 6px 18px rgba(0,0,0,0.06)" : "none",
+
   transition: "transform 160ms ease, box-shadow 160ms ease",
+
   background: selected
     ? theme.palette.mode === "light"
       ? "#eef8fb"
       : undefined
     : theme.palette.background.paper,
+
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -121,7 +121,11 @@ const ConnectButton = ({
   let b = false;
 
   const AudioAndMicCheck = () => {
-    if (device.device_type == DEVICES.SAFE_BUDS) {
+    if (device.device_type == DEVICES.ITE_PRIME) {
+      dispatch(
+        openModal(<ItePrimeDeviceTesting />, "lg", true, "deviceAudioMicCheck"),
+      );
+    } else if (device.device_type == DEVICES.SAFE_BUDS) {
       if (device.device_type == DEVICES.SAFE_BUDS && !device?.fotfile1) {
         // dispatch(SafeBudsVersionRead({ type: "SafeBudsVersionRead" }));
         dispatch(SetStepAction(0));
@@ -243,8 +247,8 @@ const ConnectButton = ({
 };
 
 const DeviceConnectUi = () => {
-  const [selected, setSelected] = useState("");
-  const { device, step } = useSelector((state) => state);
+  const [selected, setSelected] = useState("L");
+  const { device, step, deviceDataStore } = useSelector((state) => state);
   const dispatch = useDispatch();
   console.log(
     "device?.device_type === DEVICES.SAFE_BUDS && !device?.fotfile",
@@ -377,6 +381,11 @@ const DeviceConnectUi = () => {
     DEVICES.ITE_PRIME,
   ].includes(device.device_type);
 
+  useEffect(() => {
+    if (!isSingleCardType) {
+      dispatch(DeviceSideAction(LISTENING_SIDE.LEFT));
+    }
+  }, [!isSingleCardType]);
   return (
     <>
       <Header sx={{ m: 4 }} variant="h4">
@@ -384,23 +393,25 @@ const DeviceConnectUi = () => {
       </Header>
       <Divider orientation="horizontal" />
 
-    { device?.device_type === DEVICES.SAFE_BUDS && <Stepper sx={{ p: 2 }} activeStep={step.step} alternativeLabel>
-        <Step>
-          <StepLabel>Device Version</StepLabel>
-        </Step>
-        <Step>
-          <StepLabel>Upload FOT</StepLabel>
-        </Step>
-        <Step>
-          <StepLabel>Touch Check</StepLabel>
-        </Step>
-        <Step>
-          <StepLabel>Audio and Mic Test</StepLabel>
-        </Step>
-        <Step>
-          <StepLabel>Packaging Details</StepLabel>
-        </Step>
-      </Stepper>}
+      {device?.device_type === DEVICES.SAFE_BUDS && (
+        <Stepper sx={{ p: 2 }} activeStep={step.step} alternativeLabel>
+          <Step>
+            <StepLabel>Device Version</StepLabel>
+          </Step>
+          <Step>
+            <StepLabel>Upload FOT</StepLabel>
+          </Step>
+          <Step>
+            <StepLabel>Touch Check</StepLabel>
+          </Step>
+          <Step>
+            <StepLabel>Audio and Mic Test</StepLabel>
+          </Step>
+          <Step>
+            <StepLabel>Packaging Details</StepLabel>
+          </Step>
+        </Stepper>
+      )}
       <Box
         sx={{
           minHeight: "70vh",
@@ -416,68 +427,101 @@ const DeviceConnectUi = () => {
 
         {!isSingleCardType ? (
           <Grid container spacing={3} justifyContent="center">
-            {devices.map((item) => (
-              <Grid
-                item
-                key={item.side}
-                onClick={() => {
-                  setSelected(item.side);
-                  dispatch(DeviceSideAction(item.value));
-                }}
-              >
-                <DeviceCard
-                  selected={selected === item.side}
-                  sx={{ width: "14vw", height: "35vh" }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      height: "100%",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "space-evenly",
-                    }}
-                  >
-                    <Box sx={{ height: "10vh" }}>
-                      {item.side === "L"
-                        ? getLeftDeviceImage(device.device_type)
-                        : getRightDeviceImage(device.device_type)}
-                    </Box>
+            {devices.map((item) => {
+              const isCompleted =
+                item.side === "L"
+                  ? deviceDataStore.left.result
+                  : deviceDataStore.right.result;
 
-                    <Box
-                      gap={2}
-                      sx={{
-                        width: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <Avatar
+              return (
+                <Grid
+                  item
+                  key={item.side}
+                  onClick={() => {
+                    setSelected(item.side);
+                    dispatch(DeviceSideAction(item.value));
+                  }}
+                >
+                  <DeviceCard
+                    completed={isCompleted}
+                    selected={selected === item.side}
+                    sx={{ width: "14vw", height: "35vh", position: "relative" }}
+                  >
+                    {isCompleted && (
+                      <Box
                         sx={{
-                          width: 22,
-                          height: 22,
-                          bgcolor:
-                            selected === item.side
-                              ? "primary.main"
-                              : "grey.200",
+                          position: "absolute",
+                          bottom: 0,
+                          left: 0,
+                          width: "100%",
+                          bgcolor: "success.main",
+                          color: "#fff",
+                          textAlign: "center",
+                          fontSize: 12,
+                          py: 0.5,
+                          fontWeight: "bold",
                         }}
                       >
-                        {item.side === "L" ? (
-                          <img src={leftSideLogo} />
-                        ) : (
-                          <img src={rightSideLogo} />
-                        )}
-                      </Avatar>
-                      <Divider orientation="vertical" flexItem />
-                      <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                        {findObjectKeyByValue(device.device_type, DEVICES)}
-                      </Typography>
+                        QC Test Completed
+                      </Box>
+                    )}
+
+                    <Box
+                      sx={{
+                        display: "flex",
+                        height: "100%",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "space-evenly",
+                      }}
+                    >
+                      {/* Device Image */}
+                      <Box sx={{ height: "10vh" }}>
+                        {item.side === "L"
+                          ? getLeftDeviceImage(device.device_type)
+                          : getRightDeviceImage(device.device_type)}
+                      </Box>
+
+                      {/* Bottom Section */}
+                      <Box
+                        gap={2}
+                        sx={{
+                          width: "100%",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Avatar
+                          sx={{
+                            width: 22,
+                            height: 22,
+                            bgcolor:
+                              selected === item.side
+                                ? "primary.main"
+                                : "grey.200",
+                          }}
+                        >
+                          <img
+                            src={
+                              item.side === "L" ? leftSideLogo : rightSideLogo
+                            }
+                            alt="side"
+                            style={{ width: "100%", height: "100%" }}
+                          />
+                        </Avatar>
+
+                        <Divider orientation="vertical" flexItem />
+
+                        <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                          {findObjectKeyByValue(device.device_type, DEVICES)}
+                        </Typography>
+                      </Box>
                     </Box>
-                  </Box>
-                </DeviceCard>
-              </Grid>
-            ))}
+                  </DeviceCard>
+                </Grid>
+              );
+            })}
           </Grid>
         ) : (
           <Grid

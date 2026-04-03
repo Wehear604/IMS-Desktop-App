@@ -354,7 +354,7 @@ const SafeBudsUi = () => {
           dispatch(
             callSnackBar("Device QC Rejectes", SNACK_BAR_VARIETNS.warning),
           );
-          dispatch(resetDeviceDataStore());
+          dispatch(resetDeviceDataStore(true));
           dispatch(closeModal("deviceAudioMicCheck"));
         },
         (err) => {
@@ -380,7 +380,7 @@ const SafeBudsUi = () => {
           audioRef.current.currentTime = 0;
         }
         dispatch(closeModal("deviceAudioMicCheck"));
-        dispatch(resetDeviceDataStore());
+        dispatch(resetDeviceDataStore(true));
         dispatch(CloseDeviceDataStore());
       }}
       onReject={(e) => {
