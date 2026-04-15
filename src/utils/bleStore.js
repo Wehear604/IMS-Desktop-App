@@ -6,10 +6,14 @@ import audioUrl from "../assets/images/slow_instrumental.mp3"; // mp3 file
 
 export const BLE_STORE = {
   deviceObj: null,
+  LeftdeviceObj: null,
+  writeLeftFun: null,
   writeFun: null,
   readFun: null,
   disconnectFun: null,
+  LeftdisconnectFun: null,
   hardwareData: null,
+  hardwareLeftData: null,
   BTEdisconnect: false,
   server: null,
   device: null,

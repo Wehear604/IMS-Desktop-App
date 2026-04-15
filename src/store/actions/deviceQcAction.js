@@ -1,6 +1,7 @@
 import ReadITEDataFromDevice from "../../pages/wehearDeviceQc/ite/ReadITEDataFromDevice";
 import ReadITEPrimeDataFromDevice from "../../pages/wehearDeviceQc/ite/ReadITEPrimeDataFromDevice";
 import ReadRicDataFromDevice from "../../pages/wehearDeviceQc/ric/ReadRicDataToDevice";
+import WriteRicDataToDevice from "../../pages/wehearDeviceQc/ric/WriteRicDataToDevice";
 import Read from "../../pages/wehearDeviceQc/safebuds/Read";
 import ReadBLEName from "../../pages/wehearDeviceQc/safebuds/ReadBLEName";
 import ReadVersion from "../../pages/wehearDeviceQc/safebuds/ReadVersion";
@@ -101,7 +102,9 @@ export const RicDeviceCurrentVolume = (side) => {
       const response = await ReadRicDataFromDevice(
         command,
         side,
-        BLE_STORE.deviceObj,
+        side === LISTENING_SIDE.LEFT
+          ? BLE_STORE.LeftdeviceObj
+          : BLE_STORE.deviceObj,
       );
 
       if (response && response.startsWith("82 03")) {
@@ -169,8 +172,136 @@ export const readRicVolumeLevel = (side, deviceObj, onSuccess = () => {}) => {
   };
 };
 
+export const readEqualizer = (side, deviceObj, onSuccess = () => {}) => {
+  return async (dispatch, getState) => {
+    try {
+      const modeHex = (1).toString(16).padStart(2, "0").toUpperCase();
+      console.log("first modeHex", modeHex);
+      const command =
+        side === LISTENING_SIDE.RIGHT
+          ? `8A 02 02 ${modeHex}`
+          : `8A 02 01 ${modeHex}`;
+
+      const response = await ReadRicDataFromDevice(
+        command,
+        side,
+        side === LISTENING_SIDE.LEFT
+          ? BLE_STORE.LeftdeviceObj
+          : BLE_STORE.deviceObj,
+      );
+
+      if (
+        response &&
+        (response.startsWith("8a 0a") || response.startsWith("8a 12"))
+      ) {
+        const responseParts = response.split(" ");
+        console.log("responseParts", responseParts);
+
+        const responseSide =
+          responseParts[2] === "01"
+            ? LISTENING_SIDE.LEFT
+            : LISTENING_SIDE.RIGHT;
+        const responseMode = parseInt(responseParts[3], 16);
+
+        if (responseSide === side && responseMode === 1) {
+          const eqValues = responseParts
+            .slice(4, responseParts.length)
+            .map((value) => {
+              switch (value) {
+                case "01":
+                  return -1;
+
+                case "02":
+                  return -2;
+
+                case "03":
+                  return -3;
+
+                case "04":
+                  return -4;
+
+                case "05":
+                  return -5;
+
+                case "06":
+                  return -6;
+
+                case "07":
+                  return -7;
+
+                case "08":
+                  return -8;
+
+                case "09":
+                  return -9;
+
+                case "0a":
+                  return -10;
+
+                case "0b":
+                  return -11;
+
+                case "0c":
+                  return -12;
+
+                case "0d":
+                  return -13;
+
+                case "0e":
+                  return -14;
+
+                case "0f":
+                  return -15;
+
+                case "10":
+                  return -16;
+
+                case "11":
+                  return -17;
+
+                case "12":
+                  return -18;
+
+                case "13":
+                  return -19;
+
+                case "14":
+                  return -20;
+
+                case "15":
+                  return -21;
+
+                default:
+                  return 0;
+              }
+            });
+          console.log("eqValues eqValues", eqValues);
+          dispatch({
+            type: actions.SET_EQUALIZER,
+            side,
+            eqValues,
+          });
+          dispatch(
+            changeRicMode(0, LISTENING_SIDE.LEFT, BLE_STORE.LeftdeviceObj),
+          );
+          return true;
+        }
+      } else {
+        dispatch(readEqualizer(side, deviceObj, onSuccess));
+        console.log(
+          `Invalid response from ${side} device for the EQ:`,
+          response,
+        );
+      }
+      return true;
+    } catch (error) {
+      dispatch(readEqualizer(side, deviceObj, onSuccess));
+      console.error(`Error reading EQ values from ${side} device:`, error);
+    }
+  };
+};
 // ---------- RIC MODE ----------
-export const readRicMode = (side, deviceObj) => {
+export const readRicMode = (side, deviceObj, onSuccess = () => {}) => {
   return async (dispatch) => {
     try {
       const command =
@@ -182,7 +313,7 @@ export const readRicMode = (side, deviceObj) => {
         console.warn(`Invalid mode response: ${response}`);
         return;
       }
-
+      console.log("first mode response", response);
       const data = response.split(" ");
       const d1 = parseInt(data[4], 16);
 
@@ -194,8 +325,9 @@ export const readRicMode = (side, deviceObj) => {
       else if (d1 === 3)
         mode = 2; // Outdoor
       else {
-        console.error(`Unexpected mode value: ${d1}`);
-        return;
+        // dispatch(readRicMode(side, deviceObj));
+        // console.error(`Unexpected mode value: ${d1}`);
+        return (mode = 0);
       }
       console.log("object modeeeeeeeeeeeeee", mode);
       dispatch({
@@ -204,6 +336,57 @@ export const readRicMode = (side, deviceObj) => {
       });
     } catch (error) {
       console.error("Error reading mode:", error);
+    }
+  };
+};
+export const changeRightRicMode = (mode = 0, deviceSide, deviceObj) => {
+  return async (dispatch, getState) => {
+    try {
+      let command = "";
+
+      console.log("changeRicMode called", mode, deviceSide);
+
+      if (deviceSide === LISTENING_SIDE.RIGHT) {
+        if (mode === 0) command = "85 03 02 00 01";
+        else if (mode === 1) command = "85 03 02 00 02";
+        else if (mode === 2) command = "85 03 02 00 03";
+      } else if (deviceSide === LISTENING_SIDE.LEFT) {
+        if (mode === 0) command = "85 03 01 00 01";
+        else if (mode === 1) command = "85 03 01 00 02";
+        else if (mode === 2) command = "85 03 01 00 03";
+      }
+
+        await WriteRicDataToDevice(command, deviceSide, deviceObj);
+
+      return true;
+    } catch (error) {
+      console.error("Error changing RIC mode:", error);
+    }
+  };
+};
+
+export const changeRicMode = (mode = 0, deviceSide, deviceObj) => {
+  return async (dispatch, getState) => {
+    try {
+      let command = "";
+
+      console.log("changeRicMode called", mode, deviceSide);
+
+      if (deviceSide === LISTENING_SIDE.LEFT) {
+        if (mode === 0) command = "85 03 01 00 01";
+        else if (mode === 1) command = "85 03 01 00 02";
+        else if (mode === 2) command = "85 03 01 00 03";
+      }
+      if (deviceSide === LISTENING_SIDE.LEFT) {
+        await WriteRicDataToDevice(command, deviceSide, deviceObj);
+      }
+      await dispatch(
+        changeRightRicMode(0, LISTENING_SIDE.RIGHT, BLE_STORE.deviceObj),
+      );
+
+      return true;
+    } catch (error) {
+      console.error("Error changing RIC mode:", error);
     }
   };
 };

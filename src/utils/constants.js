@@ -155,6 +155,7 @@ export const actions = {
   SET_QC_TEST_CLOSE_RESULT: "SET_QC_TEST_CLOSE_RESULT",
 
   SET_STEP: "SET_STEP",
+  SET_EQUALIZER: "SET_EQUALIZER",
 };
 
 export const SERVICE_UUID = {

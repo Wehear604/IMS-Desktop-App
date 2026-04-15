@@ -64,6 +64,7 @@ import { SafeBudsVersionRead } from "../../store/actions/deviceQcAction";
 import SafebudsMainUi from "./SafebudsUi/SafebudsMainUi";
 import { SetStepAction } from "../../store/actions/stepAction";
 import ItePrimeDeviceTesting from "./ItePrimeDeviceTesting";
+import Ric16DeviceTesting from "./Ric16DeviceTesting";
 // import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 const Header = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
@@ -116,12 +117,15 @@ const ConnectButton = ({
 }) => {
   const { device } = useSelector((state) => state);
   const isConnected = device.connected;
+  const isleftConnected = device.left_connected;
   const dispatch = useDispatch();
-  //Need to check
-  let b = false;
 
   const AudioAndMicCheck = () => {
-    if (device.device_type == DEVICES.ITE_PRIME) {
+    if (device.device_type == DEVICES.RIC_OPTIMA) {
+      dispatch(
+        openModal(<Ric16DeviceTesting />, "lg", true, "deviceAudioMicCheck"),
+      );
+    } else if (device.device_type == DEVICES.ITE_PRIME) {
       dispatch(
         openModal(<ItePrimeDeviceTesting />, "lg", true, "deviceAudioMicCheck"),
       );
@@ -155,12 +159,14 @@ const ConnectButton = ({
       );
     }
   };
-
+  console.log("isleftConnected && isConnected", isleftConnected, isConnected);
   useEffect(() => {
-    if (isConnected) {
+    if (isleftConnected && isConnected) {
+      AudioAndMicCheck();
+    } else if (isConnected && device.device_type !== DEVICES.RIC_OPTIMA) {
       AudioAndMicCheck();
     }
-  }, [isConnected]);
+  }, [isConnected, isleftConnected]);
 
   useEffect(() => {
     if (!isConnected) {
@@ -171,78 +177,160 @@ const ConnectButton = ({
     deviceSide === LISTENING_SIDE.LEFT ||
     deviceSide === LISTENING_SIDE.RIGHT ||
     deviceSide === true;
-
-  if (!isConnected) {
-    return (
-      <Button
-        onClick={onClick}
-        disabled={fetchingData || device?.isConnecting || !isSideSelected}
-        sx={{
-          height: "60px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 1,
-          border: "2px solid",
-          borderColor: "#DDDDDD",
-          borderRadius: "8px",
-          width: "25vw",
-          // marginLeft: deviceSide == LISTENING_SIDE.LEFT ? "20%" : "",
-          marginTop: "5px",
-        }}
-      >
-        {!loading ? (
+  
+  if (
+    deviceSide === LISTENING_SIDE.LEFT &&
+    device.device_type === DEVICES.RIC_OPTIMA
+  ) {
+    if (!isleftConnected) {
+      return (
+        <Button
+          onClick={onClick}
+          disabled={fetchingData || device?.isConnecting || !isSideSelected}
+          sx={{
+            height: "60px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1,
+            border: "2px solid",
+            borderColor: "#DDDDDD",
+            borderRadius: "8px",
+            width: "25vw",
+            // marginLeft: deviceSide == LISTENING_SIDE.LEFT ? "20%" : "",
+            marginTop: "5px",
+          }}
+        >
+          {!loading ? (
+            <>
+              {isSideSelected && (
+                <img src={connectIcon1} alt="ConnectIcon(1)" />
+              )}
+              <Typography
+                variant="h5"
+                sx={{ fontFamily: "League spartan", padding: "5px" }}
+              >
+                CONNECT
+              </Typography>
+            </>
+          ) : (
+            <CircularProgress size={25} />
+          )}
+        </Button>
+      );
+    } else {
+      return (
+        <Button
+          onClick={() => {
+            disconnect();
+          }}
+          sx={{
+            height: "60px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            border: "2px solid",
+            borderColor:
+              deviceSide == LISTENING_SIDE.LEFT ? "#C24747" : "#2D3B67",
+            borderRadius: "8px",
+            width: "25vw",
+            // marginLeft: deviceSide == LISTENING_SIDE.LEFT ? "20%" : "",
+            backgroundColor:
+              deviceSide == LISTENING_SIDE.LEFT ? "#FCF7F7" : "#EDF0F7",
+            marginTop: "5px",
+          }}
+        >
           <>
-            {isSideSelected && <img src={connectIcon1} alt="ConnectIcon(1)" />}
+            <img src={connectIcon4} alt="ConnectIcon(3)" />
             <Typography
               variant="h5"
-              sx={{ fontFamily: "League spartan", padding: "5px" }}
+              sx={{
+                fontFamily: "League spartan",
+                padding: "5px",
+                color: "#2D3B67",
+              }}
             >
-              CONNECT
+              CONNECTED
             </Typography>
           </>
-        ) : (
-          <CircularProgress size={25} />
-        )}
-      </Button>
-    );
+        </Button>
+      );
+    }
   } else {
-    return (
-      <Button
-        onClick={() => {
-          disconnect();
-        }}
-        sx={{
-          height: "60px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          border: "2px solid",
-          borderColor:
-            deviceSide == LISTENING_SIDE.LEFT ? "#C24747" : "#2D3B67",
-          borderRadius: "8px",
-          width: "25vw",
-          // marginLeft: deviceSide == LISTENING_SIDE.LEFT ? "20%" : "",
-          backgroundColor:
-            deviceSide == LISTENING_SIDE.LEFT ? "#FCF7F7" : "#EDF0F7",
-          marginTop: "5px",
-        }}
-      >
-        <>
-          <img src={connectIcon4} alt="ConnectIcon(3)" />
-          <Typography
-            variant="h5"
-            sx={{
-              fontFamily: "League spartan",
-              padding: "5px",
-              color: "#2D3B67",
-            }}
-          >
-            CONNECTED
-          </Typography>
-        </>
-      </Button>
-    );
+    if (!isConnected) {
+      return (
+        <Button
+          onClick={onClick}
+          disabled={fetchingData || device?.isConnecting || !isSideSelected}
+          sx={{
+            height: "60px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1,
+            border: "2px solid",
+            borderColor: "#DDDDDD",
+            borderRadius: "8px",
+            width: "25vw",
+            // marginLeft: deviceSide == LISTENING_SIDE.LEFT ? "20%" : "",
+            marginTop: "5px",
+          }}
+        >
+          {!loading ? (
+            <>
+              {isSideSelected && (
+                <img src={connectIcon1} alt="ConnectIcon(1)" />
+              )}
+              <Typography
+                variant="h5"
+                sx={{ fontFamily: "League spartan", padding: "5px" }}
+              >
+                CONNECT
+              </Typography>
+            </>
+          ) : (
+            <CircularProgress size={25} />
+          )}
+        </Button>
+      );
+    } else {
+      return (
+        <Button
+          onClick={() => {
+            disconnect();
+          }}
+          sx={{
+            height: "60px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            border: "2px solid",
+            borderColor:
+              deviceSide == LISTENING_SIDE.LEFT ? "#C24747" : "#2D3B67",
+            borderRadius: "8px",
+            width: "25vw",
+            // marginLeft: deviceSide == LISTENING_SIDE.LEFT ? "20%" : "",
+            backgroundColor:
+              deviceSide == LISTENING_SIDE.LEFT ? "#FCF7F7" : "#EDF0F7",
+            marginTop: "5px",
+          }}
+        >
+          <>
+            <img src={connectIcon4} alt="ConnectIcon(3)" />
+            <Typography
+              variant="h5"
+              sx={{
+                fontFamily: "League spartan",
+                padding: "5px",
+                color: "#2D3B67",
+              }}
+            >
+              CONNECTED
+            </Typography>
+          </>
+        </Button>
+      );
+    }
   }
 };
 
@@ -386,6 +474,14 @@ const DeviceConnectUi = () => {
       dispatch(DeviceSideAction(LISTENING_SIDE.LEFT));
     }
   }, [!isSingleCardType]);
+
+  useEffect(() => {
+    if (device?.device_side === LISTENING_SIDE.RIGHT) {
+      setSelected("R");
+    } else if (device?.device_side === LISTENING_SIDE.LEFT) {
+      setSelected("L");
+    }
+  }, [device?.device_side]);
   return (
     <>
       <Header sx={{ m: 4 }} variant="h4">
@@ -624,6 +720,65 @@ const DeviceConnectUi = () => {
               connected: device.isConnecting,
             }}
           />
+        ) : device?.device_type === DEVICES.RIC_OPTIMA ? (
+          <Box sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
+            <RicConnectDevice
+              side={
+                device?.device_side === LISTENING_SIDE.RIGHT ? "Right" : "Left"
+              }
+              isConnecting={device?.isConnecting}
+              onConnectWithDevice={(data, deviceInfo) => {
+                dispatch(
+                  connectDevice(
+                    deviceInfo,
+                    LISTENING_SIDE.LEFT,
+                    device?.device_type,
+                  ),
+                );
+              }}
+              Component={ConnectButton}
+              onLoadingChange={() => {}}
+              onWriteFunctionEnabled={(fun) =>
+                dispatch(onWriteFunctionChange(fun, LISTENING_SIDE.LEFT))
+              }
+              onDisconnect={() => {
+                dispatch(disconnectAction(LISTENING_SIDE.LEFT));
+              }}
+              fitting={{
+                device_type: device?.device_type,
+                device_side: LISTENING_SIDE.LEFT,
+                connected: device.isConnecting,
+              }}
+            />
+            <RicConnectDevice
+              side={
+                device?.device_side === LISTENING_SIDE.RIGHT ? "Right" : "Left"
+              }
+              isConnecting={device?.isConnecting}
+              onConnectWithDevice={(data, deviceInfo) => {
+                dispatch(
+                  connectDevice(
+                    deviceInfo,
+                    LISTENING_SIDE.RIGHT,
+                    device?.device_type,
+                  ),
+                );
+              }}
+              Component={ConnectButton}
+              onLoadingChange={() => {}}
+              onWriteFunctionEnabled={(fun) =>
+                dispatch(onWriteFunctionChange(fun, LISTENING_SIDE.RIGHT))
+              }
+              onDisconnect={() => {
+                dispatch(disconnectAction(LISTENING_SIDE.RIGHT));
+              }}
+              fitting={{
+                device_type: device?.device_type,
+                device_side: LISTENING_SIDE.RIGHT,
+                connected: device.isConnecting,
+              }}
+            />
+          </Box>
         ) : (
           <RicConnectDevice
             side={

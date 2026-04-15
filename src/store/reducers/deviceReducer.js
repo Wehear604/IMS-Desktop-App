@@ -1,4 +1,4 @@
-import { actions } from "../../utils/constants";
+import { actions, DEVICES, LISTENING_SIDE } from "../../utils/constants";
 import { cleanValue } from "../../utils/main";
 
 const initialState = {
@@ -8,9 +8,15 @@ const initialState = {
   macBeforeOta: null,
   is_Audio_play: false,
   isMic: false,
+  left_connected: false,
   connected: false,
   isConnecting: false,
+  left_read_only: false,
   read_only: false,
+  deviceLeftInfo: {
+    name: "",
+    id: "",
+  },
   deviceInfo: {
     name: "",
     id: "",
@@ -19,6 +25,7 @@ const initialState = {
   fotfile1: false,
   version: null,
   latestVersion: null,
+  leftmac:null,
 };
 
 const deviceReducer = (state = initialState, action) => {
@@ -34,18 +41,31 @@ const deviceReducer = (state = initialState, action) => {
       return { ...state, isConnecting: action.isConnecting };
 
     case actions.CONNECT_DEVICE:
-      return {
-        ...state,
-        connected: true,
-        read_only: false,
-        deviceInfo: action.deviceInfo,
-        deviceObj: action.deviceObj,
-      };
+      return state.device_type === DEVICES.RIC_OPTIMA &&
+        state.device_side === LISTENING_SIDE.LEFT
+        ? {
+            ...state,
+            left_connected: true,
+            left_read_only: false,
+            deviceLeftInfo: action.deviceInfo,
+            deviceLeftObj: action.deviceObj,
+          }
+        : {
+            ...state,
+            connected: true,
+            read_only: false,
+            deviceInfo: action.deviceInfo,
+            deviceObj: action.deviceObj,
+          };
 
     case actions.SET_DEVICE_MAC:
       return {
         ...state,
-        mac: action.mac,
+        mac: state.device_side === LISTENING_SIDE.RIGHT ? action.mac : state.mac,
+        leftmac:
+          state.device_side === LISTENING_SIDE.LEFT
+            ? action.mac
+            : state.leftmac,
         // version: action.version,
       };
     case actions.SET_DEVICE_VERSION:

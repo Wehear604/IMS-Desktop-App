@@ -326,7 +326,7 @@ const SafebudsMainUi = ({ isUpdate, id }) => {
         onClose={() => {
           BLE_STORE.BTEdisconnect = true;
           dispatch(closeModal("deviceAudioMicCheck"));
-          dispatch(resetDeviceDataStore(truncate));
+          dispatch(resetDeviceDataStore(true));
           dispatch(CloseDeviceDataStore());
         }}
         onReject={(e) => {

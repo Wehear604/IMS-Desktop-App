@@ -8,6 +8,7 @@ const initialState = {
     volume: {
       volumeIncrease: false,
       volumeDecrease: false,
+      currentVolume: 0,
     },
     body: {
       body1: false,
@@ -27,6 +28,7 @@ const initialState = {
     volume: {
       volumeIncrease: false,
       volumeDecrease: false,
+      currentVolume: 0,
     },
     body: {
       body1: false,
@@ -51,6 +53,7 @@ const initialState = {
   deviceColor: null,
   boxId: null,
   device: null,
+  isNewric16:false,
 };
 
 const deviceDataStorageReducer = (state = initialState, action) => {
@@ -112,13 +115,14 @@ const deviceDataStorageReducer = (state = initialState, action) => {
           },
         };
       }
-    case actions.RESET_DEVICE_DATA_STORE:{
+    case actions.RESET_DEVICE_DATA_STORE: {
       if (action.reset) {
         return {
           ...initialState,
         };
       }
-      return {...state}}
+      return { ...state };
+    }
     case actions.SET_DEVICE_COLOR_DETAILS:
       return {
         ...state,
@@ -134,6 +138,49 @@ const deviceDataStorageReducer = (state = initialState, action) => {
         ...state,
         box_Contains: action.box_Contains,
         device: action.device_type,
+      };
+    case actions.SET_VOLUME_LEVEL:
+      if (action.side === LISTENING_SIDE.LEFT) {
+        return {
+          ...state,
+          left: {
+            ...state.left,
+            volume: {
+              volumeIncrease:
+                state.left.volume.currentVolume > action.volume
+                  ? true
+                  : state.left.volume.volumeIncrease,
+              volumeDecrease:
+                state.left.volume.currentVolume < action.volume
+                  ? true
+                  : state.left.volume.volumeDecrease,
+              currentVolume: action.volume,
+            },
+          },
+        };
+      } else {
+        return {
+          ...state,
+          right: {
+            ...state.right,
+            volume: {
+              volumeIncrease:
+                state.right.volume.currentVolume > action.volume
+                  ? true
+                  : state.right.volume.volumeIncrease,
+              volumeDecrease:
+                state.right.volume.currentVolume < action.volume
+                  ? true
+                  : state.right.volume.volumeDecrease,
+              currentVolume: action.volume,
+            },
+          },
+        };
+      }
+    case actions.SET_EQUALIZER:
+      return {
+        ...state,
+        isNewric16: action?.eqValues?.length === 16 ? true : false,
       };
     default:
       return state;

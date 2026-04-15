@@ -589,11 +589,11 @@ console.log("first  data ",data)
             <>
               <Box width="100%" ml={6}>
                 <Typography variant="h3" fontWeight={700} mb={2}>
-                  Mic Check
+                  Audio Check
                 </Typography>
               </Box>
               <StepCard
-                subtitle="Test device Mic output"
+                subtitle="Test device Audio output"
                 checkBox={
                   <Checkbox
                     checked={device.isMic}
@@ -602,7 +602,7 @@ console.log("first  data ",data)
                     }
                   />
                 }
-                title="Device Mic check"
+                title="Device Audio check"
                 sx={{
                   bgcolor: "#041416",
                   borderRadius: "25%",

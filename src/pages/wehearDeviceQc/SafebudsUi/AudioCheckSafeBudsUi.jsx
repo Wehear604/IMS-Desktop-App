@@ -8,7 +8,12 @@ import { FetchVolumeSafebudsDevice } from "../../../store/actions/deviceQcAction
 import audioUrl from "../../../assets/images/slow_instrumental.mp3";
 import { DeviceIsAudioCheck } from "../../../store/actions/deviceDataAction";
 
-const AudioCheckSafeBudsUi = ({isPlaying, setIsPlaying, audioRef,NotuseEffect =true}) => {
+const AudioCheckSafeBudsUi = ({
+  isPlaying,
+  setIsPlaying,
+  audioRef,
+  NotuseEffect = true,
+}) => {
   const dispatch = useDispatch();
   const { device, deviceQc } = useSelector((state) => state);
   const handlePlayPause = () => {
@@ -37,7 +42,7 @@ const AudioCheckSafeBudsUi = ({isPlaying, setIsPlaying, audioRef,NotuseEffect =t
 
   useEffect(() => {
     if (!NotuseEffect) return;
-      if (deviceQc.volumeIncrease) return;
+    if (deviceQc.volumeIncrease) return;
     const interval = setInterval(async () => {
       dispatch(FetchVolumeSafebudsDevice());
     }, 1500);
