@@ -58,7 +58,8 @@ const Ric16DeviceTesting = (isUpdate) => {
   const hasRun = useRef(false);
   const steps = ["First Mode", "Second Mode", "Third Mode"];
   const deviceTitle = DEVICES_NAME[device?.device_type] ?? "Unknown device";
-  let headset = useBluetoothHeadsetStatus();
+  let headset = true
+
   const volumeIncreasecheck =
     device?.device_side === LISTENING_SIDE.LEFT
       ? deviceDataStore.left.volume.volumeIncrease
@@ -286,7 +287,7 @@ const Ric16DeviceTesting = (isUpdate) => {
           : BLE_STORE.deviceObj,
       ),
     );
-      console.log("modeRwite", modeRwite);
+    console.log("modeRwite", modeRwite);
     // const modeLwite =
     //   modeRwite &&
     //   dispatch(changeRicMode(0, LISTENING_SIDE.LEFT, BLE_STORE.LeftdeviceObj));
@@ -297,7 +298,7 @@ const Ric16DeviceTesting = (isUpdate) => {
   }, []);
 
   useEffect(() => {
-    if(!isstart) return
+    if (!isstart) return;
     if (step !== 0 || !device) return;
 
     const interval = setInterval(() => {
@@ -330,7 +331,7 @@ const Ric16DeviceTesting = (isUpdate) => {
 
     return () => clearInterval(interval);
   }, [step, device, deviceQc, deviceDataStore, BLE_STORE]);
-console.log("deviceDataStore", deviceDataStore);
+  console.log("deviceDataStore", deviceDataStore);
   return (
     <CustomDialog
       // err={fields?.err}

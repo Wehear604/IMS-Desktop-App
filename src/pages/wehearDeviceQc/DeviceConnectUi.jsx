@@ -14,8 +14,9 @@ import {
   Stepper,
   Step,
   StepLabel,
+  Backdrop,
 } from "@mui/material";
-import { styled } from "@mui/system";
+import { Stack, styled } from "@mui/system";
 
 import leftDevice from "../../assets/images/bteLeft.svg";
 import rightDevice from "../../assets/images/bteRight.svg";
@@ -65,6 +66,9 @@ import SafebudsMainUi from "./SafebudsUi/SafebudsMainUi";
 import { SetStepAction } from "../../store/actions/stepAction";
 import ItePrimeDeviceTesting from "./ItePrimeDeviceTesting";
 import Ric16DeviceTesting from "./Ric16DeviceTesting";
+import useBluetoothHeadsetStatus from "./useBluetoothHeadsetStatus";
+import OneViewBox from "../../components/layouts/OneViewBox";
+import { center } from "../../assets/css/theme/common";
 // import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 const Header = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
@@ -119,11 +123,26 @@ const ConnectButton = ({
   const isConnected = device.connected;
   const isleftConnected = device.left_connected;
   const dispatch = useDispatch();
-
+  let headset = useBluetoothHeadsetStatus();
+  
   const AudioAndMicCheck = () => {
     if (device.device_type == DEVICES.RIC_OPTIMA) {
       dispatch(
-        openModal(<Ric16DeviceTesting />, "lg", true, "deviceAudioMicCheck"),
+        openModal(
+          !headset ? (
+            <OneViewBox sx={{ ...center }}>
+              <CircularProgress size={50} />
+              {
+                " Please connect a Bluetooth headset to start the QC process... "
+              }
+            </OneViewBox>
+          ) : (
+            <Ric16DeviceTesting />
+          ),
+          "lg",
+          true,
+          "deviceAudioMicCheck",
+        ),
       );
     } else if (device.device_type == DEVICES.ITE_PRIME) {
       dispatch(
@@ -166,18 +185,19 @@ const ConnectButton = ({
     } else if (isConnected && device.device_type !== DEVICES.RIC_OPTIMA) {
       AudioAndMicCheck();
     }
-  }, [isConnected, isleftConnected]);
+  }, [isConnected, isleftConnected, headset]);
 
   useEffect(() => {
     if (!isConnected) {
       dispatch(closeModal("deviceAudioMicCheck"));
     }
   }, [!isConnected]);
+
   const isSideSelected =
     deviceSide === LISTENING_SIDE.LEFT ||
     deviceSide === LISTENING_SIDE.RIGHT ||
     deviceSide === true;
-  
+
   if (
     deviceSide === LISTENING_SIDE.LEFT &&
     device.device_type === DEVICES.RIC_OPTIMA
@@ -331,6 +351,12 @@ const ConnectButton = ({
         </Button>
       );
     }
+  }
+  if (
+    device.device_type == DEVICES.RIC_OPTIMA &&
+    isConnected &&
+    isleftConnected
+  ) {
   }
 };
 

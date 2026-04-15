@@ -1,9 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 export default function useBluetoothHeadsetStatus() {
   const [connectedHeadset, setConnectedHeadset] = useState(null);
+  const isMounted = useRef(true);
+  const stopChecking = useRef(false); // process stop control
 
   const checkHeadset = async () => {
+    if (stopChecking.current) return;
+
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
 
@@ -11,19 +15,26 @@ export default function useBluetoothHeadsetStatus() {
       const mics = devices.filter((d) => d.kind === "audioinput");
 
       for (const mic of mics) {
+        if (stopChecking.current) return;
+
         if (isBluetoothHeadset(mic)) {
           const active = await isDeviceActive(mic.deviceId);
 
-          if (active) {
+          if (active && isMounted.current) {
             setConnectedHeadset(mic);
             console.log("🎧 Connected:", mic.label);
+
+            // headset found → stop further process
+            stopChecking.current = true;
             return;
           }
         }
       }
 
-      setConnectedHeadset(null);
-      console.log("❌ No Bluetooth headset connected");
+      if (isMounted.current) {
+        setConnectedHeadset(null);
+        console.log("❌ No Bluetooth headset connected");
+      }
     } catch (err) {
       console.error(err);
     }
@@ -34,12 +45,17 @@ export default function useBluetoothHeadsetStatus() {
 
     const handleChange = () => {
       console.log("🔄 Device change detected");
+
+      // restart checking on device change
+      stopChecking.current = false;
       checkHeadset();
     };
 
     navigator.mediaDevices.addEventListener("devicechange", handleChange);
 
     return () => {
+      isMounted.current = false;
+      stopChecking.current = true;
       navigator.mediaDevices.removeEventListener("devicechange", handleChange);
     };
   }, []);
@@ -47,9 +63,10 @@ export default function useBluetoothHeadsetStatus() {
   return connectedHeadset;
 }
 
-// helper functions
+// Detect bluetooth headset
 const isBluetoothHeadset = (device) => {
   const label = device.label.toLowerCase();
+
   return (
     label.includes("bluetooth") ||
     label.includes("headset") ||
@@ -58,13 +75,14 @@ const isBluetoothHeadset = (device) => {
   );
 };
 
+// Check active device
 const isDeviceActive = async (deviceId) => {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: { deviceId: { exact: deviceId } },
     });
 
-    stream.getTracks().forEach((t) => t.stop());
+    stream.getTracks().forEach((track) => track.stop());
     return true;
   } catch {
     return false;
