@@ -173,7 +173,10 @@ const disableNext = () => {
   }
   return false;
 };;
-console.table(step, "step");
+console.log(
+  device,
+  "step"
+);
   const data = {
     left: {
       device_type: device?.device_type,

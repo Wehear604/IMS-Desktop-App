@@ -121,6 +121,12 @@ export const DeviceColorAction = (deviceColor) => {
     deviceColor,
   };
 };
+export const DeviceContainsAction = (box_Contains) => {
+  return {
+    type: actions.SET_DEVICE_CONTAINS_DETAILS,
+    box_Contains,
+  };
+};
 export const DeviceBoxIDAction = (boxId) => {
   return {
     type: actions.SET_DEVICE_BOXID_DETAILS,

@@ -26,15 +26,16 @@ const BoxContainsUI = ({ fields }) => {
   const dispatch = useDispatch();
   const data = {
     left: {
-     ...deviceDataStore?.left,
+      ...deviceDataStore?.left,
     },
     right: {
-   ...deviceDataStore?.right,
+      ...deviceDataStore?.right,
     },
     box_Contains: deviceDataStore.box_Contains ?? [],
     deviceColor: deviceDataStore.deviceColor ?? "69521eea409668adad3cf8e2",
     boxId: deviceDataStore.boxId ?? "0000000000",
     device: device?.device_type,
+    isNewric16: deviceDataStore?.isNewric16,
   };
 
   const onComplete = async (e) => {

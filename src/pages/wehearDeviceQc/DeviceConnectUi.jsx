@@ -48,6 +48,7 @@ import connectIcon1 from "../../assets/images/connectIcon(1).svg";
 import { useDispatch, useSelector } from "react-redux";
 import {
   connectDevice,
+  DeviceContainsAction,
   DeviceSideAction,
   disconnectAction,
   onWriteFunctionChange,
@@ -178,7 +179,7 @@ const ConnectButton = ({
       );
     }
   };
-  console.log("isleftConnected && isConnected", isleftConnected, isConnected);
+
   useEffect(() => {
     if (isleftConnected && isConnected) {
       AudioAndMicCheck();
@@ -216,7 +217,7 @@ const ConnectButton = ({
             border: "2px solid",
             borderColor: "#DDDDDD",
             borderRadius: "8px",
-            width: "25vw",
+            width:device.device_type === DEVICES.RIC_OPTIMA ?"14vw": "25vw",
             // marginLeft: deviceSide == LISTENING_SIDE.LEFT ? "20%" : "",
             marginTop: "5px",
           }}
@@ -253,7 +254,7 @@ const ConnectButton = ({
             borderColor:
               deviceSide == LISTENING_SIDE.LEFT ? "#C24747" : "#2D3B67",
             borderRadius: "8px",
-            width: "25vw",
+            width: device.device_type === DEVICES.RIC_OPTIMA ? "14vw" : "25vw",
             // marginLeft: deviceSide == LISTENING_SIDE.LEFT ? "20%" : "",
             backgroundColor:
               deviceSide == LISTENING_SIDE.LEFT ? "#FCF7F7" : "#EDF0F7",
@@ -291,7 +292,7 @@ const ConnectButton = ({
             border: "2px solid",
             borderColor: "#DDDDDD",
             borderRadius: "8px",
-            width: "25vw",
+            width: device.device_type === DEVICES.RIC_OPTIMA ? "14vw" : "25vw",
             // marginLeft: deviceSide == LISTENING_SIDE.LEFT ? "20%" : "",
             marginTop: "5px",
           }}
@@ -328,7 +329,7 @@ const ConnectButton = ({
             borderColor:
               deviceSide == LISTENING_SIDE.LEFT ? "#C24747" : "#2D3B67",
             borderRadius: "8px",
-            width: "25vw",
+            width: device.device_type === DEVICES.RIC_OPTIMA ? "14vw" : "25vw",
             // marginLeft: deviceSide == LISTENING_SIDE.LEFT ? "20%" : "",
             backgroundColor:
               deviceSide == LISTENING_SIDE.LEFT ? "#FCF7F7" : "#EDF0F7",
@@ -352,12 +353,6 @@ const ConnectButton = ({
       );
     }
   }
-  if (
-    device.device_type == DEVICES.RIC_OPTIMA &&
-    isConnected &&
-    isleftConnected
-  ) {
-  }
 };
 
 const DeviceConnectUi = () => {
@@ -366,7 +361,7 @@ const DeviceConnectUi = () => {
   const dispatch = useDispatch();
   console.log(
     "device?.device_type === DEVICES.SAFE_BUDS && !device?.fotfile",
-    device?.fotfile,
+    deviceDataStore,
   );
   const devices = [
     { side: "L", label: "BTE", value: LISTENING_SIDE.LEFT },
@@ -508,6 +503,42 @@ const DeviceConnectUi = () => {
       setSelected("L");
     }
   }, [device?.device_side]);
+
+  useEffect(() => {
+    if (
+      device?.device_side === LISTENING_SIDE.RIGHT &&
+      device.connected &&
+      device.device_type == DEVICES.RIC_OPTIMA
+    ) {
+      setSelected("L");
+      dispatch(DeviceSideAction(LISTENING_SIDE.LEFT));
+    } else if (
+      device?.device_side === LISTENING_SIDE.LEFT &&
+      device.left_connected &&
+      device.device_type == DEVICES.RIC_OPTIMA
+    ) {
+      setSelected("R");
+      dispatch(DeviceSideAction(LISTENING_SIDE.RIGHT));
+    }
+  }, [device.connected, device.left_connected]);
+
+  useEffect(() => {
+    if (device?.device_type === DEVICES.RIC_OPTIMA) {
+        dispatch(
+          DeviceContainsAction([
+            { charging_Case: false },
+            { warranty_Card: false },
+            { device_user_guide: false },
+            { cleaning_Brush: false },
+            { slicone_domes: false },
+            { type_c_cable: false },
+            { adapter: false },
+            { wax_guard: false },
+          ]),
+        );
+    }
+  }, [device.device_type]);
+
   return (
     <>
       <Header sx={{ m: 4 }} variant="h4">

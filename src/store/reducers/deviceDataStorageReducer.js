@@ -57,6 +57,7 @@ const initialState = {
 };
 
 const deviceDataStorageReducer = (state = initialState, action) => {
+  console.log("action", action);
   switch (action.type) {
     case actions.SET_DEVICE_STORAGE:
       if (action.device_side === LISTENING_SIDE.LEFT) {
@@ -177,6 +178,11 @@ const deviceDataStorageReducer = (state = initialState, action) => {
           },
         };
       }
+    case actions.SET_DEVICE_CONTAINS_DETAILS:
+      return {
+        ...state,
+        box_Contains:action.box_Contains,
+      };
     case actions.SET_EQUALIZER:
       return {
         ...state,

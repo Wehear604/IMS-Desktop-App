@@ -117,6 +117,11 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                   />
                 ),
               },
+              {
+                isField: fields?.device !== DEVICES.RIC_OPTIMA,
+                label: "New RIC OPTIMA 16 :",
+                value: fields?.isNewric16 == true ? "Yes" : fields?.isNewric16 == false ? "No" : "NA",
+              },
             ]}
           />
         </Box>

@@ -25,7 +25,7 @@ const initialState = {
   fotfile1: false,
   version: null,
   latestVersion: null,
-  leftmac:null,
+  leftmac: null,
 };
 
 const deviceReducer = (state = initialState, action) => {
@@ -61,7 +61,12 @@ const deviceReducer = (state = initialState, action) => {
     case actions.SET_DEVICE_MAC:
       return {
         ...state,
-        mac: state.device_side === LISTENING_SIDE.RIGHT ? action.mac : state.mac,
+        mac:
+          state.device_side === LISTENING_SIDE.RIGHT
+            ? action.mac
+            : state.device_type !== DEVICES.RIC_OPTIMA
+              ? action.mac
+              : state.mac,
         leftmac:
           state.device_side === LISTENING_SIDE.LEFT
             ? action.mac

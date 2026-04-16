@@ -5,7 +5,7 @@ import {
   LISTENING_SIDE,
   SNACK_BAR_VARIETNS,
 } from "../../utils/constants";
-import { closeModal } from "../../store/actions/modalAction";
+import { closeModal, openModal } from "../../store/actions/modalAction";
 import {
   CloseDeviceDataStore,
   DeviceStoreAction,
@@ -42,6 +42,8 @@ import MicCheckUiSafeBudsUi from "./SafebudsUi/MicCheckUiSafeBudsUi";
 import useBluetoothHeadsetStatus from "./useBluetoothHeadsetStatus";
 import OneViewBox from "../../components/layouts/OneViewBox";
 import { center } from "../../assets/css/theme/common";
+import MessageDilog from "../../components/texts/MessageDilog";
+import { use } from "react";
 
 const Ric16DeviceTesting = (isUpdate) => {
   const { device, deviceQc, deviceDataStore } = useSelector((state) => state);
@@ -58,7 +60,7 @@ const Ric16DeviceTesting = (isUpdate) => {
   const hasRun = useRef(false);
   const steps = ["First Mode", "Second Mode", "Third Mode"];
   const deviceTitle = DEVICES_NAME[device?.device_type] ?? "Unknown device";
-  let headset = true
+  let headset = true;
 
   const volumeIncreasecheck =
     device?.device_side === LISTENING_SIDE.LEFT
@@ -200,6 +202,7 @@ const Ric16DeviceTesting = (isUpdate) => {
     deviceColor: deviceDataStore.deviceColor ?? "69521eea409668adad3cf8e2",
     boxId: deviceDataStore.boxId ?? "0000000000",
     device: device?.device_type,
+    isNewric16: deviceDataStore?.isNewric16,
   };
 
   const onSubmit = async (e) => {
@@ -225,6 +228,7 @@ const Ric16DeviceTesting = (isUpdate) => {
 
   const onRejectClick = (e) => {
     e?.preventDefault();
+    console.log("onRejectClick");
     dispatch(
       openModal(
         <MessageDilog
@@ -287,13 +291,6 @@ const Ric16DeviceTesting = (isUpdate) => {
           : BLE_STORE.deviceObj,
       ),
     );
-    console.log("modeRwite", modeRwite);
-    // const modeLwite =
-    //   modeRwite &&
-    //   dispatch(changeRicMode(0, LISTENING_SIDE.LEFT, BLE_STORE.LeftdeviceObj));
-    // modeLwite &&
-    //   dispatch(changeRicMode(0, LISTENING_SIDE.RIGHT, BLE_STORE.deviceObj));
-
     setIsStart(true);
   }, []);
 
@@ -331,7 +328,26 @@ const Ric16DeviceTesting = (isUpdate) => {
 
     return () => clearInterval(interval);
   }, [step, device, deviceQc, deviceDataStore, BLE_STORE]);
-  console.log("deviceDataStore", deviceDataStore);
+
+  useEffect(() => {
+    if (
+      deviceDataStore.right.volume.volumeIncrease &&
+      deviceDataStore.right.volume.volumeDecrease
+    ) {
+      dispatch(ChangeButtonSide(LISTENING_SIDE.LEFT));
+    } else if (
+      deviceDataStore.left.volume.volumeIncrease &&
+      deviceDataStore.left.volume.volumeDecrease
+    ) {
+      dispatch(ChangeButtonSide(LISTENING_SIDE.RIGHT));
+    }
+  }, [
+    deviceDataStore.right.volume.volumeIncrease &&
+      deviceDataStore.right.volume.volumeDecrease,
+    deviceDataStore.left.volume.volumeIncrease &&
+      deviceDataStore.left.volume.volumeDecrease,
+  ]);
+
   return (
     <CustomDialog
       // err={fields?.err}

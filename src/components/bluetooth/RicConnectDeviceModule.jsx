@@ -484,6 +484,7 @@ const RicConnectDevice = ({
     //     name: "safe",
     //   });
     // }
+    console.log("first deviceId", deviceId);
     dispatch(DeviceMACAction(deviceId));
     if (window.electronAPI) {
       window.electronAPI.selectBluetoothDevice(deviceId);
