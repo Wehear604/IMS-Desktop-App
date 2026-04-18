@@ -125,7 +125,7 @@ const ConnectButton = ({
   const isleftConnected = device.left_connected;
   const dispatch = useDispatch();
   let headset = useBluetoothHeadsetStatus();
-  
+
   const AudioAndMicCheck = () => {
     if (device.device_type == DEVICES.RIC_OPTIMA) {
       dispatch(
@@ -217,7 +217,7 @@ const ConnectButton = ({
             border: "2px solid",
             borderColor: "#DDDDDD",
             borderRadius: "8px",
-            width:device.device_type === DEVICES.RIC_OPTIMA ?"14vw": "25vw",
+            width: device.device_type === DEVICES.RIC_OPTIMA ? "14vw" : "25vw",
             // marginLeft: deviceSide == LISTENING_SIDE.LEFT ? "20%" : "",
             marginTop: "5px",
           }}
@@ -521,24 +521,22 @@ const DeviceConnectUi = () => {
       dispatch(DeviceSideAction(LISTENING_SIDE.RIGHT));
     }
   }, [device.connected, device.left_connected]);
-
   useEffect(() => {
     if (device?.device_type === DEVICES.RIC_OPTIMA) {
-        dispatch(
-          DeviceContainsAction([
-            { charging_Case: false },
-            { warranty_Card: false },
-            { device_user_guide: false },
-            { cleaning_Brush: false },
-            { slicone_domes: false },
-            { type_c_cable: false },
-            { adapter: false },
-            { wax_guard: false },
-          ]),
-        );
+      dispatch(
+        DeviceContainsAction([
+          { charging_Case: false },
+          { warranty_Card: false },
+          { device_user_guide: false },
+          { cleaning_Brush: false },
+          { slicone_domes: false },
+          { type_c_cable: false },
+          { adapter: false },
+          { wax_guard: false },
+        ]),
+      );
     }
   }, [device.device_type]);
-
   return (
     <>
       <Header sx={{ m: 4 }} variant="h4">

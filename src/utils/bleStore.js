@@ -42,8 +42,15 @@ export async function sendPlayCommand(dispatch, device_type, side, value) {
 
   if (device_type == DEVICES.BTE_OPTIMA || device_type == DEVICES.BTE_PRIME) {
     if (!BLE_STORE.writeFun || !BLE_STORE.writeFun.writeData) {
-      console.error("Write function not ready");
-      return;
+      console.error("Write function not ready", BLE_STORE);
+      dispatch(DeviceIsAudioCheck(false));
+      dispatch(
+        callSnackBar(
+          "Device is connected but write channel is not ready. Please reconnect and try again.",
+          SNACK_BAR_VARIETNS.error,
+        ),
+      );
+      return false;
     }
 
     const playPacket = [170, 171, 3, 0, 11, 184, 0];
@@ -51,13 +58,14 @@ export async function sendPlayCommand(dispatch, device_type, side, value) {
     try {
       await BLE_STORE.writeFun.writeData(playPacket);
       dispatch(DeviceIsAudioCheck(true));
-      return;
+      return true;
     } catch (err) {
       console.error("Play write failed:", err);
-      dispatch(DeviceIsAudioCheck(true));
+      dispatch(DeviceIsAudioCheck(false));
       dispatch(
         callSnackBar(`Play write failed ${err}`, SNACK_BAR_VARIETNS.error),
       );
+      return false;
     }
   }
   if (device_type === DEVICES.ITE_PRIME) {
@@ -68,13 +76,14 @@ export async function sendPlayCommand(dispatch, device_type, side, value) {
       await audio.play();
 
       dispatch(DeviceIsAudioCheck(true));
-      return; // IMPORTANT: stop here, do NOT send BLE command
+      return true; // IMPORTANT: stop here, do NOT send BLE command
     } catch (err) {
       console.error("MP3 play failed:", err);
+      dispatch(DeviceIsAudioCheck(false));
       dispatch(
         callSnackBar(`MP3 play failed: ${err}`, SNACK_BAR_VARIETNS.error),
       );
-      return;
+      return false;
     }
   }
 
@@ -88,17 +97,19 @@ export async function sendPlayCommand(dispatch, device_type, side, value) {
   try {
     await WriteRicDataToDevice(command, side, BLE_STORE.deviceObj);
     dispatch(DeviceIsAudioCheck(true));
+    return true;
   } catch (err) {
     console.error("BLE Play write failed:", err);
     dispatch(DeviceIsAudioCheck(false));
     dispatch(callSnackBar(`BLE Play failed ${err}`, SNACK_BAR_VARIETNS.error));
+    return false;
   }
 }
 
 export async function sendPauseCommand(dispatch, device_type) {
   console.log("sendPauseCommand called");
 
-  if (device_type !== DEVICES.BTE_OPTIMA || device_type !== DEVICES.BTE_PRIME) {
+  if (device_type !== DEVICES.BTE_OPTIMA && device_type !== DEVICES.BTE_PRIME) {
     if (BLE_STORE.audio) {
       try {
         BLE_STORE.audio.pause();

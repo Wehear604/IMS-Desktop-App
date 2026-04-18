@@ -370,7 +370,7 @@ const DeviceAudioMicCheckUi = () => {
     return true;
   })();
 
-  const handlePlayPause = () => {
+  const handlePlayPause = async () => {
     const hasDevice = Boolean(device?.device_type);
 
     if (isPlaying) {
@@ -381,24 +381,23 @@ const DeviceAudioMicCheckUi = () => {
         audioRef.current.currentTime = 0;
       }
 
-      if (hasDevice) sendPauseCommand(dispatch);
+      if (hasDevice) await sendPauseCommand(dispatch, device?.device_type);
       return;
     }
 
-    setIsPlaying(true);
-
     if (hasDevice) {
-      sendPlayCommand(
+      const didPlay = await sendPlayCommand(
         dispatch,
         device?.device_type,
         device?.device_side,
-        LISTENING_SIDE,
         30,
       );
+      setIsPlaying(Boolean(didPlay));
     } else {
       if (!audioRef.current) audioRef.current = new Audio(audioUrl);
       audioRef.current
         .play()
+        .then(() => setIsPlaying(true))
         .catch((err) => console.error("MP3 play error:", err));
     }
   };
@@ -480,7 +479,7 @@ const DeviceAudioMicCheckUi = () => {
     boxId: deviceDataStore.boxId ?? "0000000000",
     device: device?.device_type,
   };
-console.log("first  data ",data)
+  console.log("first  data ", data);
   const onSubmit = async (e) => {
     e?.preventDefault();
     dispatch(
@@ -625,20 +624,8 @@ console.log("first  data ",data)
                 action={
                   <Button
                     variant="contained"
-                    onClick={() => {
-                      if (
-                        device?.device_type === DEVICES.BTE_OPTIMA ||
-                        device?.device_type === DEVICES.BTE_PRIME
-                      ) {
-                        isPlaying
-                          ? (setIsPlaying(false),
-                            sendPauseCommand(dispatch, device?.device_type))
-                          : (setIsPlaying(true),
-                            sendPlayCommand(dispatch, device?.device_type));
-                      } else {
-                        handlePlayPause();
-                      }
-                    }}
+                    onClick={handlePlayPause}
+                    disabled={Boolean(device?.isConnecting)}
                     startIcon={isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
                     sx={{
                       bgcolor: "#0d5966",

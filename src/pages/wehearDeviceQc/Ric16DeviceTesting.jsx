@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import CustomDialog from "../../components/layouts/common/CustomDialog";
 import {
+  DEVICES,
   DEVICES_NAME,
   LISTENING_SIDE,
   SNACK_BAR_VARIETNS,
@@ -8,6 +9,7 @@ import {
 import { closeModal, openModal } from "../../store/actions/modalAction";
 import {
   CloseDeviceDataStore,
+  DeviceContainsAction,
   DeviceStoreAction,
   resetDeviceDataStore,
 } from "../../store/actions/deviceDataAction";
@@ -73,6 +75,22 @@ const Ric16DeviceTesting = (isUpdate) => {
   const sideLabel =
     findObjectKeyByValue(device?.device_side, LISTENING_SIDE) ?? "";
 
+  useEffect(() => {
+    if (device?.device_type === DEVICES.RIC_OPTIMA) {
+      dispatch(
+        DeviceContainsAction([
+          { charging_Case: false },
+          { warranty_Card: false },
+          { device_user_guide: false },
+          { cleaning_Brush: false },
+          { slicone_domes: false },
+          { type_c_cable: false },
+          { adapter: false },
+          { wax_guard: false },
+        ]),
+      );
+    }
+  }, [device.device_type]);
   useEffect(() => {
     setIsPlaying(Boolean(device?.is_Audio_play));
   }, [device?.is_Audio_play]);
@@ -307,7 +325,7 @@ const Ric16DeviceTesting = (isUpdate) => {
             : BLE_STORE.deviceObj,
         ),
       );
-    }, 1000);
+    }, 1500);
 
     return () => clearInterval(interval);
   }, [step, device, deviceQc, deviceDataStore, BLE_STORE]);
@@ -324,7 +342,7 @@ const Ric16DeviceTesting = (isUpdate) => {
             : BLE_STORE.deviceObj,
         ),
       );
-    }, 1000);
+    }, 1500);
 
     return () => clearInterval(interval);
   }, [step, device, deviceQc, deviceDataStore, BLE_STORE]);
