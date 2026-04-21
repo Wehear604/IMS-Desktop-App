@@ -1,7 +1,7 @@
 {
   "name": "inventory-management-frontend",
   "homepage": "./",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Desktop Inventory Management System",
   "author": "Rudren Patel",
@@ -20,6 +20,8 @@
     "child_process": "^1.0.2",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.13",
+    "electron-log": "^5.4.3",
+    "electron-updater": "^6.8.3",
     "engine.io-client": "^6.6.4",
     "file-saver": "^2.0.5",
     "html2canvas": "^1.4.1",
@@ -52,7 +54,8 @@
     "dev:electron": "nodemon --watch electron --exec electron .",
     "dev": "concurrently \"npm start\" \"npm run dev:electron\"",
     "dist": "npm run build && electron-builder --win --x64",
-    "postinstall": "electron-builder install-app-deps --arch=x64"
+    "release": "npm run build && electron-builder --win --x64 -p always",
+    "postinstall": "node move-electron.js && electron-builder install-app-deps --arch=x64"
   },
   "build": {
     "appId": "com.company.inventory",
@@ -81,7 +84,16 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "Wehear604",
+        "repo": "IMS-Desktop-App",
+        "private": false,
+        "timeout": 600000
+      }
+    ]
   },
   "browserslist": {
     "production": [
