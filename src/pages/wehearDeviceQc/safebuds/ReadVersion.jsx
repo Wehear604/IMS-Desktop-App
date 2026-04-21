@@ -21,19 +21,18 @@ const processQueue = async () => {
     if (!device?.gatt) throw new Error("No valid Bluetooth device found");
 
     const service = await device.gatt.getPrimaryService(
-      SERVICE_UUID[DEVICES.SAFE_BUDS]
+      SERVICE_UUID[DEVICES.SAFE_BUDS],
     );
 
     const characteristicWrite = await service.getCharacteristic(
-      CHARACTERISTIC_UUID_READ_WRITE[DEVICES.SAFE_BUDS]
+      CHARACTERISTIC_UUID_READ_WRITE[DEVICES.SAFE_BUDS],
     );
 
     const characteristicRead = await service.getCharacteristic(
-      CHARACTERISTIC_UUID_READ_NOTIFY[DEVICES.SAFE_BUDS]
+      CHARACTERISTIC_UUID_READ_NOTIFY[DEVICES.SAFE_BUDS],
     );
 
     await characteristicRead.startNotifications();
-
     const onValueChanged = (event) => {
       const bytes = Array.from(new Uint8Array(event.target.value.buffer));
 
@@ -49,7 +48,7 @@ const processQueue = async () => {
 
         characteristicRead.removeEventListener(
           "characteristicvaluechanged",
-          onValueChanged
+          onValueChanged,
         );
 
         isProcessing = false;
@@ -60,11 +59,15 @@ const processQueue = async () => {
 
     characteristicRead.addEventListener(
       "characteristicvaluechanged",
-      onValueChanged
+      onValueChanged,
     );
 
     if (type === "SafeBudsVersionRead") {
       await characteristicWrite.writeValue(new Uint8Array([0x60, 0x02]));
+      isProcessing = false;
+      resolve("V1");
+      processQueue();
+      console.log("first VersionRead", type, side);
     }
   } catch (error) {
     console.error(`Error reading data from ${side} device:`, error);

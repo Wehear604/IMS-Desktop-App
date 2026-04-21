@@ -29,12 +29,13 @@ import {
   getDeviceByIdApi,
   updateDeviceQcApi,
 } from "../../apis/deviceQc.api";
-import { closeModal } from "../../store/actions/modalAction";
+import { closeModal, openModal } from "../../store/actions/modalAction";
 import { fetchProductColorAction } from "../../store/actions/setting.Action";
 import CustomDialog from "../../components/layouts/common/CustomDialog";
 import { CenteredBox } from "../../components/layouts/OneViewBox";
 import SafeBudsBoxContainsUI from "./SafebudsUi/SafeBudsBoxContainsUI";
 import SafebudsMainUi from "./SafebudsUi/SafebudsMainUi";
+import BoxContainsUI from "./AllDevice/BoxContainsUI";
 
 const DeviceQcListController = ({
   initialStep = 0,
@@ -60,9 +61,18 @@ const DeviceQcListController = ({
     if (
       step === 1 &&
       deviceDataStore.left.result &&
-      deviceDataStore.right.result
+      deviceDataStore.right.result &&
+      deviceDataStore.left.device_type !== DEVICES.SAFE_BUDS &&
+      deviceDataStore.right.device_type !== DEVICES.SAFE_BUDS
     ) {
-      setStep(2);
+      dispatch(
+        openModal(
+          <BoxContainsUI allDevice={true} fields={fields} />,
+          "lg",
+          true,
+          "deviceAudioMicCheck",
+        ),
+      );
     }
   }, [deviceDataStore.left.result, deviceDataStore.right.result, step]);
 
@@ -92,110 +102,10 @@ const DeviceQcListController = ({
       );
     }
   }, [fields]);
-  // console.log("deviceDataStore", deviceDataStore);
-
-  const validationSchemaForCreate = useMemo(
-    () => [
-      // {
-      //   required: true,
-      //   value: fields.box_Contains.length !== 0,
-      //   field: "Box Contains",
-      // },
-      {
-        required: true,
-        value: fields.boxId,
-        field: "Box ID",
-      },
-      {
-        required: true,
-        value: fields.deviceColor,
-        field: "Device Color",
-      },
-    ],
-    [fields],
-  );
-  console.log("object device.macBeforeData", device);
-  const onSubmit = async () => {
-    const validationResponse = validate(validationSchemaForCreate);
-
-    if (validationResponse === true) {
-      setLoading(true);
-      dispatch(
-        callApiAction(
-          async () =>
-            await createDeviceQcApi({
-              ...deviceDataStore,
-              macBeforeOta: device.macBeforeOta,
-            }),
-          async (response) => {
-            setLoading(false);
-            setStep(0);
-            dispatch(
-              callSnackBar(
-                "Device QC Created Successfully",
-                SNACK_BAR_VARIETNS.suceess,
-              ),
-            );
-            dispatch(resetDeviceDataStore());
-
-            // dispatch(fetchDeviceQcAction(settings.deviceQc_filters))
-            // dispatch(closeModal("device-qc"))
-          },
-          (err) => {
-            setFields({ ...fields, err });
-            dispatch(callSnackBar(err, SNACK_BAR_VARIETNS.error));
-          },
-        ),
-      );
-    } else {
-      setFields({ ...fields, err: validationResponse });
-    }
-  };
-
-  const updateFunction = async () => {
-    const updatedData = { id };
-
-    if (updatedData) {
-      setLoading(true);
-      dispatch(
-        callApiAction(
-          async () => await updateDeviceQcApi({ ...updatedData, ...fields }),
-          async (response) => {
-            await callBack(updatedData);
-            setFields(response);
-            setLoading(false);
-            dispatch(
-              callSnackBar(
-                "Packaging Details Updated Successfully",
-                SNACK_BAR_VARIETNS.suceess,
-              ),
-            );
-            dispatch(closeModal("update-product-qc"));
-          },
-          (err) => {
-            setLoading(false);
-            setFields({ ...fields, err });
-          },
-        ),
-      );
-    } else {
-      setFields({ ...fields, err: validationResponse });
-    }
-  };
 
   useEffect(() => {
     setStep(initialStep);
   }, [initialStep]);
-  console.log("object id", id);
-
-  const Submit = async (e) => {
-    e.preventDefault();
-    if (id) {
-      updateFunction();
-    } else {
-      onSubmit();
-    }
-  };
 
   const fetchById = useCallback(
     (id) => {
@@ -230,7 +140,7 @@ const DeviceQcListController = ({
   }, []);
 
   useEffect(() => {
-    dispatch(resetDeviceDataStore());
+    dispatch(resetDeviceDataStore(true));
   }, []);
   return (
     <>
@@ -315,6 +225,29 @@ const DeviceQcListController = ({
             ) : (
               <>
                 <DeviceConnectUi />
+                <Box
+                  p={2}
+                  mt={4}
+                  m={2}
+                  sx={{
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "flex-start",
+                  }}
+                >
+                  <Button
+                    variant="contained"
+                    sx={{ width: "8vw" }}
+                    onClick={() => {
+                      dispatch(DeviceSideAction(null));
+                      setStep(step - 1);
+                    }}
+                  >
+                    <Typography variant="h5" sx={{ textTransform: "none" }}>
+                      Back
+                    </Typography>
+                  </Button>
+                </Box>
                 {/* <SafebudsMainUi /> */}
                 {/* <ProductDetailsQcUi
                   setBox={setFields}

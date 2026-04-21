@@ -1,5 +1,5 @@
 import { BLE_STORE } from "../../utils/bleStore";
-import { actions, SNACK_BAR_VARIETNS } from "../../utils/constants";
+import { actions, LISTENING_SIDE, SNACK_BAR_VARIETNS } from "../../utils/constants";
 import { callSnackBar } from "./snackbarAction";
 
 export const DeviceSelectAction = (device_type) => {
@@ -45,6 +45,15 @@ export const disconnectAction = (side, flag = false) => {
       BLE_STORE.disconnectFun = null;
       BLE_STORE.writeFun = null;
       BLE_STORE.hardwareData = null;
+      
+      if (BLE_STORE.LeftdeviceObj?.gatt?.connected) {
+        BLE_STORE.LeftdeviceObj.gatt.disconnect();
+      }
+
+      BLE_STORE.LeftdeviceObj = null;
+      BLE_STORE.LeftdisconnectFun = null;
+      BLE_STORE.writeLeftFun = null;
+      BLE_STORE.hardwareLeftData = null;
 
       dispatch(callSnackBar("Device Disconnected.", SNACK_BAR_VARIETNS.error));
 
@@ -66,7 +75,11 @@ export const disconnectAction = (side, flag = false) => {
 };
 
 export const onWriteFunctionChange = (value, side) => {
-  BLE_STORE.writeFun = value;
+  if(side === LISTENING_SIDE.LEFT){
+    BLE_STORE.writeLeftFun = value;
+  } else {
+    BLE_STORE.writeFun = value;
+  }
   return { type: actions.CHANGE_WRITE_FUN, side };
 };
 
@@ -108,6 +121,12 @@ export const DeviceColorAction = (deviceColor) => {
     deviceColor,
   };
 };
+export const DeviceContainsAction = (box_Contains) => {
+  return {
+    type: actions.SET_DEVICE_CONTAINS_DETAILS,
+    box_Contains,
+  };
+};
 export const DeviceBoxIDAction = (boxId) => {
   return {
     type: actions.SET_DEVICE_BOXID_DETAILS,
@@ -115,8 +134,8 @@ export const DeviceBoxIDAction = (boxId) => {
   };
 };
 
-export const resetDeviceDataStore = () => {
-  return { type: actions.RESET_DEVICE_DATA_STORE };
+export const resetDeviceDataStore = (reset) => {
+  return { type: actions.RESET_DEVICE_DATA_STORE, reset };
 };
 export const CloseDeviceDataStore = () => {
   return { type: actions.SET_QC_TEST_CLOSE_RESULT };
@@ -124,6 +143,6 @@ export const CloseDeviceDataStore = () => {
 export const SetDeviceFOT = () => {
   return { type: actions.SET_FOT_FILES };
 };
-export const SetDevicVersionFOT = () => {
-  return { type: actions.SET_FOT_FILES_VERSION };
+export const SetDevicVersionFOT = (fot) => {
+  return { type: actions.SET_FOT_FILES_VERSION, fot };
 };

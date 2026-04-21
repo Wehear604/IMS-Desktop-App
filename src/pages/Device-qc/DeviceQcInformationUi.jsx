@@ -13,7 +13,7 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
   const dispatch = useDispatch();
   const [fields, setFields] = useState({});
   const [loading, setLoading] = useState(false);
-
+  const device = fields.device === DEVICES.SAFE_BUDS;
   const fetchById = useCallback(
     (id) => {
       setLoading(true);
@@ -87,10 +87,10 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                 value: fields?.deviceColor?.name || "NA",
               },
 
-              {
-                label: "Mac Before OTA :",
-                value: fields?.macBeforeOta || "NA",
-              },
+              // {
+              //   label: "Mac Before OTA :",
+              //   value: fields?.macBeforeOta || "NA",
+              // },
               {
                 label: "QC Executive :",
                 value: toTitleCase(fields?.qcExcecutive?.name) || "NA",
@@ -117,6 +117,11 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                   />
                 ),
               },
+              {
+                isField: fields?.device !== DEVICES.RIC_OPTIMA,
+                label: "New RIC OPTIMA 16 :",
+                value: fields?.isNewric16 == true ? "Yes" : fields?.isNewric16 == false ? "No" : "NA",
+              },
             ]}
           />
         </Box>
@@ -128,52 +133,58 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
           <InformationUI
             Data={[
               {
-                label: "Test Case Executed",
-                value: (
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-evenly",
-                      width: "100%",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Typography variant="body1" fontWeight={600} ml={2}>
-                      Left Device
-                    </Typography>
-                    <Divider orientation="vertical" flexItem />
-                    <Typography variant="body1" fontWeight={600}>
-                      Right Device
-                    </Typography>
-                  </Box>
-                ),
-              },
-              {
-                label: "Test Case Executed",
-                value: (
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-evenly",
-                      width: "100%",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Typography variant="body1" fontWeight={600} ml={2}>
-                      Left Device
-                    </Typography>
-                    <Divider orientation="vertical" flexItem />
-                    <Typography variant="body1" fontWeight={600}>
-                      Right Device
-                    </Typography>
-                  </Box>
-                ),
-              },
-              {
                 isField: fields?.device === DEVICES.SAFE_BUDS,
                 label: "Left Device Mac :",
                 value: fields?.left?.mac,
               },
+              {
+                isField: fields?.device === DEVICES.SAFE_BUDS,
+                label: "Right Device Mac :",
+                value: fields?.right?.mac,
+              },
+              {
+                label: "Test Case Executed",
+                value: (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-evenly",
+                      width: "100%",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Typography variant="body1" fontWeight={600} ml={2}>
+                      Left Device
+                    </Typography>
+                    <Divider orientation="vertical" flexItem />
+                    <Typography variant="body1" fontWeight={600}>
+                      Right Device
+                    </Typography>
+                  </Box>
+                ),
+              },
+              {
+                label: "Test Case Executed",
+                value: (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-evenly",
+                      width: "100%",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Typography variant="body1" fontWeight={600} ml={2}>
+                      Left Device
+                    </Typography>
+                    <Divider orientation="vertical" flexItem />
+                    <Typography variant="body1" fontWeight={600}>
+                      Right Device
+                    </Typography>
+                  </Box>
+                ),
+              },
+
               {
                 label: "Overall Device QC Result :",
                 value: (
@@ -213,6 +224,12 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                 ),
               },
               {
+                isField: !(
+                  fields?.device === DEVICES.SAFE_BUDS ||
+                  fields?.device === DEVICES.ITE_PRIME ||
+                  fields?.device === DEVICES.BTE_OPTIMA ||
+                  fields?.device === DEVICES.BTE_PRIME
+                ),
                 label: "Device Audio Test :",
                 value: (
                   <Box
@@ -289,7 +306,6 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                 ),
               },
               {
-                isField: fields?.device !== DEVICES.SAFE_BUDS,
                 label: "Device Mic Test :",
                 value: (
                   <Box
@@ -417,15 +433,18 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                   >
                     <Chip
                       label={
-                        fields?.left?.volume?.volumeIncrease
+                        fields?.left?.volume?.volumeIncrease ||
+                        fields?.left?.result
                           ? "Passed"
                           : "Failed"
                       }
                       size="small"
                       sx={{
-                        backgroundColor: fields?.left?.volume?.volumeIncrease
-                          ? "success.main"
-                          : "error.main",
+                        backgroundColor:
+                          fields?.left?.volume?.volumeIncrease ||
+                          fields?.left?.result
+                            ? "success.main"
+                            : "error.main",
                         color: "#fff",
                         fontWeight: 500,
                         textTransform: "capitalize",
@@ -434,15 +453,18 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                     <Divider orientation="vertical" flexItem />
                     <Chip
                       label={
-                        fields?.right?.volume?.volumeIncrease
+                        fields?.right?.volume?.volumeIncrease ||
+                        fields?.right?.result
                           ? "Passed"
                           : "Failed"
                       }
                       size="small"
                       sx={{
-                        backgroundColor: fields?.right?.volume?.volumeIncrease
-                          ? "success.main"
-                          : "error.main",
+                        backgroundColor:
+                          fields?.right?.volume?.volumeIncrease ||
+                          fields?.right?.result
+                            ? "success.main"
+                            : "error.main",
                         color: "#fff",
                         fontWeight: 500,
                         textTransform: "capitalize",
@@ -498,7 +520,7 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                 ),
               },
               {
-                label: "Single Touch :",
+                label: device ? "Single Touch :" : "First Mode :",
                 value: (
                   <Box
                     sx={{
@@ -509,11 +531,15 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                   >
                     <Chip
                       label={
-                        fields?.left?.mode.includes(1) ? "Passed" : "Failed"
+                        fields?.left?.mode.includes(device ? 1 : 0)
+                          ? "Passed"
+                          : "Failed"
                       }
                       size="small"
                       sx={{
-                        backgroundColor: fields?.left?.mode.includes(1)
+                        backgroundColor: fields?.left?.mode.includes(
+                          device ? 1 : 0,
+                        )
                           ? "success.main"
                           : "error.main",
                         color: "#fff",
@@ -524,11 +550,15 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                     <Divider orientation="vertical" flexItem />
                     <Chip
                       label={
-                        fields?.right?.mode.includes(1) ? "Passed" : "Failed"
+                        fields?.right?.mode.includes(device ? 1 : 0)
+                          ? "Passed"
+                          : "Failed"
                       }
                       size="small"
                       sx={{
-                        backgroundColor: fields?.right?.mode.includes(1)
+                        backgroundColor: fields?.right?.mode.includes(
+                          device ? 1 : 0,
+                        )
                           ? "success.main"
                           : "error.main",
                         color: "#fff",
@@ -540,7 +570,7 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                 ),
               },
               {
-                label: "Double Touch :",
+                label: device ? "Double Touch :" : "Second Mode :",
                 value: (
                   <Box
                     sx={{
@@ -551,11 +581,15 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                   >
                     <Chip
                       label={
-                        fields?.left?.mode.includes(2) ? "Passed" : "Failed"
+                        fields?.left?.mode.includes(device ? 2 : 1)
+                          ? "Passed"
+                          : "Failed"
                       }
                       size="small"
                       sx={{
-                        backgroundColor: fields?.left?.mode.includes(2)
+                        backgroundColor: fields?.left?.mode.includes(
+                          device ? 2 : 1,
+                        )
                           ? "success.main"
                           : "error.main",
                         color: "#fff",
@@ -566,11 +600,15 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                     <Divider orientation="vertical" flexItem />
                     <Chip
                       label={
-                        fields?.right?.mode.includes(2) ? "Passed" : "Failed"
+                        fields?.right?.mode.includes(device ? 2 : 1)
+                          ? "Passed"
+                          : "Failed"
                       }
                       size="small"
                       sx={{
-                        backgroundColor: fields?.right?.mode.includes(2)
+                        backgroundColor: fields?.right?.mode.includes(
+                          device ? 2 : 1,
+                        )
                           ? "success.main"
                           : "error.main",
                         color: "#fff",
@@ -582,7 +620,7 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                 ),
               },
               {
-                label: "Triple Touch :",
+                label: device ? "Triple Touch :" : "Third Mode :",
                 value: (
                   <Box
                     sx={{
@@ -593,11 +631,15 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                   >
                     <Chip
                       label={
-                        fields?.left?.mode.includes(3) ? "Passed" : "Failed"
+                        fields?.left?.mode.includes(device ? 3 : 2)
+                          ? "Passed"
+                          : "Failed"
                       }
                       size="small"
                       sx={{
-                        backgroundColor: fields?.left?.mode.includes(3)
+                        backgroundColor: fields?.left?.mode.includes(
+                          device ? 3 : 2,
+                        )
                           ? "success.main"
                           : "error.main",
                         color: "#fff",
@@ -608,11 +650,15 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                     <Divider orientation="vertical" flexItem />
                     <Chip
                       label={
-                        fields?.right?.mode.includes(3) ? "Passed" : "Failed"
+                        fields?.right?.mode.includes(device ? 3 : 2)
+                          ? "Passed"
+                          : "Failed"
                       }
                       size="small"
                       sx={{
-                        backgroundColor: fields?.right?.mode.includes(3)
+                        backgroundColor: fields?.right?.mode.includes(
+                          device ? 3 : 2,
+                        )
                           ? "success.main"
                           : "error.main",
                         color: "#fff",
@@ -624,7 +670,8 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                 ),
               },
               {
-                label: "Long Press :",
+                isField: fields?.device === DEVICES.RIC_OPTIMA,
+                label: device ? "Long Press :" : "Four Mode :",
                 value: (
                   <Box
                     sx={{
@@ -635,11 +682,15 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                   >
                     <Chip
                       label={
-                        fields?.left?.mode.includes(4) ? "Passed" : "Failed"
+                        fields?.left?.mode.includes(device ? 4 : 3)
+                          ? "Passed"
+                          : "Failed"
                       }
                       size="small"
                       sx={{
-                        backgroundColor: fields?.left?.mode.includes(4)
+                        backgroundColor: fields?.left?.mode.includes(
+                          device ? 4 : 3,
+                        )
                           ? "success.main"
                           : "error.main",
                         color: "#fff",
@@ -650,11 +701,15 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                     <Divider orientation="vertical" flexItem />
                     <Chip
                       label={
-                        fields?.right?.mode.includes(4) ? "Passed" : "Failed"
+                        fields?.right?.mode.includes(device ? 4 : 3)
+                          ? "Passed"
+                          : "Failed"
                       }
                       size="small"
                       sx={{
-                        backgroundColor: fields?.right?.mode.includes(4)
+                        backgroundColor: fields?.right?.mode.includes(
+                          device ? 4 : 3,
+                        )
                           ? "success.main"
                           : "error.main",
                         color: "#fff",
@@ -668,8 +723,16 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
             ]}
           />
         </Box>
+      </CustomDialog>
+      ;
+    </>
+  );
+};
 
-        {/* <Box mt={4}>
+export default DeviceQcInformationUi;
+
+{
+  /* <Box mt={4}>
           <Typography variant="h4" fontWeight="bold" mb={2}>
             Right Device QC Details :
           </Typography>
@@ -903,11 +966,5 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
               },
             ]}
           />
-        </Box> */}
-      </CustomDialog>
-      ;
-    </>
-  );
-};
-
-export default DeviceQcInformationUi;
+        </Box> */
+}

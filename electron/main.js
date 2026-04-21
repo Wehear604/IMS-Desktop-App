@@ -102,11 +102,9 @@ function createWindow() {
     },
   );
 
-ipcMain.handle("check-safe-buds-connected", async () => {
-  return await isSafeBudsConnected();
-});
-
-
+  ipcMain.handle("check-safe-buds-connected", async () => {
+    return await isSafeBudsConnected();
+  });
 
   ipcMain.on("bluetooth-device-selected", (event, deviceId) => {
     console.log("React requested device:", deviceId);
@@ -128,7 +126,7 @@ ipcMain.handle("check-safe-buds-connected", async () => {
     if (selectBluetoothCallback) {
       selectBluetoothCallback(""); // Cancel
       selectBluetoothCallback = null;
-    } 
+    }
     cachedDeviceToSelect = null;
   });
 
@@ -155,7 +153,7 @@ ipcMain.handle("check-safe-buds-connected", async () => {
     }
   });
 
-  if (false) {
+  if (true) {
     win.loadFile(path.join(__dirname, "..", "build", "index.html"));
     console.log(
       "Forcing static build load from:",
@@ -168,9 +166,6 @@ ipcMain.handle("check-safe-buds-connected", async () => {
     console.log("Loading development server: http://localhost:3000");
   }
 }
-
- 
-  
 // -----------------------------------------------------
 //   ELECTRON APP EVENTS
 // -----------------------------------------------------

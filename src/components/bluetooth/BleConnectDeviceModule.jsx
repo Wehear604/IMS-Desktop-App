@@ -27,6 +27,7 @@ import { Bluetooth } from "@mui/icons-material";
 import { DeviceMACAction } from "../../store/actions/deviceDataAction";
 import { use } from "react";
 import { BLE_STORE } from "../../utils/bleStore";
+import { initializeBteModesOnFirstConnection } from "../../utils/bteModeInitializer";
 
 // Style for the modal
 const modalStyle = {
@@ -78,17 +79,17 @@ const BleConnectDeviceModule = ({
         switch (details.pairingKind) {
           case "confirm":
             response.confirmed = window.confirm(
-              `Do you want to connect to device ${details.deviceId}?`
+              `Do you want to connect to device ${details.deviceId}?`,
             );
             break;
           case "confirmPin":
             response.confirmed = window.confirm(
-              `Does the pin ${details.pin} match the pin on device ${details.deviceId}?`
+              `Does the pin ${details.pin} match the pin on device ${details.deviceId}?`,
             );
             break;
           case "providePin":
             const pin = window.prompt(
-              `Please provide a pin for ${details.deviceId}.`
+              `Please provide a pin for ${details.deviceId}.`,
             );
             if (pin) {
               response.pin = pin;
@@ -104,7 +105,7 @@ const BleConnectDeviceModule = ({
       });
     } else {
       console.warn(
-        "electronAPI is not available. Running in a standard browser."
+        "electronAPI is not available. Running in a standard browser.",
       );
     }
   }, []);
@@ -134,18 +135,21 @@ const BleConnectDeviceModule = ({
   const readAppearanceValue = async (characteristic) => {
     const arr_res = await readAndDecodeData(characteristic);
     setData(arr_res); // Set the data for the UI
-    setDeviceFunctions({
-      // This was `setWriteFunction`
+    const writerInterface = {
       readData: async () => {
         return await readAndDecodeData(characteristic);
       },
       writeData: async (arr_to_be_write) => {
         console.log("writeData called with:", arr_to_be_write);
         return await characteristic.writeValueWithoutResponse(
-          Uint8Array.from(arr_to_be_write)
+          Uint8Array.from(arr_to_be_write),
         );
       },
-    });
+    };
+
+    // Keep a consistent shape everywhere: BLE_STORE.writeFun must expose readData/writeData.
+    BLE_STORE.writeFun = writerInterface;
+    setDeviceFunctions(writerInterface);
     return arr_res;
   };
 
@@ -178,17 +182,17 @@ const BleConnectDeviceModule = ({
       }
 
       if (
-        (fitting.device_side === LISTENING_SIDE.LEFT &&
-          !device.name.endsWith("L")) ||
-        (fitting.device_side === LISTENING_SIDE.RIGHT &&
-          !device.name.endsWith("R"))
+        // (fitting.device_side === LISTENING_SIDE.LEFT &&
+        //   !device.name.endsWith("L")) ||
+        fitting.device_side === LISTENING_SIDE.RIGHT &&
+        !device.name.endsWith("R")
       ) {
         const side = findObjectKeyByValue(fitting.device_side, LISTENING_SIDE);
         dispatch(
           callSnackBar(
             `Please connect the ${side} side device `,
-            SNACK_BAR_VARIETNS.error
-          )
+            SNACK_BAR_VARIETNS.error,
+          ),
         );
         setLoading(false);
         return;
@@ -206,9 +210,8 @@ const BleConnectDeviceModule = ({
 
       const characteristics = await service.getCharacteristics();
       controlCharacteristic = await service.getCharacteristic(
-        "e093f3b5-00a3-a9e5-9eca-40036e0edc24"
+        "e093f3b5-00a3-a9e5-9eca-40036e0edc24",
       );
-
       for (const characteristic of characteristics) {
         switch (characteristic.uuid) {
           case window.BluetoothUUID.getCharacteristic("gap.device_name"):
@@ -221,6 +224,39 @@ const BleConnectDeviceModule = ({
             break;
         }
       }
+
+      if (BLE_STORE.writeFun?.writeData) {
+        try {
+          const modeInitResult = await initializeBteModesOnFirstConnection({
+            deviceId: device.id,
+            side: fitting.device_side,
+            writeData: BLE_STORE.writeFun.writeData,
+          });
+
+          console.log("Initialization result:", modeInitResult);
+
+          if (modeInitResult.written) {
+            dispatch(
+              callSnackBar(
+                "Default BTE modes synced on first connection.",
+                SNACK_BAR_VARIETNS.info,
+              ),
+            );
+            BLE_STORE.BTEdisconnect = true;
+          }
+        } catch (modeInitError) {
+          console.error("BTE mode initialization failed:", modeInitError);
+          dispatch(
+            callSnackBar(
+              "Connected, but default mode sync failed. You can reconnect and retry.",
+              SNACK_BAR_VARIETNS.warning,
+            ),
+          );
+
+          BLE_STORE.BTEdisconnect = true;
+        }
+      }
+
       setConnected(true);
       setLoading(false);
     } catch (e) {
