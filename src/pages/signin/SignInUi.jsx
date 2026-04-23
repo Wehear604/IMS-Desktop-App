@@ -15,7 +15,7 @@ const SignInUI = ({ state, setState, onSubmit, loading }) => {
       >
         <Box width={"100%"} display={"flex"} flexDirection={"column"}>
           <Typography align="center" variant="h1" color={"primary"} mb={1}>
-            Log In Updated
+            Log In Updated 2.0
           </Typography>
           <Typography align="center" variant="h5" color={"red"} mb={1}>
             {state.err}&nbsp;
