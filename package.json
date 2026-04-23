@@ -1,7 +1,7 @@
 {
   "name": "inventory-management-frontend",
   "homepage": "./",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Desktop Inventory Management System",
   "author": "Rudren Patel",
@@ -54,7 +54,8 @@
     "dev:electron": "nodemon --watch electron --exec electron .",
     "dev": "concurrently \"npm start\" \"npm run dev:electron\"",
     "dist": "npm run build && electron-builder --win --x64",
-    "release": "npm run build && electron-builder --win --x64 -p always",
+    "release": "npm run build && electron-builder --win --x64 -p never",
+    "release:github": "npm run build && electron-builder --win --x64 -p always",
     "postinstall": "node move-electron.js && electron-builder install-app-deps --arch=x64"
   },
   "build": {
