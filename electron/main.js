@@ -1,9 +1,57 @@
-const { app, BrowserWindow, ipcMain, session } = require("electron/main");
+const {
+  app,
+  BrowserWindow,
+  ipcMain,
+  session,
+  dialog,
+  Menu,
+} = require("electron/main");
 const path = require("node:path");
+const { autoUpdater } = require("electron-updater");
+const log = require("electron-log");
 const loudness = require("loudness");
+let hasCheckedForUpdates = false;
 let bluetoothPinCallback = null;
 let selectBluetoothCallback = null;
 let cachedDeviceToSelect = null;
+
+function checkForUpdatesOnce() {
+  if (hasCheckedForUpdates || !app.isPackaged) return;
+  hasCheckedForUpdates = true;
+  autoUpdater.checkForUpdatesAndNotify();
+}
+
+function checkForUpdatesManual() {
+  if (!app.isPackaged) {
+    dialog.showMessageBox({
+      type: "info",
+      title: "Updates",
+      message: "Update checks are available only in packaged builds.",
+    });
+    return;
+  }
+
+  autoUpdater.checkForUpdates();
+}
+
+function setupAppMenu() {
+  const template = [
+    {
+      label: "Help",
+      submenu: [
+        {
+          label: "Check for Updates",
+          click: () => {
+            checkForUpdatesManual();
+          },
+        },
+      ],
+    },
+  ];
+
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
+}
 
 // Auto reload during development
 if (process.env.NODE_ENV === "development") {
@@ -165,11 +213,83 @@ function createWindow() {
     win.webContents.openDevTools();
     console.log("Loading development server: http://localhost:3000");
   }
+
+  win.once("ready-to-show", () => {
+    checkForUpdatesOnce();
+  });
 }
+
+autoUpdater.on("checking-for-update", () => {
+  console.log("Checking for update...");
+});
+
+autoUpdater.on("update-available", (info) => {
+  console.log("Update available:", info.version);
+});
+
+autoUpdater.on("update-not-available", (info) => {
+  console.log(
+    "No update available. Current/latest:",
+    app.getVersion(),
+    info.version,
+  );
+});
+
+autoUpdater.on("download-progress", (progressObj) => {
+  console.log(
+    `Download speed: ${progressObj.bytesPerSecond} - Downloaded ${progressObj.percent.toFixed(1)}%`,
+  );
+});
+
+autoUpdater.on("update-downloaded", () => {
+  console.log("Update downloaded.");
+  dialog
+    .showMessageBox({
+      type: "info",
+      title: "Update Ready",
+      message:
+        "A new version has been downloaded. Restart the application to apply the updates.",
+      buttons: ["Restart", "Later"],
+    })
+    .then((returnValue) => {
+      if (returnValue.response === 0) {
+        autoUpdater.quitAndInstall();
+      }
+    });
+});
+
+autoUpdater.on("error", (err) => {
+  console.error(
+    "Error in auto-updater:",
+    err == null ? "unknown" : err.message,
+  );
+});
+
+ipcMain.handle("check-for-updates-manual", async () => {
+  checkForUpdatesManual();
+  return { ok: true };
+});
+
+autoUpdater.logger = log;
+autoUpdater.logger.transports.file.level = "info";
+autoUpdater.disableWebInstaller = true;
 // -----------------------------------------------------
 //   ELECTRON APP EVENTS
 // -----------------------------------------------------
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  setupAppMenu();
+  createWindow();
+
+  if (app.isPackaged) {
+    autoUpdater.setFeedURL({
+      provider: "github",
+      owner: "Wehear604",
+      repo: "IMS-Desktop-App",
+    });
+
+    checkForUpdatesOnce();
+  }
+});
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
