@@ -1,4 +1,4 @@
-export const mode = "development";
+export const mode = "production1";
 let domain = "";
 
 switch (mode) {
