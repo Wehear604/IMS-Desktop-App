@@ -95,9 +95,17 @@ const deviceQcReducer = (state = initialState, action) => {
             ? action.volume
             : state.volumeRight,
         volumeIncrease:
-          state.currentVolume == 0 ? false:state.currentVolume !== action.volume ? true : state.volumeIncrease,
+          state.currentVolume == 0
+            ? false
+            : state.currentVolume !== action.volume
+              ? true
+              : state.volumeIncrease,
         volumeDecrease:
-          state.currentVolume < action.volume ? true : state.volumeDecrease,
+          state.currentVolume == 0
+            ? false
+            : state.currentVolume < action.volume
+              ? true
+              : state.volumeDecrease,
         currentVolume: action.volume,
       };
 
