@@ -35,94 +35,106 @@ const DeviceQcListUi = ({fields, setFields, filters, setFilters }) => {
         };
 
         switch (productType) {
-            case DEVICES.BTE_OPTIMA:
-                return {
-                    ...baseConfig,
-                    src: BTE,
-                    OnClickCenter: () => updateSuggestedProduct(DEVICES.BTE_OPTIMA),
-                };
+          case DEVICES.BTE_OPTIMA:
+            return {
+              ...baseConfig,
+              src: BTE,
+              OnClickCenter: () => updateSuggestedProduct(DEVICES.BTE_OPTIMA),
+            };
 
-            case DEVICES.BTE_PRIME:
-                return {
-                    ...baseConfig,
-                    src: BTE,
-                    OnClickCenter: () => updateSuggestedProduct(DEVICES.BTE_PRIME),
-                };
+          case DEVICES.BTE_PRIME:
+            return {
+              ...baseConfig,
+              src: BTE,
+              OnClickCenter: () => updateSuggestedProduct(DEVICES.BTE_PRIME),
+            };
 
-            case DEVICES.RIC_OPTIMA_8:
-                return {
-                    ...baseConfig,
-                    src: ric8WithoutDome,
-                    OnClickCenter: () => updateSuggestedProduct(DEVICES.RIC_OPTIMA_8),
-                };
+          case DEVICES.RIC_OPTIMA_8C:
+            return {
+              ...baseConfig,
+              src: ric8WithoutDome,
+              OnClickCenter: () =>
+                updateSuggestedProduct(DEVICES.RIC_OPTIMA_8C),
+            };
 
-            case DEVICES.RIC_OPTIMA:
-                return {
-                    ...baseConfig,
-                    src: METALIC_RIC_OPTIMA,
-                    sideColor: {
-                        METALIC: "#C6C1C5",
-                        BLACK: "#000000",
-                        BEIGE: "#D6B19F",
-                    },
-                    OnClickCenter: () => updateSuggestedProduct(DEVICES.RIC_OPTIMA),
-                };
+          case DEVICES.RIC_OPTIMA_8:
+            return {
+              ...baseConfig,
+              src: METALIC_RIC_OPTIMA,
+              sideColor: {
+                METALIC: "#C6C1C5",
+                BLACK: "#000000",
+                BEIGE: "#D6B19F",
+              },
+              OnClickCenter: () => updateSuggestedProduct(DEVICES.RIC_OPTIMA_8),
+            };
+          case DEVICES.RIC_OPTIMA:
+            return {
+              ...baseConfig,
+              src: METALIC_RIC_OPTIMA,
+              sideColor: {
+                METALIC: "#C6C1C5",
+                BLACK: "#000000",
+                BEIGE: "#D6B19F",
+              },
+              OnClickCenter: () => updateSuggestedProduct(DEVICES.RIC_OPTIMA),
+            };
 
-            case DEVICES.RIC_32:
-                return {
-                    ...baseConfig,
-                    src: METALIC_RIC_OPTIMA,
-                    sideColor: {
-                        METALIC: "#C6C1C5",
-                        BLACK: "#000000",
-                        BEIGE: "#D6B19F",
-                    },
-                    OnClickCenter: () => updateSuggestedProduct(DEVICES.RIC_32),
-                };
+          case DEVICES.RIC_32:
+            return {
+              ...baseConfig,
+              src: METALIC_RIC_OPTIMA,
+              sideColor: {
+                METALIC: "#C6C1C5",
+                BLACK: "#000000",
+                BEIGE: "#D6B19F",
+              },
+              OnClickCenter: () => updateSuggestedProduct(DEVICES.RIC_32),
+            };
 
-            case DEVICES.ITE_OPTIMA:
-                return {
-                    ...baseConfig,
-                    src: iteOptimaBlack,
-                    sideColor: { BLACK: "#000000", WHITE: "#FFFFFF" },
-                    OnClickCenter: () => updateSuggestedProduct(DEVICES.ITE_OPTIMA),
-                };
+          case DEVICES.ITE_OPTIMA:
+            return {
+              ...baseConfig,
+              src: iteOptimaBlack,
+              sideColor: { BLACK: "#000000", WHITE: "#FFFFFF" },
+              OnClickCenter: () => updateSuggestedProduct(DEVICES.ITE_OPTIMA),
+            };
 
-            case DEVICES.WEHEAR_OX:
-                return {
-                    ...baseConfig,
-                    src: wehearox,
-                    OnClickCenter: () => updateSuggestedProduct(DEVICES.WEHEAR_OX),
-                };
-            case DEVICES.SAFE_BUDS:
-                return {
-                    ...baseConfig,
-                    src: SAFE_BUDS,
-                    OnClickCenter: () => updateSuggestedProduct(DEVICES.SAFE_BUDS),
-                };
-            case DEVICES.WEHEAR_2_0:
-                return {
-                    ...baseConfig,
-                    src: wehear_2_0,
-                    OnClickCenter: () => updateSuggestedProduct(DEVICES.WEHEAR_2_0),
-                };
-            case DEVICES.ITE_PRIME:
-                return {
-                    ...baseConfig,
-                    src: itePrimeWhite,
-                    OnClickCenter: () => updateSuggestedProduct(DEVICES.ITE_PRIME),
-                };
+          case DEVICES.WEHEAR_OX:
+            return {
+              ...baseConfig,
+              src: wehearox,
+              OnClickCenter: () => updateSuggestedProduct(DEVICES.WEHEAR_OX),
+            };
+          case DEVICES.SAFE_BUDS:
+            return {
+              ...baseConfig,
+              src: SAFE_BUDS,
+              OnClickCenter: () => updateSuggestedProduct(DEVICES.SAFE_BUDS),
+            };
+          case DEVICES.WEHEAR_2_0:
+            return {
+              ...baseConfig,
+              src: wehear_2_0,
+              OnClickCenter: () => updateSuggestedProduct(DEVICES.WEHEAR_2_0),
+            };
+          case DEVICES.ITE_PRIME:
+            return {
+              ...baseConfig,
+              src: itePrimeWhite,
+              OnClickCenter: () => updateSuggestedProduct(DEVICES.ITE_PRIME),
+            };
 
-            case DEVICES.NECKBAND:
-                return {
-                    ...baseConfig,
-                    src: neckbandBlack,
-                    IsOnlyBoth: "OnlyBoth",
-                    OnClickCenter: () => updateSuggestedProduct(DEVICES.NECKBAND),
-                };
+          case DEVICES.NECKBAND:
+            return {
+              ...baseConfig,
+              src: neckbandBlack,
+              IsOnlyBoth: "OnlyBoth",
+              OnClickCenter: () => updateSuggestedProduct(DEVICES.NECKBAND),
+            };
 
-            default:
-                return {};
+          default:
+            return {};
         }
     };
 

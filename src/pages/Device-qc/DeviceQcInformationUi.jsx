@@ -670,7 +670,7 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                 ),
               },
               {
-                isField: fields?.device === DEVICES.RIC_OPTIMA,
+                isField: fields?.device === DEVICES.RIC_OPTIMA || fields?.device === DEVICES.RIC_OPTIMA_8,
                 label: device ? "Long Press :" : "Four Mode :",
                 value: (
                   <Box

@@ -6,7 +6,7 @@ const initialState = {
   modeLeft: [],
   modeRight: [],
   device_side: null,
-  currentVolume: 0,
+  currentVolume: null,
   start: false,
   volumeDecrease: false,
   volumeIncrease: false,
@@ -78,6 +78,12 @@ const deviceQcReducer = (state = initialState, action) => {
 
     // ---------- RIC VOLUME ----------
     case actions.SET_VOLUME_LEVEL:
+      console.log(
+        " state.currentVolume > action.volume ",
+        state.currentVolume !== action.volume,
+        state.currentVolume > action.volume,
+        state.currentVolume , action.volume,
+      );
       return {
         ...state,
         volumeLeft:
@@ -89,7 +95,7 @@ const deviceQcReducer = (state = initialState, action) => {
             ? action.volume
             : state.volumeRight,
         volumeIncrease:
-          state.currentVolume > action.volume ? true : state.volumeIncrease,
+          state.currentVolume == 0 ? false:state.currentVolume !== action.volume ? true : state.volumeIncrease,
         volumeDecrease:
           state.currentVolume < action.volume ? true : state.volumeDecrease,
         currentVolume: action.volume,

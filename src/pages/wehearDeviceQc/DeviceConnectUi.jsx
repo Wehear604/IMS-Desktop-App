@@ -383,6 +383,14 @@ const DeviceConnectUi = () => {
           />
         );
       case DEVICES.RIC_OPTIMA_8:
+        return (
+          <img
+            style={{ width: 120, height: 120 }}
+            src={leftRic16}
+            alt="Ric 16"
+          />
+        );
+      case DEVICES.RIC_OPTIMA_8C:
         return <img src={leftRic8} alt="Ric 8" />;
       case DEVICES.ITE_OPTIMA:
         return (
@@ -452,6 +460,14 @@ const DeviceConnectUi = () => {
           />
         );
       case DEVICES.RIC_OPTIMA_8:
+        return (
+          <img
+            style={{ width: 120, height: 120 }}
+            src={rightRic16}
+            alt="Ric 16"
+          />
+        );
+      case DEVICES.RIC_OPTIMA_8C:
         return <img src={rightRic8} alt="Ric 8" />;
       case DEVICES.ITE_OPTIMA:
         return (

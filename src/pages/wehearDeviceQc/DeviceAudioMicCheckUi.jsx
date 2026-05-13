@@ -154,6 +154,7 @@ const DeviceAudioMicCheckUi = () => {
 
     if (
       dev?.device_type === DEVICES.RIC_OPTIMA ||
+      dev?.device_type === DEVICES.RIC_OPTIMA_8 ||
       dev?.device_type === DEVICES.RIC_32
     ) {
       if (step === 1)
@@ -162,7 +163,7 @@ const DeviceAudioMicCheckUi = () => {
         dispatch(readRicMode(dev.device_side, BLE_STORE.deviceObj));
     }
 
-    if (dev?.device_type === DEVICES.RIC_OPTIMA_8) {
+    if (dev?.device_type === DEVICES.RIC_OPTIMA_8C) {
       if (step === 1 || step === 2) dispatch(readRic8Volume(dev.device_side));
     }
 
@@ -230,11 +231,12 @@ const DeviceAudioMicCheckUi = () => {
 
       if (
         device?.device_type === DEVICES.RIC_OPTIMA ||
+        device?.device_type === DEVICES.RIC_OPTIMA_8 ||
         device?.device_type === DEVICES.RIC_32
       )
         dispatch(RicDeviceCurrentVolume(device.device_side));
 
-      if (device?.device_type === DEVICES.RIC_OPTIMA_8)
+      if (device?.device_type === DEVICES.RIC_OPTIMA_8C)
         dispatch(readRic8Volume(device.device_side, true));
 
       if (device?.device_type === DEVICES.ITE_OPTIMA)
@@ -320,8 +322,9 @@ const DeviceAudioMicCheckUi = () => {
         dispatch(closeModal("deviceAudioMicCheck"));
 
         if (
-          device?.device_type === DEVICES.RIC_OPTIMA_8 ||
+          device?.device_type === DEVICES.RIC_OPTIMA_8C ||
           device?.device_type === DEVICES.RIC_OPTIMA ||
+          device?.device_type === DEVICES.RIC_OPTIMA_8 ||
           device?.device_type === DEVICES.RIC_32
         ) {
           BLE_STORE.disconnectFun();
@@ -352,7 +355,7 @@ const DeviceAudioMicCheckUi = () => {
     if (step === 0)
       return !Boolean(device?.is_Audio_play) && !Boolean(device.isMic);
     if (step === 1)
-      return device?.device_type === DEVICES.RIC_OPTIMA
+      return device?.device_type === DEVICES.RIC_OPTIMA || device?.device_type === DEVICES.RIC_OPTIMA_8
         ? !(deviceQc?.volumeIncrease || deviceQc?.volumeDecrease)
         : !(deviceQc?.volumeIncrease && deviceQc?.volumeDecrease);
     if (step === 2) {
@@ -360,7 +363,7 @@ const DeviceAudioMicCheckUi = () => {
         device?.device_side === LISTENING_SIDE.LEFT
           ? deviceQc?.modeLeft
           : deviceQc?.modeRight;
-      return device?.device_type === DEVICES.RIC_OPTIMA
+      return device?.device_type === DEVICES.RIC_OPTIMA || device?.device_type === DEVICES.RIC_OPTIMA_8
         ? !(Array.isArray(modes) && modes.length === 3)
         : !(Array.isArray(modes) && modes.length === 4);
     }
@@ -659,7 +662,7 @@ const DeviceAudioMicCheckUi = () => {
             <Box>
               {(device?.device_type === DEVICES.BTE_OPTIMA ||
                 device?.device_type === DEVICES.BTE_PRIME ||
-                device?.device_type === DEVICES.RIC_OPTIMA_8) && (
+                device?.device_type === DEVICES.RIC_OPTIMA_8C) && (
                 <StepCard
                   isChecked={true}
                   checked={deviceQc.volumeIncrease}
@@ -676,7 +679,7 @@ const DeviceAudioMicCheckUi = () => {
                 title={
                   device?.device_type === DEVICES.BTE_OPTIMA ||
                   device?.device_type === DEVICES.BTE_PRIME ||
-                  device?.device_type === DEVICES.RIC_OPTIMA_8
+                  device?.device_type === DEVICES.RIC_OPTIMA_8C
                     ? deviceQc.volumeDecrease
                       ? "Volume Level Decreased"
                       : "Decrease Volume"
@@ -719,7 +722,7 @@ const DeviceAudioMicCheckUi = () => {
               {(device?.device_type === DEVICES.BTE_OPTIMA ||
                 device?.device_type === DEVICES.BTE_PRIME ||
                 device?.device_type === DEVICES.ITE_PRIME ||
-                device?.device_type === DEVICES.RIC_OPTIMA_8) && (
+                device?.device_type === DEVICES.RIC_OPTIMA_8C) && (
                 <StepCard
                   isChecked={true}
                   checked={modecheck(3)}

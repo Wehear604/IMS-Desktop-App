@@ -162,6 +162,7 @@ export const actions = {
 export const SERVICE_UUID = {
   1: "e093f3b5-00a3-a9e5-9eca-40016e0edc24",
   6: "0000fff0-0000-1000-8000-00805f9b34fb",
+  18: "0000fff0-0000-1000-8000-00805f9b34fb",
   8: "0000fff0-0000-1000-8000-00805f9b34fb",
   9: "0000fdc2-0000-1000-8000-00805f9b34fb",
   11: "0000fff0-0000-1000-8000-00805f9b34fb",
@@ -173,6 +174,7 @@ export const SERVICE_UUID = {
 export const MANUFACTURER_IDENTIFIER = {
   1: "0x0362",
   6: "0x6C42",
+  18: "0x6C42",
   8: "0x0088",
   9: "0x3231",
   11: "0x6C42",
@@ -184,6 +186,7 @@ export const MANUFACTURER_IDENTIFIER = {
 
 export const CHARACTERISTIC_UUID_READ_WRITE = {
   1: "e093f3b5-00a3-a9e5-9eca-40036e0edc24",
+  18: "0000fff2-0000-1000-8000-00805f9b34fb",
   6: "0000fff2-0000-1000-8000-00805f9b34fb",
   8: "0000fff2-0000-1000-8000-00805f9b34fb",
   9: "e49a25e0-f69a-11e8-8eb2-f2801f1b9fd1",
@@ -195,6 +198,7 @@ export const CHARACTERISTIC_UUID_READ_WRITE = {
 
 export const CHARACTERISTIC_UUID_READ_NOTIFY = {
   1: "e093f3b5-00a3-a9e5-9eca-40026e0edc24",
+  18: "0000fff1-0000-1000-8000-00805f9b34fb",
   6: "0000fff1-0000-1000-8000-00805f9b34fb",
   8: "0000fff1-0000-1000-8000-00805f9b34fb",
   9: "e49a28e1-f69a-11e8-8eb2-f2801f1b9fd1",
@@ -287,8 +291,9 @@ export const DEVICES_NAME = {
   // 4: "BTE 32",
   // 5: "BTE 24",
   6: "RIC OPTIMA 16",
+ 18: "RIC OPTIMA 8",
   // 7: "RIC PRIME",
-  8: "RIC OPTIMA 8",
+  8: "RIC OPTIMA 8C",
   9: "ITE OPTIMA",
   10: "POWER BTE",
   11: "RIC OPTIMA 32",
@@ -319,14 +324,15 @@ export const DOM_TYPE = {
 export const DEVICES = {
   BTE_OPTIMA: 1,
   BTE_PRIME: 2,
+  RIC_OPTIMA_8C: 8,
+  RIC_OPTIMA_8: 18,
   RIC_OPTIMA: 6,
-  RIC_OPTIMA_8: 8,
+  ITE_PRIME: 12,
   ITE_OPTIMA: 9,
   // POWER_BTE: 10,
   // RIC_32: 11,
-  ITE_PRIME: 12,
   // NECKBAND: 13,
-
+  
   WEHEAR_OX: 14,
   SAFE_BUDS: 15,
   // SAFE_HEADPHONE: 16,

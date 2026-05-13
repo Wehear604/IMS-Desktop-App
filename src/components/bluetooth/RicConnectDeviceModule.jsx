@@ -374,7 +374,7 @@ const RicConnectDevice = ({
 
       const currentDeviceInfo = { name: device.name, id: device.id };
       setDeviceInfo(currentDeviceInfo);
-      if (fitting.device_type === DEVICES.RIC_OPTIMA_8) {
+      if (fitting.device_type === DEVICES.RIC_OPTIMA_8C) {
         await WriteRicDataToDevice("0x02", side, BLE_STORE.deviceObj || device);
         if (side === "Left") {
           await WriteRicDataToDevice(
