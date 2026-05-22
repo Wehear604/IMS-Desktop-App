@@ -18,9 +18,7 @@ import SafeBudsColorUi from "../SafebudsUi/SafeBudsColorUi";
 import SafeBudsBoxIdUi from "../SafebudsUi/SafeBudsBoxIdUi";
 
 const BoxContainsUI = ({ fields }) => {
-      const { device, deviceQc, deviceDataStore } = useSelector(
-        (state) => state,
-      );
+  const { device, deviceQc, deviceDataStore } = useSelector((state) => state);
   const [loading, setLoading] = useState(false);
 
   const dispatch = useDispatch();
@@ -36,6 +34,7 @@ const BoxContainsUI = ({ fields }) => {
     boxId: deviceDataStore.boxId ?? "0000000000",
     device: device?.device_type,
     isNewric16: deviceDataStore?.isNewric16,
+    boxImage: deviceDataStore?.boxImage,
   };
 
   const onComplete = async (e) => {

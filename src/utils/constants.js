@@ -157,6 +157,8 @@ export const actions = {
   SET_STEP: "SET_STEP",
   SET_EQUALIZER: "SET_EQUALIZER",
   SET_DEVICE_CONTAINS_DETAILS: "SET_DEVICE_CONTAINS_DETAILS",
+
+  SET_DEVICE_BOXIMAGE_DETAILS: "SET_DEVICE_BOXIMAGE_DETAILS",
 };
 
 export const SERVICE_UUID = {
@@ -291,7 +293,7 @@ export const DEVICES_NAME = {
   // 4: "BTE 32",
   // 5: "BTE 24",
   6: "RIC OPTIMA 16",
- 18: "RIC OPTIMA 8",
+  18: "RIC OPTIMA 8",
   // 7: "RIC PRIME",
   8: "RIC OPTIMA 8C",
   9: "ITE OPTIMA",
@@ -332,7 +334,7 @@ export const DEVICES = {
   // POWER_BTE: 10,
   // RIC_32: 11,
   // NECKBAND: 13,
-  
+
   WEHEAR_OX: 14,
   SAFE_BUDS: 15,
   // SAFE_HEADPHONE: 16,

@@ -11,8 +11,12 @@ import QrScannerPopup from "../../../components/Scanner/QrScannerPopup";
 import CustomInput from "../../../components/inputs/CustomInputs";
 import BarcodeIcon from "@mui/icons-material/QrCode2";
 import { useDispatch, useSelector } from "react-redux";
-import { DeviceBoxIDAction } from "../../../store/actions/deviceDataAction";
+import {
+  DeviceBoxIDAction,
+  DeviceBoxImageAction,
+} from "../../../store/actions/deviceDataAction";
 import qrScanLogo from "../../../assets/images/qrScanLogo.svg";
+import CameraCaptureComponent from "../../../components/layouts/upload/CameraCaptureComponent";
 
 const SafeBudsBoxIdUi = () => {
   const [Barcode, setBarcode] = useState(true);

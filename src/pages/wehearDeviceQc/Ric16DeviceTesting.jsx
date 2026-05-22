@@ -221,6 +221,7 @@ const Ric16DeviceTesting = (isUpdate) => {
     boxId: deviceDataStore.boxId ?? "0000000000",
     device: device?.device_type,
     isNewric16: deviceDataStore?.isNewric16,
+    boxImage: deviceDataStore.boxImage ?? "",
   };
 
   const onSubmit = async (e) => {

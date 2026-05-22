@@ -154,29 +154,26 @@ const ItePrimeDeviceTesting = ({ isUpdate }) => {
     return true;
   };
 
-const disableNext = () => {
-  if (step === 0) {
-    return !isStepValid();
-  } else if (step === 1) {
-    return !(
-      device?.device_type &&
-      device?.device_side &&
-      deviceQc?.modeLeft &&
-      (deviceQc?.volumeIncrease || deviceQc?.volumeDecrease) &&
-      fields.body1 &&
-      fields.body2 &&
-      fields.charging &&
-      device?.is_Audio_play &&
-      device?.mac &&
-      device.isMic
-    );
-  }
-  return false;
-};;
-console.log(
-  device,
-  "step"
-);
+  const disableNext = () => {
+    if (step === 0) {
+      return !isStepValid();
+    } else if (step === 1) {
+      return !(
+        device?.device_type &&
+        device?.device_side &&
+        deviceQc?.modeLeft &&
+        (deviceQc?.volumeIncrease || deviceQc?.volumeDecrease) &&
+        fields.body1 &&
+        fields.body2 &&
+        fields.charging &&
+        device?.is_Audio_play &&
+        device?.mac &&
+        device.isMic
+      );
+    }
+    return false;
+  };
+  console.log(device, "step");
   const data = {
     left: {
       device_type: device?.device_type,
@@ -215,6 +212,7 @@ console.log(
     box_Contains: deviceDataStore.box_Contains ?? [],
     deviceColor: deviceDataStore.deviceColor ?? "69521eea409668adad3cf8e2",
     boxId: deviceDataStore.boxId ?? "0000000000",
+    boxImage: deviceDataStore.boxImage ?? "",
     device: device?.device_type,
   };
 

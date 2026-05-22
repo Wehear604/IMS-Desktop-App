@@ -62,6 +62,25 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
               },
               { label: "Device Box Id :", value: fields?.boxId },
               {
+                label: "Box Image :",
+                value: fields?.boxImage ? (
+                  <Box
+                    component="img"
+                    src={fields.boxImage}
+                    alt="Box"
+                    sx={{
+                      maxWidth: 220,
+                      maxHeight: 160,
+                      objectFit: "contain",
+                      borderRadius: 2,
+                      border: "1px solid #dddddd",
+                    }}
+                  />
+                ) : (
+                  "NA"
+                ),
+              },
+              {
                 isField: !fields?.box_Contains?.length,
                 label: "Box Contains :",
                 isArray: true,
@@ -120,7 +139,12 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
               {
                 isField: fields?.device !== DEVICES.RIC_OPTIMA,
                 label: "New RIC OPTIMA 16 :",
-                value: fields?.isNewric16 == true ? "Yes" : fields?.isNewric16 == false ? "No" : "NA",
+                value:
+                  fields?.isNewric16 == true
+                    ? "Yes"
+                    : fields?.isNewric16 == false
+                      ? "No"
+                      : "NA",
               },
             ]}
           />
@@ -670,7 +694,9 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                 ),
               },
               {
-                isField: fields?.device === DEVICES.RIC_OPTIMA || fields?.device === DEVICES.RIC_OPTIMA_8,
+                isField:
+                  fields?.device === DEVICES.RIC_OPTIMA ||
+                  fields?.device === DEVICES.RIC_OPTIMA_8,
                 label: device ? "Long Press :" : "Four Mode :",
                 value: (
                   <Box

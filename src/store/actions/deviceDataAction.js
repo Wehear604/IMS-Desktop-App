@@ -1,5 +1,9 @@
 import { BLE_STORE } from "../../utils/bleStore";
-import { actions, LISTENING_SIDE, SNACK_BAR_VARIETNS } from "../../utils/constants";
+import {
+  actions,
+  LISTENING_SIDE,
+  SNACK_BAR_VARIETNS,
+} from "../../utils/constants";
 import { callSnackBar } from "./snackbarAction";
 
 export const DeviceSelectAction = (device_type) => {
@@ -45,7 +49,7 @@ export const disconnectAction = (side, flag = false) => {
       BLE_STORE.disconnectFun = null;
       BLE_STORE.writeFun = null;
       BLE_STORE.hardwareData = null;
-      
+
       if (BLE_STORE.LeftdeviceObj?.gatt?.connected) {
         BLE_STORE.LeftdeviceObj.gatt.disconnect();
       }
@@ -75,7 +79,7 @@ export const disconnectAction = (side, flag = false) => {
 };
 
 export const onWriteFunctionChange = (value, side) => {
-  if(side === LISTENING_SIDE.LEFT){
+  if (side === LISTENING_SIDE.LEFT) {
     BLE_STORE.writeLeftFun = value;
   } else {
     BLE_STORE.writeFun = value;
@@ -131,6 +135,14 @@ export const DeviceBoxIDAction = (boxId) => {
   return {
     type: actions.SET_DEVICE_BOXID_DETAILS,
     boxId,
+  };
+};
+
+export const DeviceBoxImageAction = (boxImage) => {
+  console.log("boxImage in action", boxImage);
+  return {
+    type: actions.SET_DEVICE_BOXIMAGE_DETAILS,
+    boxImage,
   };
 };
 

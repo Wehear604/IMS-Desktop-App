@@ -112,6 +112,29 @@ function createWindow() {
     win.webContents.send("bluetooth-pairing-request", details);
   });
 
+  // Auto-allow camera/microphone permission requests from renderer.
+  // This helps packaged desktop builds where the renderer may not trigger
+  // the regular Chrome permission UI. Adjust as needed for security.
+  session.defaultSession.setPermissionRequestHandler(
+    (webContents, permission, callback) => {
+      try {
+        if (
+          permission === "media" ||
+          permission === "camera" ||
+          permission === "microphone"
+        ) {
+          callback(true);
+          return;
+        }
+      } catch (e) {
+        console.error("Permission handler error:", e);
+      }
+
+      // Deny other permissions by default
+      callback(false);
+    },
+  );
+
   // ipcMain.on("bluetooth-device-selected", (event, deviceId) => {
   //   if (selectBluetoothCallback) {
   //     console.log("User selected device:", deviceId);

@@ -40,6 +40,8 @@ import {
 import {
   CloseDeviceDataStore,
   DeviceBoxDetailsAction,
+  DeviceBoxIDAction,
+  DeviceBoxImageAction,
   DeviceColorAction,
   resetDeviceDataStore,
 } from "../../../store/actions/deviceDataAction";
@@ -50,6 +52,7 @@ import { callApiAction } from "../../../store/actions/commonAction";
 import VersionCheckingLoader from "../../../utils/customeloader";
 import MessageDilog from "../../../components/texts/MessageDilog";
 import DeviceVersionUi from "./DeviceVersionUi";
+import CameraCaptureComponent from "../../../components/layouts/upload/CameraCaptureComponent";
 
 const SafebudsMainUi = ({ isUpdate, id }) => {
   const dispatch = useDispatch();
@@ -129,11 +132,14 @@ const SafebudsMainUi = ({ isUpdate, id }) => {
     box_Contains: deviceDataStore.box_Contains ?? [],
     deviceColor: deviceDataStore.deviceColor ?? "69521eea409668adad3cf8e2",
     boxId: deviceDataStore.boxId ?? "0000000000",
+    boxImage: deviceDataStore.boxImage ?? null,
     device: device?.device_type,
   };
 
   const onSubmit = async (e) => {
     e?.preventDefault();
+
+    console.log("DAta  of ", data);
     dispatch(
       callApiAction(
         async () => await createDeviceQcApi(data),
@@ -165,6 +171,7 @@ const SafebudsMainUi = ({ isUpdate, id }) => {
             box_Contains: deviceDataStore.box_Contains,
             deviceColor: deviceDataStore.deviceColor,
             boxId: deviceDataStore.boxId,
+            boxImage: deviceDataStore.boxImage,
           }),
         async () => {
           setLoading(false);
@@ -202,6 +209,8 @@ const SafebudsMainUi = ({ isUpdate, id }) => {
             }
 
             dispatch(DeviceColorAction(response?.deviceColor?._id ?? null));
+            dispatch(DeviceBoxIDAction(response?.boxId ?? null));
+            dispatch(DeviceBoxImageAction(response?.boxImage ?? null));
 
             setLoading(false);
           },
@@ -398,10 +407,12 @@ const SafebudsMainUi = ({ isUpdate, id }) => {
               {" "}
               <Grid container sx={{ padding: 4 }}>
                 <Grid item xs={12} md={!isUpdate ? 4 : 12}>
+                  <Box>Box ID : {deviceDataStore?.boxId || "NA"}</Box>
                   <Box
                     display={"flex"}
                     flexDirection={isUpdate ? "row" : "column"}
                     justifyContent={"space-evenly"}
+                    mt={3}
                   >
                     <Box>
                       <SafeBudsBoxContainsUI />
@@ -420,6 +431,14 @@ const SafebudsMainUi = ({ isUpdate, id }) => {
                     </Grid>
                   </Grid>
                 )}
+
+                <CameraCaptureComponent
+                  defaultFile={deviceDataStore?.boxImage || ""}
+                  title="Box Image Upload"
+                  subTitle="Upload a clear image of the box label or packaging"
+                  onChange={(url) => dispatch(DeviceBoxImageAction(url))}
+                  onDelete={() => dispatch(DeviceBoxImageAction(null))}
+                />
               </Grid>{" "}
             </>
           )}

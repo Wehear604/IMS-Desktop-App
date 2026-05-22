@@ -27,6 +27,9 @@ import rightRic8 from "../../assets/images/R8 HA all open domes.right.svg";
 import rightITEOptima from "../../assets/images/ITE_OPTIMA_LEFT_BLACK.svg";
 import leftITEOptima from "../../assets/images/ITE_OPTIMA_RIGHT_BLACK.svg";
 
+import leftOpenBlack from "../../assets/images/Left_Open_Black.png";
+import rightOpenBlack from "../../assets/images/Right_Open_Black.png";
+
 import itePrimeWhite from "../../assets/images/ITE_PRIME_WHITE.svg";
 // import itePrimeWhite from "../../assets/images/ITE_PRIME_LEFT.svg";
 // import rightItePrime from "../../assets/images/ITE_PRIME_RIGHT.svg";
@@ -378,7 +381,7 @@ const DeviceConnectUi = () => {
         return (
           <img
             style={{ width: 120, height: 120 }}
-            src={leftRic16}
+            src={leftOpenBlack}
             alt="Ric 16"
           />
         );
@@ -386,7 +389,7 @@ const DeviceConnectUi = () => {
         return (
           <img
             style={{ width: 120, height: 120 }}
-            src={leftRic16}
+            src={leftOpenBlack}
             alt="Ric 16"
           />
         );
@@ -455,7 +458,7 @@ const DeviceConnectUi = () => {
         return (
           <img
             style={{ width: 120, height: 120 }}
-            src={rightRic16}
+            src={rightOpenBlack}
             alt="Ric 16"
           />
         );
@@ -463,7 +466,7 @@ const DeviceConnectUi = () => {
         return (
           <img
             style={{ width: 120, height: 120 }}
-            src={rightRic16}
+            src={rightOpenBlack}
             alt="Ric 16"
           />
         );

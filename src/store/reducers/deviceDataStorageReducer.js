@@ -51,9 +51,10 @@ const initialState = {
     { warranty_Card: false },
   ],
   deviceColor: null,
+  boxImage: null,
   boxId: null,
   device: null,
-  isNewric16:false,
+  isNewric16: false,
 };
 
 const deviceDataStorageReducer = (state = initialState, action) => {
@@ -134,6 +135,11 @@ const deviceDataStorageReducer = (state = initialState, action) => {
         ...state,
         boxId: action.boxId,
       };
+    case actions.SET_DEVICE_BOXIMAGE_DETAILS:
+      return {
+        ...state,
+        boxImage: action.boxImage,
+      };
     case actions.SET_BOX_DETAILS:
       return {
         ...state,
@@ -181,7 +187,7 @@ const deviceDataStorageReducer = (state = initialState, action) => {
     case actions.SET_DEVICE_CONTAINS_DETAILS:
       return {
         ...state,
-        box_Contains:action.box_Contains,
+        box_Contains: action.box_Contains,
       };
     case actions.SET_EQUALIZER:
       return {

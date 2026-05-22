@@ -355,7 +355,8 @@ const DeviceAudioMicCheckUi = () => {
     if (step === 0)
       return !Boolean(device?.is_Audio_play) && !Boolean(device.isMic);
     if (step === 1)
-      return device?.device_type === DEVICES.RIC_OPTIMA || device?.device_type === DEVICES.RIC_OPTIMA_8
+      return device?.device_type === DEVICES.RIC_OPTIMA ||
+        device?.device_type === DEVICES.RIC_OPTIMA_8
         ? !(deviceQc?.volumeIncrease || deviceQc?.volumeDecrease)
         : !(deviceQc?.volumeIncrease && deviceQc?.volumeDecrease);
     if (step === 2) {
@@ -363,7 +364,8 @@ const DeviceAudioMicCheckUi = () => {
         device?.device_side === LISTENING_SIDE.LEFT
           ? deviceQc?.modeLeft
           : deviceQc?.modeRight;
-      return device?.device_type === DEVICES.RIC_OPTIMA || device?.device_type === DEVICES.RIC_OPTIMA_8
+      return device?.device_type === DEVICES.RIC_OPTIMA ||
+        device?.device_type === DEVICES.RIC_OPTIMA_8
         ? !(Array.isArray(modes) && modes.length === 3)
         : !(Array.isArray(modes) && modes.length === 4);
     }
@@ -481,6 +483,7 @@ const DeviceAudioMicCheckUi = () => {
     deviceColor: deviceDataStore.deviceColor ?? "69521eea409668adad3cf8e2",
     boxId: deviceDataStore.boxId ?? "0000000000",
     device: device?.device_type,
+    boxImage: deviceDataStore.boxImage ?? "",
   };
   console.log("first  data ", data);
   const onSubmit = async (e) => {
