@@ -3,6 +3,7 @@ import CustomDialog from "../../../components/layouts/common/CustomDialog";
 import { closeModal } from "../../../store/actions/modalAction";
 import {
   CloseDeviceDataStore,
+  DeviceBoxImageAction,
   resetDeviceDataStore,
 } from "../../../store/actions/deviceDataAction";
 import { useDispatch, useSelector } from "react-redux";
@@ -16,6 +17,7 @@ import { Box, Grid } from "@mui/material";
 import SafeBudsBoxContainsUI from "../SafebudsUi/SafeBudsBoxContainsUI";
 import SafeBudsColorUi from "../SafebudsUi/SafeBudsColorUi";
 import SafeBudsBoxIdUi from "../SafebudsUi/SafeBudsBoxIdUi";
+import CameraCaptureComponent from "../../../components/layouts/upload/CameraCaptureComponent";
 
 const BoxContainsUI = ({ fields }) => {
   const { device, deviceQc, deviceDataStore } = useSelector((state) => state);
@@ -107,6 +109,13 @@ const BoxContainsUI = ({ fields }) => {
               <SafeBudsBoxIdUi />
             </Grid>
           </Grid>
+          <CameraCaptureComponent
+            defaultFile={deviceDataStore?.boxImage || ""}
+            title="Box Image Upload"
+            subTitle="Upload a clear image of the box label or packaging"
+            onChange={(url) => dispatch(DeviceBoxImageAction(url))}
+            onDelete={() => dispatch(DeviceBoxImageAction(null))}
+          />
         </Grid>
       </Grid>
     </CustomDialog>
