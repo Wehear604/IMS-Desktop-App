@@ -445,7 +445,6 @@ export const readRic8Volume = (side, currentVolume) => {
   };
 };
 
-// credit goes to dilip mali
 export const getITEOptimaData = (side, currentVolume) => {
   return async (dispatch) => {
     const command = "AA 00 03";
@@ -546,33 +545,24 @@ export const getITEPrimeCurrentVolume = (side, volume) => {
   };
 };
 
-// ---- HearNu skeleton actions ----
 export const getHearNuMode = (side, deviceObj) => {
   return async (dispatch) => {
-    // 1. The specific command for this HearNU version
     const command = [0x55, 0x05, 0x00, 0x00, 0x50];
 
     try {
-       await new Promise((resolve) => setTimeout(resolve, 200));
+      await new Promise((resolve) => setTimeout(resolve, 200));
       const response = await ReadHearNuDataFromDevice(command, side, deviceObj);
 
-      // 👉 If this logs, the BLE read was successful
       console.log("HearNu mode response", response);
 
-      // 2. CORRECT PARSING: The 0x55 command returns a shorter payload, and mode is at index 4
-      if (response && response.length >= 5) {
-        const mode = response[4]; // Mode is at index 4 for this command
+      const mode = response[0];
 
-        dispatch({
-          type: actions.SET_HEAR_NU_MODE,
-          mode,
-          device_side: side,
-        });
-      } else {
-        console.warn("Invalid payload received for HearNU Mode", response);
-      }
+      dispatch({
+        type: actions.SET_HEAR_NU_MODE,
+        mode,
+        device_side: side,
+      });
     } catch (err) {
-      // 👉 If the console.log above is skipped, this error will tell you why
       console.error("getHearNuMode failed", err);
     }
   };
@@ -580,17 +570,14 @@ export const getHearNuMode = (side, deviceObj) => {
 
 export const getHearNuVolume = (side, deviceObj) => {
   return async (dispatch, getState) => {
-    // Correct Read Command: AA 00 03 (Same command, but we extract different indices)
     const command = [0xaa, 0x00, 0x03];
     try {
       const response = await ReadHearNuDataFromDevice(command, side, deviceObj);
 
       if (response && response.length >= 20 && response[0] === 0xff) {
-        // Left Vol is index 8, Right Vol is index 9
         const leftVol = response[8];
         const rightVol = response[9];
 
-        // Pick the right value based on which side the QC test is querying
         const volume = side === "left" || side === 1 ? leftVol : rightVol;
 
         dispatch({ type: actions.SET_HEAR_NU_VOLUME, side, volume });

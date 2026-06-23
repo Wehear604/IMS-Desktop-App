@@ -644,6 +644,7 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                 ),
               },
               {
+                isField: fields?.device == DEVICES.HEAR_NU,
                 label: device ? "Triple Touch :" : "Third Mode :",
                 value: (
                   <Box
@@ -696,7 +697,8 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
               {
                 isField:
                   fields?.device === DEVICES.RIC_OPTIMA ||
-                  fields?.device === DEVICES.RIC_OPTIMA_8,
+                  fields?.device === DEVICES.RIC_OPTIMA_8 ||
+                  fields?.device == DEVICES.HEAR_NU,
                 label: device ? "Long Press :" : "Four Mode :",
                 value: (
                   <Box

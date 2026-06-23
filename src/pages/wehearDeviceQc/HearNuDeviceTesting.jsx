@@ -42,7 +42,7 @@ const HearNuDeviceTesting = ({ isUpdate }) => {
     body2: false,
     charging: false,
   });
-  const steps = ["First Mode", "Second Mode", "Third Mode", "Fourth Mode"];
+  const steps = ["First Mode", "Second Mode"];
   const deviceTitle = DEVICES_NAME[device?.device_type] ?? "Unknown device";
   const sideLabel =
     findObjectKeyByValue(device?.device_side, LISTENING_SIDE) ?? "";
@@ -68,10 +68,14 @@ const HearNuDeviceTesting = ({ isUpdate }) => {
   useEffect(() => {
     let timer;
 
+    if (step != 0) {
+      return;
+    }
+    dispatch(getHearNuMode(LISTENING_SIDE.LEFT, BLE_STORE.deviceObj));
     if (step === 0) {
-      timer = setTimeout(() => {
+      timer = setTimeout(async () => {
         dispatch(getHearNuMode(LISTENING_SIDE.LEFT, BLE_STORE.deviceObj));
-      }, 1000);
+      }, 3000);
     }
 
     return () => {
@@ -147,7 +151,7 @@ const HearNuDeviceTesting = ({ isUpdate }) => {
   );
   const isStepValid = () => {
     if (step === 0) {
-      return modecheck(1) && modecheck(2) && modecheck(3) && modecheck(0);
+      return modecheck(1) && modecheck(0);
     }
     return true;
   };
@@ -368,7 +372,7 @@ const HearNuDeviceTesting = ({ isUpdate }) => {
                   isPlaying={isPlaying}
                   setIsPlaying={setIsPlaying}
                   audioRef={audioRef}
-                  NotuseEffect={false}
+                  // NotuseEffect={false}
                 />
               </Box>
               <Divider />
