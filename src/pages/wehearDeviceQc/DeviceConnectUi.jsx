@@ -156,7 +156,6 @@ const ConnectButton = ({
         openModal(<ItePrimeDeviceTesting />, "lg", true, "deviceAudioMicCheck"),
       );
     } else if (device.device_type == DEVICES.HEAR_NU) {
-      // Open HearNu QC modal (skeleton)
       dispatch(
         openModal(<HearNuDeviceTesting />, "lg", true, "deviceAudioMicCheck"),
       );
@@ -867,35 +866,6 @@ const DeviceConnectUi = () => {
               }}
             />
           </Box>
-        ) : device?.device_type === DEVICES.HEAR_NU ? (
-          <HearNuConnectDeviceModule
-            side={
-              device?.device_side === LISTENING_SIDE.RIGHT ? "Right" : "Left"
-            }
-            isConnecting={device?.isConnecting}
-            onConnectWithDevice={(data, deviceInfo) => {
-              console.log("🟢 Dedicated HearNU Connected Successfully!");
-
-              // Fire your standard existing parent reducer lifecycle dispatches smoothly
-              dispatch(
-                connectDevice(
-                  deviceInfo,
-                  device?.device_side,
-                  device?.device_type,
-                ),
-              );
-            }}
-            Component={ConnectButton}
-            onEnableChange={() => {}}
-            onDisconnect={() => {
-              dispatch(disconnectAction(device.device_side));
-            }}
-            fitting={{
-              device_type: device?.device_type,
-              device_side: device?.device_side,
-              connected: device.isConnecting,
-            }}
-          />
         ) : (
           <RicConnectDevice
             side={

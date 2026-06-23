@@ -20,6 +20,8 @@ import StepCard from "../../components/StepCard";
 import {
   getHearNuMode,
   getHearNuVolume,
+  getITEPrimeMode,
+  getITEPrimeVolume,
 } from "../../store/actions/deviceQcAction";
 import { BLE_STORE } from "../../utils/bleStore";
 import SafeBudsBodyCheck from "./SafebudsUi/SafeBudsBodyCheck";
@@ -32,7 +34,7 @@ import { callApiAction } from "../../store/actions/commonAction";
 const HearNuDeviceTesting = ({ isUpdate }) => {
   const { device, deviceQc, deviceDataStore } = useSelector((state) => state);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0);
   const audioRef = useRef(null);
   const dispatch = useDispatch();
   const [fields, setFields] = useState({
@@ -57,9 +59,7 @@ const HearNuDeviceTesting = ({ isUpdate }) => {
     }
     setStep(step + 1);
   };
-
   const modecheck = (number) => {
-    // For HearNu we reuse the same deviceQc.modeLeft array semantics
     return (
       Array.isArray(deviceQc.modeLeft) && deviceQc.modeLeft.includes(number)
     );
@@ -68,9 +68,8 @@ const HearNuDeviceTesting = ({ isUpdate }) => {
   useEffect(() => {
     let timer;
 
-    if (step === 1) {
+    if (step === 0) {
       timer = setTimeout(() => {
-        console.log("BLE_STORE.deviceObj ", BLE_STORE.deviceObj);
         dispatch(getHearNuMode(LISTENING_SIDE.LEFT, BLE_STORE.deviceObj));
       }, 1000);
     }
@@ -133,6 +132,7 @@ const HearNuDeviceTesting = ({ isUpdate }) => {
           ),
         );
         dispatch(closeModal("deviceAudioMicCheck"));
+        // BLE_STORE.BTEdisconnect = true;
         dispatch(resetDeviceDataStore(false));
       } else {
         dispatch(
@@ -145,11 +145,17 @@ const HearNuDeviceTesting = ({ isUpdate }) => {
     },
     [dispatch, device, deviceQc, fields],
   );
+  const isStepValid = () => {
+    if (step === 0) {
+      return modecheck(1) && modecheck(2) && modecheck(3) && modecheck(0);
+    }
+    return true;
+  };
 
   const disableNext = () => {
-    if (step === 1) {
-      return !(modecheck(1) && modecheck(2) && modecheck(3) && modecheck(0));
-    } else if (step === 2) {
+    if (step === 0) {
+      return !isStepValid();
+    } else if (step === 1) {
       return !(
         device?.device_type &&
         device?.device_side &&
@@ -165,7 +171,7 @@ const HearNuDeviceTesting = ({ isUpdate }) => {
     }
     return false;
   };
-
+  console.log(device, "step");
   const data = {
     left: {
       device_type: device?.device_type,
@@ -174,7 +180,10 @@ const HearNuDeviceTesting = ({ isUpdate }) => {
         volumeIncrease: deviceQc.volumeIncrease,
         volumeDecrease: deviceQc.volumeIncrease,
       },
-      body: { body1: fields.body1, body2: fields.body2 },
+      body: {
+        body1: fields.body1,
+        body2: fields.body2,
+      },
       charging: fields.charging,
       audio: device?.is_Audio_play,
       mac: device?.mac,
@@ -188,7 +197,10 @@ const HearNuDeviceTesting = ({ isUpdate }) => {
         volumeIncrease: deviceQc.volumeIncrease,
         volumeDecrease: deviceQc.volumeIncrease,
       },
-      body: { body1: fields.body1, body2: fields.body2 },
+      body: {
+        body1: fields.body1,
+        body2: fields.body2,
+      },
       charging: fields.charging,
       audio: device?.is_Audio_play,
       mac: device?.mac,
@@ -214,9 +226,10 @@ const HearNuDeviceTesting = ({ isUpdate }) => {
           dispatch(resetDeviceDataStore(true));
           dispatch(closeModal("deviceAudioMicCheck"));
           dispatch(closeModal("rejectDeviceQc"));
+          BLE_STORE.BTEdisconnect = true;
         },
         (err) => {
-          console.log("hear nu submit error", err);
+          console.log("first", err);
         },
       ),
     );
@@ -242,22 +255,25 @@ const HearNuDeviceTesting = ({ isUpdate }) => {
 
   useEffect(() => {
     let timer;
-    if (deviceQc.volumeIncrease) return;
-    if (step === 2 && !BLE_STORE.disconnectFun) {
+    if (deviceQc.volumeIncrease) {
+      return;
+    }
+    if (step === 1 && !BLE_STORE.BTEdisconnect) {
       timer = setTimeout(() => {
         dispatch(getHearNuVolume(LISTENING_SIDE.LEFT, BLE_STORE.deviceObj));
       }, 1000);
     }
+
     return () => {
       if (timer) clearTimeout(timer);
     };
   }, [step, deviceQc]);
-
   return (
     <CustomDialog
-      title="HEAR NU QC Checklist"
+      // err={fields?.err}
+      title="HearNu QC Checklist"
       id="deviceAudioMicCheck"
-      onSubmit={(e) => (step === 2 ? Submit(e) : handleNext(e))}
+      onSubmit={(e) => (step === 1 ? Submit(e) : handleNext(e))}
       onClose={() => {
         if (audioRef.current) {
           audioRef.current.pause();
@@ -266,6 +282,7 @@ const HearNuDeviceTesting = ({ isUpdate }) => {
         dispatch(closeModal("deviceAudioMicCheck"));
         dispatch(resetDeviceDataStore(true));
         dispatch(CloseDeviceDataStore());
+        BLE_STORE.BTEdisconnect = true;
       }}
       onReject={(e) => {
         if (audioRef.current) {
@@ -303,12 +320,15 @@ const HearNuDeviceTesting = ({ isUpdate }) => {
               style={{ marginLeft: 8 }}
             />
           </Typography>
+
           <Typography variant="h5" sx={{ color: "#DDD" }}>
             {deviceTitle}
           </Typography>
+
           <Typography variant="h6">{device?.mac}</Typography>
         </Box>
-        {step === 1 && (
+        {step === 0 && (
+          // <Box sx={{ width: "100%", display: "flex", flexDirection: "row" }}><>
           <>
             <Box width="95%" ml={8}>
               <Typography variant="h3" fontWeight={700} mb={2}>
@@ -324,18 +344,23 @@ const HearNuDeviceTesting = ({ isUpdate }) => {
                 flexDirection: "column",
               }}
             >
-              {steps.map((label, index) => (
-                <StepCard
-                  key={index}
-                  isChecked={true}
-                  checked={modecheck(index)}
-                  title={modecheck(index) ? `${label} Tested` : `Test ${label}`}
-                />
-              ))}
+              {steps.map((label, index) => {
+                const isChecked = modecheck(index);
+
+                return (
+                  <StepCard
+                    key={index}
+                    isChecked={true}
+                    checked={isChecked}
+                    title={isChecked ? `${label} Tested` : `Test ${label}`}
+                  />
+                );
+              })}
             </Box>
           </>
+          // </Box>
         )}
-        {step === 2 && (
+        {step === 1 && (
           <Grid container>
             <Grid item xs={12} md={5.9} mt={2} pr={2}>
               <Box>
@@ -357,7 +382,7 @@ const HearNuDeviceTesting = ({ isUpdate }) => {
                 isPlaying={isPlaying}
                 setIsPlaying={setIsPlaying}
                 audioRef={audioRef}
-              />
+              />{" "}
             </Grid>
           </Grid>
         )}

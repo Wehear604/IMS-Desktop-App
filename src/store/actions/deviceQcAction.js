@@ -553,6 +553,7 @@ export const getHearNuMode = (side, deviceObj) => {
     const command = [0x55, 0x05, 0x00, 0x00, 0x50];
 
     try {
+       await new Promise((resolve) => setTimeout(resolve, 200));
       const response = await ReadHearNuDataFromDevice(command, side, deviceObj);
 
       // 👉 If this logs, the BLE read was successful

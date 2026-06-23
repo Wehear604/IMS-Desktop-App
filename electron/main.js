@@ -81,6 +81,19 @@ function createWindow() {
 
   win.maximize();
 
+  win.webContents.on("before-input-event", (event, input) => {
+    const key = input.key?.toLowerCase();
+    if ((input.control || input.meta) && key === "r") {
+      event.preventDefault();
+      win.reload();
+    }
+
+    if (key === "f5") {
+      event.preventDefault();
+      win.reload();
+    }
+  });
+
   win.webContents.on(
     "select-bluetooth-device",
     (event, deviceList, callback) => {

@@ -224,11 +224,18 @@ const RicConnectDevice = ({
       } else {
         filterData.acceptAllDevices = true;
       }
-
-      const device = await navigator.bluetooth.requestDevice({
-        ...filterData,
-        optionalServices: [serviceUuid],
-      });
+      let device;
+      if (fitting.device_type == DEVICES.HEAR_NU) {
+        device = await navigator.bluetooth.requestDevice({
+          filters: [{ namePrefix: "HearNU" }], 
+          optionalServices: [serviceUuid],
+        });
+      } else {
+        device = await navigator.bluetooth.requestDevice({
+          ...filterData,
+          optionalServices: [serviceUuid],
+        });
+      }
 
       if (!device) {
         setLoadingMessage("No device selected.");
