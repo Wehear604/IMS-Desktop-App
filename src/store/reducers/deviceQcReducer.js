@@ -82,7 +82,8 @@ const deviceQcReducer = (state = initialState, action) => {
         " state.currentVolume > action.volume ",
         state.currentVolume !== action.volume,
         state.currentVolume > action.volume,
-        state.currentVolume , action.volume,
+        state.currentVolume,
+        action.volume,
       );
       return {
         ...state,
@@ -201,6 +202,54 @@ const deviceQcReducer = (state = initialState, action) => {
       };
 
     case actions.SET_ITE_PRIME_MODE:
+      return {
+        ...state,
+        modeLeft:
+          action.device_side === LISTENING_SIDE.LEFT
+            ? [
+                ...new Set(
+                  [...state.modeLeft, action.mode].filter(
+                    (v) => v !== undefined,
+                  ),
+                ),
+              ]
+            : state.modeLeft,
+        modeRight:
+          action.device_side === LISTENING_SIDE.RIGHT
+            ? [
+                ...new Set(
+                  [...state.modeRight, action.mode].filter(
+                    (v) => v !== undefined,
+                  ),
+                ),
+              ]
+            : state.modeRight,
+      };
+
+    case actions.SET_HEAR_NU_CURRENT_VOLUME:
+      return {
+        ...state,
+        currentVolume: action.volume,
+        start: true,
+      };
+
+    case actions.SET_HEAR_NU_VOLUME:
+      return {
+        ...state,
+        volumeIncrease:
+          state.currentVolume < action.volume ||
+          state.currentVolume > action.volume
+            ? true
+            : state.volumeIncrease,
+        volumeDecrease:
+          state.currentVolume < action.volume ||
+          state.currentVolume > action.volume
+            ? true
+            : state.volumeDecrease,
+        currentVolume: action.volume,
+      };
+
+    case actions.SET_HEAR_NU_MODE:
       return {
         ...state,
         modeLeft:

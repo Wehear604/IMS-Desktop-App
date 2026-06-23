@@ -10,7 +10,7 @@ const path = require("node:path");
 const { autoUpdater } = require("electron-updater");
 const log = require("electron-log");
 const loudness = require("loudness");
-let hasCheckedForUpdates = false;
+let hasCheckedForUpdates = false;   
 let bluetoothPinCallback = null;
 let selectBluetoothCallback = null;
 let cachedDeviceToSelect = null;
@@ -224,7 +224,7 @@ function createWindow() {
     }
   });
 
-  if (true) {
+  if (false) {
     win.loadFile(path.join(__dirname, "..", "build", "index.html"));
     console.log(
       "Forcing static build load from:",

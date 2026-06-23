@@ -36,6 +36,7 @@ import itePrimeWhite from "../../assets/images/ITE_PRIME_WHITE.svg";
 import wehearox from "../../assets/images/wehearox.svg";
 import wehear_2_0 from "../../assets/images/wehear 2 0.svg";
 import safeBuds from "../../assets/images/safebuds.svg";
+import hearNu from "../../assets/images/HearnuPro.png";
 
 import leftSideLogo from "../../assets/images/leftSideSmall.svg";
 import rightSideLogo from "../../assets/images/rightSideSmall.svg";
@@ -69,10 +70,12 @@ import { SafeBudsVersionRead } from "../../store/actions/deviceQcAction";
 import SafebudsMainUi from "./SafebudsUi/SafebudsMainUi";
 import { SetStepAction } from "../../store/actions/stepAction";
 import ItePrimeDeviceTesting from "./ItePrimeDeviceTesting";
+import HearNuDeviceTesting from "./HearNuDeviceTesting";
 import Ric16DeviceTesting from "./Ric16DeviceTesting";
 import useBluetoothHeadsetStatus from "./useBluetoothHeadsetStatus";
 import OneViewBox from "../../components/layouts/OneViewBox";
 import { center } from "../../assets/css/theme/common";
+import HearNuConnectDeviceModule from "../../components/bluetooth/HearNuConnectDeviceModule";
 // import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 const Header = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
@@ -152,6 +155,11 @@ const ConnectButton = ({
       dispatch(
         openModal(<ItePrimeDeviceTesting />, "lg", true, "deviceAudioMicCheck"),
       );
+    } else if (device.device_type == DEVICES.HEAR_NU) {
+      // Open HearNu QC modal (skeleton)
+      dispatch(
+        openModal(<HearNuDeviceTesting />, "lg", true, "deviceAudioMicCheck"),
+      );
     } else if (device.device_type == DEVICES.SAFE_BUDS) {
       if (device.device_type == DEVICES.SAFE_BUDS && !device?.fotfile1) {
         // dispatch(SafeBudsVersionRead({ type: "SafeBudsVersionRead" }));
@@ -184,6 +192,9 @@ const ConnectButton = ({
   };
 
   useEffect(() => {
+    console.log("=== CENTRAL WATCHER TRIGGERED ===");
+    console.log("isConnected Status:", isConnected);
+    console.log("Current Device Type in State:", device?.device_type);
     if (isleftConnected && isConnected) {
       AudioAndMicCheck();
     } else if (isConnected && device.device_type !== DEVICES.RIC_OPTIMA) {
@@ -200,6 +211,7 @@ const ConnectButton = ({
   const isSideSelected =
     deviceSide === LISTENING_SIDE.LEFT ||
     deviceSide === LISTENING_SIDE.RIGHT ||
+    deviceSide === LISTENING_SIDE.BOTH ||
     deviceSide === true;
 
   if (
@@ -362,10 +374,7 @@ const DeviceConnectUi = () => {
   const [selected, setSelected] = useState("L");
   const { device, step, deviceDataStore } = useSelector((state) => state);
   const dispatch = useDispatch();
-  console.log(
-    "device?.device_type === DEVICES.SAFE_BUDS && !device?.fotfile",
-    deviceDataStore,
-  );
+
   const devices = [
     { side: "L", label: "BTE", value: LISTENING_SIDE.LEFT },
     { side: "R", label: "BTE", value: LISTENING_SIDE.RIGHT },
@@ -418,6 +427,10 @@ const DeviceConnectUi = () => {
             src={itePrimeWhite}
             alt="ITE Prime"
           />
+        );
+      case DEVICES.HEAR_NU:
+        return (
+          <img style={{ width: 160, height: 120 }} src={hearNu} alt="Hear Nu" />
         );
       case DEVICES.SAFE_BUDS:
         return (
@@ -507,6 +520,7 @@ const DeviceConnectUi = () => {
     DEVICES.WEHEAR_2_0,
     DEVICES.WEHEAR_OX,
     DEVICES.ITE_PRIME,
+    DEVICES.HEAR_NU,
   ].includes(device.device_type);
 
   useEffect(() => {
@@ -853,6 +867,35 @@ const DeviceConnectUi = () => {
               }}
             />
           </Box>
+        ) : device?.device_type === DEVICES.HEAR_NU ? (
+          <HearNuConnectDeviceModule
+            side={
+              device?.device_side === LISTENING_SIDE.RIGHT ? "Right" : "Left"
+            }
+            isConnecting={device?.isConnecting}
+            onConnectWithDevice={(data, deviceInfo) => {
+              console.log("🟢 Dedicated HearNU Connected Successfully!");
+
+              // Fire your standard existing parent reducer lifecycle dispatches smoothly
+              dispatch(
+                connectDevice(
+                  deviceInfo,
+                  device?.device_side,
+                  device?.device_type,
+                ),
+              );
+            }}
+            Component={ConnectButton}
+            onEnableChange={() => {}}
+            onDisconnect={() => {
+              dispatch(disconnectAction(device.device_side));
+            }}
+            fitting={{
+              device_type: device?.device_type,
+              device_side: device?.device_side,
+              connected: device.isConnecting,
+            }}
+          />
         ) : (
           <RicConnectDevice
             side={
