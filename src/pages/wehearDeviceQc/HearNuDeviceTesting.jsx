@@ -13,6 +13,7 @@ import CustomDialog from "../../components/layouts/common/CustomDialog";
 import { closeModal, openModal } from "../../store/actions/modalAction";
 import {
   CloseDeviceDataStore,
+  DeviceClassicMacAction,
   DeviceStoreAction,
   resetDeviceDataStore,
 } from "../../store/actions/deviceDataAction";
@@ -42,7 +43,7 @@ const HearNuDeviceTesting = ({ isUpdate }) => {
     body2: false,
     charging: false,
   });
-  const steps = ["First Mode", "Second Mode"];
+  const steps = ["Bluetooth Mode", "Hearing Aid Mode"];
   const deviceTitle = DEVICES_NAME[device?.device_type] ?? "Unknown device";
   const sideLabel =
     findObjectKeyByValue(device?.device_side, LISTENING_SIDE) ?? "";
@@ -71,7 +72,23 @@ const HearNuDeviceTesting = ({ isUpdate }) => {
     if (step != 0) {
       return;
     }
-    dispatch(getHearNuMode(LISTENING_SIDE.LEFT, BLE_STORE.deviceObj));
+    if (step === 0) {
+      timer = setTimeout(async () => {
+        dispatch(getHearNuMode(LISTENING_SIDE.LEFT, BLE_STORE.deviceObj));
+      }, 3000);
+    }
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [step]);
+
+  useEffect(() => {
+    let timer;
+
+    if (step != 0) {
+      return;
+    }
     if (step === 0) {
       timer = setTimeout(async () => {
         dispatch(getHearNuMode(LISTENING_SIDE.LEFT, BLE_STORE.deviceObj));
@@ -218,6 +235,33 @@ const HearNuDeviceTesting = ({ isUpdate }) => {
     device: device?.device_type,
   };
 
+  const windowinfo = async () => {
+    if (!window?.electronAPI?.getTrackingData) {
+      return null;
+    }
+
+    try {
+      const data = await window.electronAPI.getTrackingData();
+
+      dispatch(DeviceClassicMacAction(data?.[0]?.macAddress || ""));
+
+      console.log("data", data[0].macAddress);
+
+      return data;
+    } catch (error) {
+      console.error("Failed to read tracking data", error);
+      return null;
+    }
+  };
+  useEffect(() => {
+    const load = async () => {
+      // if (user?.data?._id) {
+      const trackingData = await windowinfo();
+      // }
+    };
+
+    load();
+  }, []);
   const onSubmit = async (e) => {
     e?.preventDefault();
     dispatch(

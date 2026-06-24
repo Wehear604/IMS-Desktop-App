@@ -8,7 +8,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
   cancelBluetoothRequest: () => ipcRenderer.send("cancel-bluetooth-request"),
   bluetoothPairingResponse: (response) =>
     ipcRenderer.send("bluetooth-pairing-response"),
-  
+
+  getTrackingData: async () => {
+    return await ipcRenderer.invoke("get-tracking-data");
+  },
 
   // --- NEW: Window Controls ---
   minimizeWindow: () => ipcRenderer.send("minimize-window"),

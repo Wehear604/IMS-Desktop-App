@@ -157,7 +157,21 @@ const ConnectButton = ({
       );
     } else if (device.device_type == DEVICES.HEAR_NU) {
       dispatch(
-        openModal(<HearNuDeviceTesting />, "lg", true, "deviceAudioMicCheck"),
+        openModal(
+          !headset ? (
+            <OneViewBox sx={{ ...center }}>
+              <CircularProgress size={50} />
+              {
+                " Please connect a Bluetooth headset to start the QC process... "
+              }
+            </OneViewBox>
+          ) : (
+            <HearNuDeviceTesting />
+          ),
+          "lg",
+          true,
+          "deviceAudioMicCheck",
+        ),
       );
     } else if (device.device_type == DEVICES.SAFE_BUDS) {
       if (device.device_type == DEVICES.SAFE_BUDS && !device?.fotfile1) {
@@ -191,9 +205,6 @@ const ConnectButton = ({
   };
 
   useEffect(() => {
-    console.log("=== CENTRAL WATCHER TRIGGERED ===");
-    console.log("isConnected Status:", isConnected);
-    console.log("Current Device Type in State:", device?.device_type);
     if (isleftConnected && isConnected) {
       AudioAndMicCheck();
     } else if (isConnected && device.device_type !== DEVICES.RIC_OPTIMA) {

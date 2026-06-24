@@ -92,11 +92,11 @@ const MicCheckUi = () => {
         if (mics.length) {
           // Prefer "Communication" mic
           const communicationMic = mics.find((m) =>
-            m.label.toLowerCase().includes("communication")
+            m.label.toLowerCase().includes("communication"),
           );
 
           setSelectedMic(
-            communicationMic ? communicationMic.deviceId : mics[0].deviceId
+            communicationMic ? communicationMic.deviceId : mics[0].deviceId,
           );
         }
       } catch (err) {
@@ -241,9 +241,9 @@ const MicCheckUi = () => {
         <CardContent>
           <Stack direction="row" justifyContent="space-between">
             <Box>
-              <Typography sx={{ fontSize: 11, opacity: 0.7 }}>
+              {/* <Typography sx={{ fontSize: 11, opacity: 0.7 }}>
                 SAFEBUDS QC
-              </Typography>
+              </Typography> */}
               <Typography variant="h6">Microphone Monitor</Typography>
             </Box>
 

@@ -26,6 +26,9 @@ export const DeviceIsConnectingAction = (isConnecting) => {
 export const DeviceIsAudioCheck = (is_Audio_play) => {
   return { type: actions.IS_AUDIO_CHECK, is_Audio_play };
 };
+export const DeviceClassicMacAction = (classicMac) => {
+  return { type: actions.CLASSIC_MAC, classicMac };
+};
 
 export const connectDevice = (deviceInfo, side, deviceObj) => {
   console.log("deviceInfo in action", deviceInfo);

@@ -10,6 +10,7 @@ const path = require("node:path");
 const { autoUpdater } = require("electron-updater");
 const log = require("electron-log");
 const loudness = require("loudness");
+const tracker = require("./tracker");
 let hasCheckedForUpdates = false;
 let bluetoothPinCallback = null;
 let selectBluetoothCallback = null;
@@ -52,6 +53,10 @@ function setupAppMenu() {
   const menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu);
 }
+
+ipcMain.handle("get-tracking-data", async () => {
+  return tracker.getTrackingData();
+});
 
 // Auto reload during development
 if (process.env.NODE_ENV === "development") {

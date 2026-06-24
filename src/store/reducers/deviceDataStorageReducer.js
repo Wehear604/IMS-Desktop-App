@@ -55,6 +55,7 @@ const initialState = {
   boxId: null,
   device: null,
   isNewric16: false,
+  classicMac: "",
 };
 
 const deviceDataStorageReducer = (state = initialState, action) => {
@@ -124,6 +125,9 @@ const deviceDataStorageReducer = (state = initialState, action) => {
         };
       }
       return { ...state };
+    }
+    case actions.CLASSIC_MAC: {
+      return { ...state, classicMac: action.classicMac };
     }
     case actions.SET_DEVICE_COLOR_DETAILS:
       return {

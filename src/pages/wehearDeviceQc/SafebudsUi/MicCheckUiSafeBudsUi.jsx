@@ -216,9 +216,9 @@ const MicCheckUiSafeBudsUi = ({ isPlaying, setIsPlaying, audioRef }) => {
           <CardContent>
             <Stack direction="row" justifyContent="space-between">
               <Box>
-                <Typography sx={{ fontSize: 11, opacity: 0.7 }}>
+                {/* <Typography sx={{ fontSize: 11, opacity: 0.7 }}>
                   SAFEBUDS QC
-                </Typography>
+                </Typography> */}
                 <Typography variant="h6">Microphone Monitor</Typography>
               </Box>
 

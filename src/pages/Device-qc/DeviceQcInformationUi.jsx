@@ -158,12 +158,21 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
             Data={[
               {
                 isField: fields?.device === DEVICES.SAFE_BUDS,
-                label: "Left Device Mac :",
-                value: fields?.left?.mac,
+                label:
+                  fields?.device === DEVICES.HEAR_NU
+                    ? "Classic Mac : "
+                    : "Left Device Mac",
+                value:
+                  fields?.device === DEVICES.HEAR_NU
+                    ? fields.classicMac
+                    : fields?.left?.mac,
               },
               {
                 isField: fields?.device === DEVICES.SAFE_BUDS,
-                label: "Right Device Mac :",
+                label:
+                  fields?.device === DEVICES.HEAR_NU
+                    ? "BLE Mac : "
+                    : "Right Device Mac :",
                 value: fields?.right?.mac,
               },
               {
