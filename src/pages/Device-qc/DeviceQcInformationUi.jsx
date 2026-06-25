@@ -158,12 +158,21 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
             Data={[
               {
                 isField: fields?.device === DEVICES.SAFE_BUDS,
-                label: "Left Device Mac :",
-                value: fields?.left?.mac,
+                label:
+                  fields?.device === DEVICES.HEAR_NU_PRO
+                    ? "Classic Mac : "
+                    : "Left Device Mac",
+                value:
+                  fields?.device === DEVICES.HEAR_NU_PRO
+                    ? fields.classicMac
+                    : fields?.left?.mac,
               },
               {
                 isField: fields?.device === DEVICES.SAFE_BUDS,
-                label: "Right Device Mac :",
+                label:
+                  fields?.device === DEVICES.HEAR_NU_PRO
+                    ? "BLE Mac : "
+                    : "Right Device Mac :",
                 value: fields?.right?.mac,
               },
               {
@@ -644,6 +653,7 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                 ),
               },
               {
+                isField: fields?.device == DEVICES.HEAR_NU_PRO,
                 label: device ? "Triple Touch :" : "Third Mode :",
                 value: (
                   <Box
@@ -696,7 +706,8 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
               {
                 isField:
                   fields?.device === DEVICES.RIC_OPTIMA ||
-                  fields?.device === DEVICES.RIC_OPTIMA_8,
+                  fields?.device === DEVICES.RIC_OPTIMA_8 ||
+                  fields?.device == DEVICES.HEAR_NU_PRO,
                 label: device ? "Long Press :" : "Four Mode :",
                 value: (
                   <Box

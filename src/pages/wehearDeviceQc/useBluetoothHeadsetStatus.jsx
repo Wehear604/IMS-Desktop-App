@@ -13,7 +13,7 @@ export default function useBluetoothHeadsetStatus() {
 
       const devices = await navigator.mediaDevices.enumerateDevices();
       const mics = devices.filter((d) => d.kind === "audioinput");
-
+      console.log("mics", mics);
       for (const mic of mics) {
         if (stopChecking.current) return;
 

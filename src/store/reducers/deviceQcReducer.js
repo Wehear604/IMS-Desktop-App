@@ -82,7 +82,8 @@ const deviceQcReducer = (state = initialState, action) => {
         " state.currentVolume > action.volume ",
         state.currentVolume !== action.volume,
         state.currentVolume > action.volume,
-        state.currentVolume , action.volume,
+        state.currentVolume,
+        action.volume,
       );
       return {
         ...state,
@@ -225,6 +226,62 @@ const deviceQcReducer = (state = initialState, action) => {
             : state.modeRight,
       };
 
+    case actions.SET_HEAR_NU_PRO_CURRENT_VOLUME:
+      return {
+        ...state,
+        currentVolume: action.volume,
+        start: true,
+      };
+    case actions.SET_HEAR_NU_PRO_VOLUME:
+      console.log(
+        " state.currentVolume > action.volume ",
+        state.currentVolume !== action.volume,
+        state.currentVolume > action.volume,
+        state.currentVolume,
+        action.volume,
+      );
+      return {
+        ...state,
+        volumeLeft:
+          action.side === LISTENING_SIDE.LEFT
+            ? action.volume
+            : state.volumeLeft,
+        volumeRight:
+          action.side === LISTENING_SIDE.RIGHT
+            ? action.volume
+            : state.volumeRight,
+        volumeIncrease:
+          state.currentVolume > action.volume ? true : state.volumeIncrease,
+        volumeDecrease:
+          state.currentVolume < action.volume ? true : state.volumeDecrease,
+        currentVolume: action.volume,
+      };
+
+    case actions.SET_HEAR_NU_PRO_MODE:
+      return {
+        ...state,
+        modeLeft:
+          action.device_side === LISTENING_SIDE.LEFT
+            ? [
+                ...new Set(
+                  [...state.modeLeft, action.mode].filter(
+                    (v) => v !== undefined,
+                  ),
+                ),
+              ]
+            : state.modeLeft,
+        modeRight:
+          action.device_side === LISTENING_SIDE.RIGHT
+            ? [
+                ...new Set(
+                  [...state.modeRight, action.mode].filter(
+                    (v) => v !== undefined,
+                  ),
+                ),
+              ]
+            : state.modeRight,
+      };
+
     case actions.SET_SAFE_BUDS_TAP:
       return {
         ...state,
@@ -244,11 +301,17 @@ const deviceQcReducer = (state = initialState, action) => {
         currentVolume: action.currentVolume,
       };
 
-    case actions.FETCH_VOLUME_SAFE_BUDS:
+    case actions.FETCH_VOLUME_HEAR_NU_PRO:
       return {
         ...state,
         volumeIncrease:
           state.currentVolume !== action.volume ? true : state.volumeIncrease,
+        volumeIncrease:
+          state.currentVolume !== action.volume ? true : state.volumeIncrease,
+      };
+    case actions.FETCH_VOLUME_SAFE_BUDS:
+      return {
+        ...state,
         volumeIncrease:
           state.currentVolume !== action.volume ? true : state.volumeIncrease,
       };

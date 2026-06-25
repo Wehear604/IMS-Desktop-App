@@ -36,6 +36,7 @@ import itePrimeWhite from "../../assets/images/ITE_PRIME_WHITE.svg";
 import wehearox from "../../assets/images/wehearox.svg";
 import wehear_2_0 from "../../assets/images/wehear 2 0.svg";
 import safeBuds from "../../assets/images/safebuds.svg";
+import hearNu from "../../assets/images/HearnuPro.png";
 
 import leftSideLogo from "../../assets/images/leftSideSmall.svg";
 import rightSideLogo from "../../assets/images/rightSideSmall.svg";
@@ -69,10 +70,12 @@ import { SafeBudsVersionRead } from "../../store/actions/deviceQcAction";
 import SafebudsMainUi from "./SafebudsUi/SafebudsMainUi";
 import { SetStepAction } from "../../store/actions/stepAction";
 import ItePrimeDeviceTesting from "./ItePrimeDeviceTesting";
+import HearNuDeviceTesting from "./HearNuDeviceTesting";
 import Ric16DeviceTesting from "./Ric16DeviceTesting";
 import useBluetoothHeadsetStatus from "./useBluetoothHeadsetStatus";
 import OneViewBox from "../../components/layouts/OneViewBox";
 import { center } from "../../assets/css/theme/common";
+import HearNuConnectDeviceModule from "../../components/bluetooth/HearNuConnectDeviceModule";
 // import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 const Header = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
@@ -152,6 +155,24 @@ const ConnectButton = ({
       dispatch(
         openModal(<ItePrimeDeviceTesting />, "lg", true, "deviceAudioMicCheck"),
       );
+    } else if (device.device_type == DEVICES.HEAR_NU_PRO) {
+      dispatch(
+        openModal(
+          !headset ? (
+            <OneViewBox sx={{ ...center }}>
+              <CircularProgress size={50} />
+              {
+                " Please connect a Bluetooth headset to start the QC process... "
+              }
+            </OneViewBox>
+          ) : (
+            <HearNuDeviceTesting />
+          ),
+          "lg",
+          true,
+          "deviceAudioMicCheck",
+        ),
+      );
     } else if (device.device_type == DEVICES.SAFE_BUDS) {
       if (device.device_type == DEVICES.SAFE_BUDS && !device?.fotfile1) {
         // dispatch(SafeBudsVersionRead({ type: "SafeBudsVersionRead" }));
@@ -200,6 +221,7 @@ const ConnectButton = ({
   const isSideSelected =
     deviceSide === LISTENING_SIDE.LEFT ||
     deviceSide === LISTENING_SIDE.RIGHT ||
+    deviceSide === LISTENING_SIDE.BOTH ||
     deviceSide === true;
 
   if (
@@ -362,10 +384,7 @@ const DeviceConnectUi = () => {
   const [selected, setSelected] = useState("L");
   const { device, step, deviceDataStore } = useSelector((state) => state);
   const dispatch = useDispatch();
-  console.log(
-    "device?.device_type === DEVICES.SAFE_BUDS && !device?.fotfile",
-    deviceDataStore,
-  );
+
   const devices = [
     { side: "L", label: "BTE", value: LISTENING_SIDE.LEFT },
     { side: "R", label: "BTE", value: LISTENING_SIDE.RIGHT },
@@ -417,6 +436,14 @@ const DeviceConnectUi = () => {
             style={{ width: 200, height: 120 }}
             src={itePrimeWhite}
             alt="ITE Prime"
+          />
+        );
+      case DEVICES.HEAR_NU_PRO:
+        return (
+          <img
+            style={{ width: 160, height: 120 }}
+            src={hearNu}
+            alt="Hear Nu Pro"
           />
         );
       case DEVICES.SAFE_BUDS:
@@ -507,6 +534,7 @@ const DeviceConnectUi = () => {
     DEVICES.WEHEAR_2_0,
     DEVICES.WEHEAR_OX,
     DEVICES.ITE_PRIME,
+    DEVICES.HEAR_NU_PRO,
   ].includes(device.device_type);
 
   useEffect(() => {
@@ -552,6 +580,17 @@ const DeviceConnectUi = () => {
           { type_c_cable: false },
           { adapter: false },
           { wax_guard: false },
+        ]),
+      );
+    } else if (device?.device_type === DEVICES.HEAR_NU_PRO) {
+      dispatch(
+        DeviceContainsAction([
+          { manual: false },
+          { type_c_cable: false },
+          { adapter: false },
+          { silicone_Strap: false },
+          { cleaning_Fabric: false },
+          { carry_Pouch: false },
         ]),
       );
     }

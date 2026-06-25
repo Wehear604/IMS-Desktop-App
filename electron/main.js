@@ -10,6 +10,7 @@ const path = require("node:path");
 const { autoUpdater } = require("electron-updater");
 const log = require("electron-log");
 const loudness = require("loudness");
+const tracker = require("./tracker");
 let hasCheckedForUpdates = false;
 let bluetoothPinCallback = null;
 let selectBluetoothCallback = null;
@@ -53,6 +54,10 @@ function setupAppMenu() {
   Menu.setApplicationMenu(menu);
 }
 
+ipcMain.handle("get-tracking-data", async () => {
+  return tracker.getTrackingData();
+});
+
 // Auto reload during development
 if (process.env.NODE_ENV === "development") {
   try {
@@ -80,6 +85,19 @@ function createWindow() {
   });
 
   win.maximize();
+
+  win.webContents.on("before-input-event", (event, input) => {
+    const key = input.key?.toLowerCase();
+    if ((input.control || input.meta) && key === "r") {
+      event.preventDefault();
+      win.reload();
+    }
+
+    if (key === "f5") {
+      event.preventDefault();
+      win.reload();
+    }
+  });
 
   win.webContents.on(
     "select-bluetooth-device",
@@ -224,7 +242,7 @@ function createWindow() {
     }
   });
 
-  if (true) {
+  if (false) {
     win.loadFile(path.join(__dirname, "..", "build", "index.html"));
     console.log(
       "Forcing static build load from:",

@@ -37,6 +37,7 @@ const BoxContainsUI = ({ fields }) => {
     device: device?.device_type,
     isNewric16: deviceDataStore?.isNewric16,
     boxImage: deviceDataStore?.boxImage,
+    classicMac: deviceDataStore?.classicMac,
   };
 
   const onComplete = async (e) => {

@@ -1,5 +1,6 @@
 import ReadITEDataFromDevice from "../../pages/wehearDeviceQc/ite/ReadITEDataFromDevice";
 import ReadITEPrimeDataFromDevice from "../../pages/wehearDeviceQc/ite/ReadITEPrimeDataFromDevice";
+import ReadHearNuDataFromDevice from "../../pages/wehearDeviceQc/hearnu/ReadHearNuDataFromDevice";
 import ReadRicDataFromDevice from "../../pages/wehearDeviceQc/ric/ReadRicDataToDevice";
 import WriteRicDataToDevice from "../../pages/wehearDeviceQc/ric/WriteRicDataToDevice";
 import Read from "../../pages/wehearDeviceQc/safebuds/Read";
@@ -11,6 +12,7 @@ import WriteVersion from "../../pages/wehearDeviceQc/safebuds/WriteVersion";
 import { BLE_STORE, interpolateValue } from "../../utils/bleStore";
 import {
   actions,
+  DEVICES,
   EQ_LEVEL,
   ITE_MODE,
   LISTENING_SIDE,
@@ -356,7 +358,7 @@ export const changeRightRicMode = (mode = 0, deviceSide, deviceObj) => {
         else if (mode === 2) command = "85 03 01 00 03";
       }
 
-        await WriteRicDataToDevice(command, deviceSide, deviceObj);
+      await WriteRicDataToDevice(command, deviceSide, deviceObj);
 
       return true;
     } catch (error) {
@@ -444,7 +446,6 @@ export const readRic8Volume = (side, currentVolume) => {
   };
 };
 
-// credit goes to dilip mali
 export const getITEOptimaData = (side, currentVolume) => {
   return async (dispatch) => {
     const command = "AA 00 03";
@@ -542,6 +543,64 @@ export const getITEPrimeCurrentVolume = (side, volume) => {
     });
 
     console.log("ITE volume:", volume);
+  };
+};
+
+export const getHearNuMode = (side, deviceObj) => {
+  return async (dispatch) => {
+    const command = [0x55, 0x05, 0x00, 0x00, 0x50];
+
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      const response = await ReadHearNuDataFromDevice(command, side, deviceObj);
+
+      console.log("HearNu mode response", response);
+
+      const mode = response[0];
+
+      dispatch({
+        type: actions.SET_HEAR_NU_PRO_MODE,
+        mode,
+        device_side: side,
+      });
+    } catch (err) {
+      console.error("getHearNuMode failed", err);
+    }
+  };
+};
+
+export const getHearNuVolume = (side, deviceObj) => {
+  return async (dispatch, getState) => {
+    const command = [0xaa, 0x00, 0x03];
+    try {
+      const response = await ReadHearNuDataFromDevice(command, side, deviceObj);
+
+      if (response && response.length >= 20 && response[0] === 0xff) {
+        const leftVol = response[8];
+        const rightVol = response[9];
+
+        const volume = side === "left" || side === 1 ? leftVol : rightVol;
+
+        dispatch({ type: actions.SET_HEAR_NU_PRO_VOLUME, side, volume });
+      } else {
+        console.warn("Invalid payload received for HearNU Volume", response);
+      }
+    } catch (err) {
+      console.error("getHearNuVolume failed", err);
+    }
+  };
+};
+
+export const getHearNuCurrentVolume = (side, volume) => {
+  return (dispatch, getState) => {
+    dispatch({
+      type: !getState().deviceQc.start
+        ? actions.SET_HEAR_NU_PRO_CURRENT_VOLUME
+        : actions.SET_HEAR_NU_PRO_VOLUME,
+      volume,
+      side,
+      device_side: side,
+    });
   };
 };
 export const SafeBudsDeviceName = ({ type }) => {
@@ -662,13 +721,16 @@ export const SafebudsDeviceCurrentVolume = () => {
     }
   };
 };
-export const FetchVolumeSafebudsDevice = () => {
+export const FetchVolumeSafebudsDevice = (device_type) => {
   return async (dispatch) => {
     const data = await window.electronAPI.getVolume();
     console.log("System volume data:", data);
     try {
       dispatch({
-        type: actions.FETCH_VOLUME_SAFE_BUDS,
+        type:
+          device_type === DEVICES.HEAR_NU_PRO
+            ? actions.SET_HEAR_NU_PRO_VOLUME
+            : actions.SET_SAFE_BUDS_CURRENT_VOLUME,
         volume: data.volume,
       });
     } catch (err) {
