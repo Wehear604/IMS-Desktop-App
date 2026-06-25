@@ -1,7 +1,7 @@
 {
   "name": "inventory-management-frontend",
   "homepage": "./",
-  "version": "7.0.3",
+  "version": "7.0.4",
   "private": true,
   "description": "Desktop Inventory Management System",
   "author": "Rudren Patel",
