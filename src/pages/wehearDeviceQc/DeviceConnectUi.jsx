@@ -155,7 +155,7 @@ const ConnectButton = ({
       dispatch(
         openModal(<ItePrimeDeviceTesting />, "lg", true, "deviceAudioMicCheck"),
       );
-    } else if (device.device_type == DEVICES.HEAR_NU) {
+    } else if (device.device_type == DEVICES.HEAR_NU_PRO) {
       dispatch(
         openModal(
           !headset ? (
@@ -438,9 +438,13 @@ const DeviceConnectUi = () => {
             alt="ITE Prime"
           />
         );
-      case DEVICES.HEAR_NU:
+      case DEVICES.HEAR_NU_PRO:
         return (
-          <img style={{ width: 160, height: 120 }} src={hearNu} alt="Hear Nu" />
+          <img
+            style={{ width: 160, height: 120 }}
+            src={hearNu}
+            alt="Hear Nu Pro"
+          />
         );
       case DEVICES.SAFE_BUDS:
         return (
@@ -530,7 +534,7 @@ const DeviceConnectUi = () => {
     DEVICES.WEHEAR_2_0,
     DEVICES.WEHEAR_OX,
     DEVICES.ITE_PRIME,
-    DEVICES.HEAR_NU,
+    DEVICES.HEAR_NU_PRO,
   ].includes(device.device_type);
 
   useEffect(() => {
@@ -576,6 +580,17 @@ const DeviceConnectUi = () => {
           { type_c_cable: false },
           { adapter: false },
           { wax_guard: false },
+        ]),
+      );
+    } else if (device?.device_type === DEVICES.HEAR_NU_PRO) {
+      dispatch(
+        DeviceContainsAction([
+          { manual: false },
+          { type_c_cable: false },
+          { adapter: false },
+          { silicone_Strap: false },
+          { cleaning_Fabric: false },
+          { carry_Pouch: false },
         ]),
       );
     }

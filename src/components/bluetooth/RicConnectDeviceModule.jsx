@@ -225,9 +225,9 @@ const RicConnectDevice = ({
         filterData.acceptAllDevices = true;
       }
       let device;
-      if (fitting.device_type == DEVICES.HEAR_NU) {
+      if (fitting.device_type == DEVICES.HEAR_NU_PRO) {
         device = await navigator.bluetooth.requestDevice({
-          filters: [{ namePrefix: "HearNU" }], 
+          filters: [{ namePrefix: "HearNU" }],
           optionalServices: [serviceUuid],
         });
       } else {

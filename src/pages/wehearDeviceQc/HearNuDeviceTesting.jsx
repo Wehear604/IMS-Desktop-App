@@ -301,21 +301,21 @@ const HearNuDeviceTesting = ({ isUpdate }) => {
     );
   };
 
-  useEffect(() => {
-    let timer;
-    if (deviceQc.volumeIncrease) {
-      return;
-    }
-    if (step === 1 && !BLE_STORE.BTEdisconnect) {
-      timer = setTimeout(() => {
-        dispatch(getHearNuVolume(LISTENING_SIDE.LEFT, BLE_STORE.deviceObj));
-      }, 1000);
-    }
+  // useEffect(() => {
+  //   let timer;
+  //   if (deviceQc.volumeIncrease) {
+  //     return;
+  //   }
+  //   if (step === 1 && !BLE_STORE.BTEdisconnect) {
+  //     timer = setTimeout(() => {
+  //       dispatch(getHearNuVolume(LISTENING_SIDE.LEFT, BLE_STORE.deviceObj));
+  //     }, 1000);
+  //   }
 
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
-  }, [step, deviceQc]);
+  //   return () => {
+  //     if (timer) clearTimeout(timer);
+  //   };
+  // }, [step, deviceQc]);
   return (
     <CustomDialog
       // err={fields?.err}

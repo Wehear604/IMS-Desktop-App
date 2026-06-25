@@ -128,12 +128,12 @@ const HearNuConnectDeviceModule = ({
       dispatch(DeviceIsConnectingAction(true));
 
       // Direct dictionary lookup from constant file using the exact HearNU Device Type ID (24)
-      const serviceUuid = SERVICE_UUID[DEVICES.HEAR_NU] || SERVICE_UUID[24];
+      const serviceUuid = SERVICE_UUID[DEVICES.HEAR_NU_PRO] || SERVICE_UUID[24];
       const readNotifyUuid =
-        CHARACTERISTIC_UUID_READ_NOTIFY[DEVICES.HEAR_NU] ||
+        CHARACTERISTIC_UUID_READ_NOTIFY[DEVICES.HEAR_NU_PRO] ||
         CHARACTERISTIC_UUID_READ_NOTIFY[24];
       const readWriteUuid =
-        CHARACTERISTIC_UUID_READ_WRITE[DEVICES.HEAR_NU] ||
+        CHARACTERISTIC_UUID_READ_WRITE[DEVICES.HEAR_NU_PRO] ||
         CHARACTERISTIC_UUID_READ_WRITE[24];
 
       console.log("🚀 HearNU lookup resolved serviceUuid:", serviceUuid);

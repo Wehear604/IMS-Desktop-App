@@ -22,13 +22,14 @@ const processHearNuQueue = async () => {
       throw new Error("No valid Bluetooth device found!");
     }
 
-    const SERVICE_UUId = SERVICE_UUID[DEVICES.HEAR_NU];
-    const WRITE_CHAR_UUId = CHARACTERISTIC_UUID_READ_WRITE[DEVICES.HEAR_NU];
-    const NOTIFY_CHAR_UUId = CHARACTERISTIC_UUID_READ_NOTIFY[DEVICES.HEAR_NU];
+    const SERVICE_UUId = SERVICE_UUID[DEVICES.HEAR_NU_PRO];
+    const WRITE_CHAR_UUId = CHARACTERISTIC_UUID_READ_WRITE[DEVICES.HEAR_NU_PRO];
+    const NOTIFY_CHAR_UUId =
+      CHARACTERISTIC_UUID_READ_NOTIFY[DEVICES.HEAR_NU_PRO];
 
     if (!SERVICE_UUId || !WRITE_CHAR_UUId || !NOTIFY_CHAR_UUId) {
       throw new Error(
-        "HEAR_NU UUIDs are not configured in constants.js. Please set SERVICE_UUID and CHARACTERISTIC_UUID entries for DEVICES.HEAR_NU.",
+        "HEAR_NU_PRO UUIDs are not configured in constants.js. Please set SERVICE_UUID and CHARACTERISTIC_UUID entries for DEVICES.HEAR_NU_PRO.",
       );
     }
 

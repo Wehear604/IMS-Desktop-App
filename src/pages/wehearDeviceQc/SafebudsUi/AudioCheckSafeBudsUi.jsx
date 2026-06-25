@@ -7,6 +7,7 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import { FetchVolumeSafebudsDevice } from "../../../store/actions/deviceQcAction";
 import audioUrl from "../../../assets/images/slow_instrumental.mp3";
 import { DeviceIsAudioCheck } from "../../../store/actions/deviceDataAction";
+import { DEVICES } from "../../../utils/constants";
 
 const AudioCheckSafeBudsUi = ({
   isPlaying,
@@ -44,7 +45,7 @@ const AudioCheckSafeBudsUi = ({
     if (!NotuseEffect) return;
     if (deviceQc.volumeIncrease) return;
     const interval = setInterval(async () => {
-      dispatch(FetchVolumeSafebudsDevice());
+      dispatch(FetchVolumeSafebudsDevice(device.device_type));
     }, 1500);
 
     return () => clearInterval(interval);
@@ -76,7 +77,11 @@ const AudioCheckSafeBudsUi = ({
       />
       <StepCard
         isChecked={true}
-        checked={deviceQc.volumeIncrease}
+        checked={
+          device.device_type === DEVICES.HEAR_NU_PRO
+            ? deviceQc.volumeDecrease && deviceQc.volumeIncrease
+            : deviceQc.volumeIncrease
+        }
         title={"Volume Level check"}
       />
     </Box>

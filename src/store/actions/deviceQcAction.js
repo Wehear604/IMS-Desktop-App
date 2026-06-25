@@ -12,6 +12,7 @@ import WriteVersion from "../../pages/wehearDeviceQc/safebuds/WriteVersion";
 import { BLE_STORE, interpolateValue } from "../../utils/bleStore";
 import {
   actions,
+  DEVICES,
   EQ_LEVEL,
   ITE_MODE,
   LISTENING_SIDE,
@@ -558,7 +559,7 @@ export const getHearNuMode = (side, deviceObj) => {
       const mode = response[0];
 
       dispatch({
-        type: actions.SET_HEAR_NU_MODE,
+        type: actions.SET_HEAR_NU_PRO_MODE,
         mode,
         device_side: side,
       });
@@ -580,7 +581,7 @@ export const getHearNuVolume = (side, deviceObj) => {
 
         const volume = side === "left" || side === 1 ? leftVol : rightVol;
 
-        dispatch({ type: actions.SET_HEAR_NU_VOLUME, side, volume });
+        dispatch({ type: actions.SET_HEAR_NU_PRO_VOLUME, side, volume });
       } else {
         console.warn("Invalid payload received for HearNU Volume", response);
       }
@@ -594,8 +595,8 @@ export const getHearNuCurrentVolume = (side, volume) => {
   return (dispatch, getState) => {
     dispatch({
       type: !getState().deviceQc.start
-        ? actions.SET_HEAR_NU_CURRENT_VOLUME
-        : actions.SET_HEAR_NU_VOLUME,
+        ? actions.SET_HEAR_NU_PRO_CURRENT_VOLUME
+        : actions.SET_HEAR_NU_PRO_VOLUME,
       volume,
       side,
       device_side: side,
@@ -720,13 +721,16 @@ export const SafebudsDeviceCurrentVolume = () => {
     }
   };
 };
-export const FetchVolumeSafebudsDevice = () => {
+export const FetchVolumeSafebudsDevice = (device_type) => {
   return async (dispatch) => {
     const data = await window.electronAPI.getVolume();
     console.log("System volume data:", data);
     try {
       dispatch({
-        type: actions.FETCH_VOLUME_SAFE_BUDS,
+        type:
+          device_type === DEVICES.HEAR_NU_PRO
+            ? actions.SET_HEAR_NU_PRO_VOLUME
+            : actions.SET_SAFE_BUDS_CURRENT_VOLUME,
         volume: data.volume,
       });
     } catch (err) {

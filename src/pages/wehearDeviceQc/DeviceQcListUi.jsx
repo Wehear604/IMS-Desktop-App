@@ -8,7 +8,7 @@ import {
 } from "../../utils/constants";
 import AccordionDetailsUi from "../../components/layouts/common/AccordionDetailsUi";
 import neckbandBlack from "../../assets/images/neckband.svg";
-import hearNu from "../../assets/images/HearnuPro.png";
+import hearNuPro from "../../assets/images/HearnuPro.png";
 import itePrimeWhite from "../../assets/images/ITE_PRIME_WHITE.svg";
 import iteOptimaBlack from "../../assets/images/ITE_OPTIMA_BLACK.svg";
 import METALIC_RIC_OPTIMA from "../../assets/images/metalic_ric.svg";
@@ -124,11 +124,11 @@ const DeviceQcListUi = ({ fields, setFields, filters, setFilters }) => {
           OnClickCenter: () => updateSuggestedProduct(DEVICES.WEHEAR_2_0),
         };
 
-      case DEVICES.HEAR_NU:
+      case DEVICES.HEAR_NU_PRO:
         return {
           ...baseConfig,
-          src: hearNu,
-          OnClickCenter: () => updateSuggestedProduct(DEVICES.HEAR_NU),
+          src: hearNuPro,
+          OnClickCenter: () => updateSuggestedProduct(DEVICES.HEAR_NU_PRO),
         };
 
       case DEVICES.ITE_PRIME:
