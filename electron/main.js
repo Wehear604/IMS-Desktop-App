@@ -242,24 +242,24 @@ function createWindow() {
     }
   });
 
-  if (false) {
+  if (true) { 
     win.loadFile(path.join(__dirname, "..", "build", "index.html"));
-    console.log(
+    console.log(   
       "Forcing static build load from:",
       path.join(__dirname, "..", "build", "index.html"),
     );
   } else {
     win.loadURL("http://localhost:3000");
-
+  
     win.webContents.openDevTools();
     console.log("Loading development server: http://localhost:3000");
-  }
+  }  
 
   win.once("ready-to-show", () => {
     checkForUpdatesOnce();
   });
 }
-
+  
 autoUpdater.on("checking-for-update", () => {
   console.log("Checking for update...");
 });
