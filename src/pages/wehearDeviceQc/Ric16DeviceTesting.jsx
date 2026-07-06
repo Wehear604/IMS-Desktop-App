@@ -127,7 +127,7 @@ const Ric16DeviceTesting = (isUpdate) => {
             },
             fields.charging,
             device?.is_Audio_play,
-            device?.mac,
+            device?.leftmac,
             device.isMic,
           ),
         );
@@ -195,7 +195,7 @@ const Ric16DeviceTesting = (isUpdate) => {
       },
       charging: fields.charging,
       audio: device?.is_Audio_play,
-      mac: device?.mac,
+      mac: device?.leftmac,
       result: false,
       mic: device?.isMic,
     },
