@@ -1,0 +1,77 @@
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import StepCard from "../../../components/StepCard";
+import { Box, Button, Typography } from "@mui/material";
+import PauseIcon from "@mui/icons-material/Pause";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import audioUrl from "../../../assets/images/slow_instrumental.mp3";
+import { DeviceIsAudioCheck } from "../../../store/actions/deviceDataAction";
+import { DEVICES } from "../../../utils/constants";
+
+const AudioCheckITEUi = ({
+  isPlaying,
+  setIsPlaying,
+  audioRef,
+  NotuseEffect = true,
+}) => {
+  const dispatch = useDispatch();
+  const { device, deviceQc } = useSelector((state) => state);
+  const handlePlayPause = () => {
+    if (!audioRef.current) return;
+
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch((err) => {
+        console.error("Audio play failed:", err);
+      });
+    }
+    dispatch(DeviceIsAudioCheck(true));
+    setIsPlaying((prev) => !prev);
+  };
+  useEffect(() => {
+    audioRef.current = new Audio(audioUrl);
+    audioRef.current.loop = true; // optional
+    audioRef.current.volume = 1;
+
+    return () => {
+      audioRef.current.pause();
+      audioRef.current = null;
+    };
+  }, []);
+
+  return (
+    <Box>
+      <Box>
+        <Typography variant="h3" fontWeight={700} mb={2}>
+          Audio Check
+        </Typography>
+      </Box>
+      <StepCard
+        isChecked={true}
+        title="Audio Check"
+        subtitle="Test device audio output"
+        checked={device.is_Audio_play}
+        action={
+          <Button
+            variant="contained"
+            onClick={handlePlayPause}
+            startIcon={isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
+            sx={{
+              bgcolor: "#0d5966",
+              borderRadius: "25%",
+              height: "6vh",
+            }}
+          />
+        }
+      />
+      <StepCard
+        isChecked
+        checked={deviceQc.volumeIncrease}
+        title="Volume Level Check"
+      />
+    </Box>
+  );
+};
+
+export default AudioCheckITEUi;

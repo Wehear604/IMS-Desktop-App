@@ -15,11 +15,13 @@ import {
   DEVICES,
   EQ_LEVEL,
   ITE_MODE,
+  ITE_MODE_COMMANDS,
   LISTENING_SIDE,
   MODES,
   VOLUME_COMMANDS_REVERSE,
 } from "../../utils/constants";
 import { DeviceVersionAction } from "./deviceDataAction";
+import WriteITEDataToDevice from "../../pages/wehearDeviceQc/ite/WriteITEDataToDevice";
 
 const gattLock = (() => {
   let busy = false;
@@ -484,20 +486,45 @@ export const getITEOptimaData = (side, currentVolume) => {
     //     device_side: side
     // });
     console.log("object volume", volume, mode, responseParts);
+
+    console.log("Mode byte:", responseParts[7]);
+    console.log("Mapped mode:", mode);
+    console.log("ITE_MODE:", ITE_MODE);
+
+    console.log("Dispatch Data", {
+      side,
+      mode,
+      volume,
+      currentVolume,
+    });
     if (currentVolume) {
       dispatch({
         type: actions.SET_ITE_OPTIMA_CURRENT_VOLUME,
         volume,
         device_side: side,
-      });
-    } else {
-      dispatch({
-        type: actions.SET_ITE_OPTIMA_VOLUME,
-        side,
-        volume,
         mode,
       });
+    } else {
+      // dispatch({
+      //   type: actions.SET_ITE_OPTIMA_VOLUME,
+      //   side,
+      //   volume,
+      //   mode,
+      // });
+      dispatch({
+        type: actions.SET_VOLUME_LEVEL,
+        side,
+        volume: volume,
+      });
     }
+  };
+};
+
+export const changeITEOptimaMode = (mode, side) => {
+  return async () => {
+    const command = ITE_MODE_COMMANDS[mode];
+
+    await WriteITEDataToDevice(command, side, BLE_STORE.deviceObj);
   };
 };
 
@@ -730,7 +757,9 @@ export const FetchVolumeSafebudsDevice = (device_type) => {
         type:
           device_type === DEVICES.HEAR_NU_PRO
             ? actions.SET_HEAR_NU_PRO_VOLUME
-            : actions.SET_SAFE_BUDS_CURRENT_VOLUME,
+            : device_type === DEVICES.ITE_OPTIMA
+              ? actions.SET_ITE_OPTIMA_VOLUME
+              : actions.SET_SAFE_BUDS_CURRENT_VOLUME,
         volume: data.volume,
       });
     } catch (err) {

@@ -167,10 +167,6 @@ const DeviceAudioMicCheckUi = () => {
       if (step === 1 || step === 2) dispatch(readRic8Volume(dev.device_side));
     }
 
-    if (dev?.device_type === DEVICES.ITE_OPTIMA) {
-      if (step === 1 || step === 2) dispatch(getITEOptimaData(dev.device_side));
-    }
-
     if (
       dev?.device_type === DEVICES.ITE_PRIME ||
       dev?.device_type === DEVICES.NECKBAND
@@ -725,7 +721,8 @@ const DeviceAudioMicCheckUi = () => {
               {(device?.device_type === DEVICES.BTE_OPTIMA ||
                 device?.device_type === DEVICES.BTE_PRIME ||
                 device?.device_type === DEVICES.ITE_PRIME ||
-                device?.device_type === DEVICES.RIC_OPTIMA_8C) && (
+                device?.device_type === DEVICES.RIC_OPTIMA_8C ||
+                device?.device_type === DEVICES.ITE_OPTIMA) && (
                 <StepCard
                   isChecked={true}
                   checked={modecheck(3)}

@@ -24,15 +24,12 @@ import rightRic16 from "../../assets/images/RIC optima 16_Close Dome_left_Biege.
 import leftRic16 from "../../assets/images/RIC optima 16_Close Dome_right_Biege.png";
 import leftRic8 from "../../assets/images/R8 HA all open domes.left.svg";
 import rightRic8 from "../../assets/images/R8 HA all open domes.right.svg";
-import rightITEOptima from "../../assets/images/ITE_OPTIMA_LEFT_BLACK.svg";
-import leftITEOptima from "../../assets/images/ITE_OPTIMA_RIGHT_BLACK.svg";
+import leftITEOptima from "../../assets/images/ITE_OPTIMA_BLACK.svg";
 
 import leftOpenBlack from "../../assets/images/Left_Open_Black.png";
 import rightOpenBlack from "../../assets/images/Right_Open_Black.png";
 
 import itePrimeWhite from "../../assets/images/ITE_PRIME_WHITE.svg";
-// import itePrimeWhite from "../../assets/images/ITE_PRIME_LEFT.svg";
-// import rightItePrime from "../../assets/images/ITE_PRIME_RIGHT.svg";
 import wehearox from "../../assets/images/wehearox.svg";
 import wehear_2_0 from "../../assets/images/wehear 2 0.svg";
 import safeBuds from "../../assets/images/safebuds.svg";
@@ -76,6 +73,7 @@ import useBluetoothHeadsetStatus from "./useBluetoothHeadsetStatus";
 import OneViewBox from "../../components/layouts/OneViewBox";
 import { center } from "../../assets/css/theme/common";
 import HearNuConnectDeviceModule from "../../components/bluetooth/HearNuConnectDeviceModule";
+import ITEOptimaDeviceTesting from "./ITEOptimaDeviceTesting";
 // import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 const Header = styled(Typography)(({ theme }) => ({
   color: theme.palette.text.secondary,
@@ -167,6 +165,24 @@ const ConnectButton = ({
             </OneViewBox>
           ) : (
             <HearNuDeviceTesting />
+          ),
+          "lg",
+          true,
+          "deviceAudioMicCheck",
+        ),
+      );
+    } else if (device.device_type == DEVICES.ITE_OPTIMA) {
+      dispatch(
+        openModal(
+          !headset ? (
+            <OneViewBox sx={{ ...center }}>
+              <CircularProgress size={50} />
+              {
+                " Please connect a Bluetooth headset to start the QC process... "
+              }
+            </OneViewBox>
+          ) : (
+            <ITEOptimaDeviceTesting />
           ),
           "lg",
           true,
@@ -417,7 +433,7 @@ const DeviceConnectUi = () => {
       case DEVICES.ITE_OPTIMA:
         return (
           <img
-            style={{ width: 100, height: 100 }}
+            style={{ width: 200, height: 120 }}
             src={leftITEOptima}
             alt="ITE Optima"
           />
@@ -499,14 +515,14 @@ const DeviceConnectUi = () => {
         );
       case DEVICES.RIC_OPTIMA_8C:
         return <img src={rightRic8} alt="Ric 8" />;
-      case DEVICES.ITE_OPTIMA:
-        return (
-          <img
-            style={{ width: 100, height: 100 }}
-            src={rightITEOptima}
-            alt="ITE Optima"
-          />
-        );
+      // case DEVICES.ITE_OPTIMA:
+      //   return (
+      //     <img
+      //       style={{ width: 100, height: 100 }}
+      //       src={rightITEOptima}
+      //       alt="ITE Optima"
+      //     />
+      //   );
       case DEVICES.RIC_32:
         return (
           <img
@@ -535,6 +551,7 @@ const DeviceConnectUi = () => {
     DEVICES.WEHEAR_OX,
     DEVICES.ITE_PRIME,
     DEVICES.HEAR_NU_PRO,
+    DEVICES.ITE_OPTIMA,
   ].includes(device.device_type);
 
   useEffect(() => {
@@ -591,6 +608,19 @@ const DeviceConnectUi = () => {
           { silicone_Strap: false },
           { cleaning_Fabric: false },
           { carry_Pouch: false },
+        ]),
+      );
+    } else if (device?.device_type === DEVICES.ITE_OPTIMA) {
+      dispatch(
+        DeviceContainsAction([
+          { manual: false },
+          { type_c_cable: false },
+          { adapter: false },
+          { cleaning_Fabric: false },
+          { charging_Case: false },
+          { cleaning_Brush: false },
+          { warranty_Card: false },
+          { doms: false },
         ]),
       );
     }

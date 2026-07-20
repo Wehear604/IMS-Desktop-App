@@ -149,9 +149,34 @@ const deviceQcReducer = (state = initialState, action) => {
         currentVolume: action.volume,
         start: true,
         device_side: action.device_side,
+        modeLeft:
+          action.device_side === LISTENING_SIDE.LEFT
+            ? [
+                ...new Set(
+                  [...state.modeLeft, action.mode].filter(
+                    (v) => v !== undefined,
+                  ),
+                ),
+              ]
+            : state.modeLeft,
+        modeRight:
+          action.device_side === LISTENING_SIDE.RIGHT
+            ? [
+                ...new Set(
+                  [...state.modeRight, action.mode].filter(
+                    (v) => v !== undefined,
+                  ),
+                ),
+              ]
+            : state.modeRight,
       };
 
     case actions.SET_ITE_OPTIMA_VOLUME:
+      console.log("SET_ITE_OPTIMA_VOLUME", {
+        currentVolume: state.currentVolume,
+        actionVolume: action.volume,
+      });
+
       return {
         ...state,
         volumeLeft:

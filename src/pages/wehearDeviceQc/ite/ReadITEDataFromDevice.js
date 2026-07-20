@@ -19,35 +19,52 @@ const processQueue = async () => {
     const CHARACTERISTIC_UUID_READ = "e49a28e1-f69a-11e8-8eb2-f2801f1b9fd1";
 
     const service = await device.gatt.getPrimaryService(SERVICE_UUID);
-    const characteristicWrite = await service.getCharacteristic(CHARACTERISTIC_UUID_WRITE);
-    const characteristicRead = await service.getCharacteristic(CHARACTERISTIC_UUID_READ);
+    const characteristicWrite = await service.getCharacteristic(
+      CHARACTERISTIC_UUID_WRITE,
+    );
+    const characteristicRead = await service.getCharacteristic(
+      CHARACTERISTIC_UUID_READ,
+    );
 
+    console.log("Sending:", command);
     await characteristicRead.startNotifications();
+    console.log("Notifications enabled");
 
-    const dataArray = command.split(" ").map(byte => parseInt(byte, 16)).filter(byte => !isNaN(byte));
+    const dataArray = command
+      .split(" ")
+      .map((byte) => parseInt(byte, 16))
+      .filter((byte) => !isNaN(byte));
     if (dataArray.length === 0) {
       throw new Error("Invalid command format");
     }
     const dataBuffer = new Uint8Array(dataArray);
     await characteristicWrite.writeValue(dataBuffer);
+    console.log("Command written");
     const onValueChanged = (event) => {
-
       const value = event.target.value;
       const decodedValue = Array.from(new Uint8Array(value.buffer))
-        .map(byte => byte.toString(16).padStart(2, '0'))
-        .join(' ');
+        .map((byte) => byte.toString(16).padStart(2, "0"))
+        .join(" ");
 
-
-      characteristicRead.removeEventListener('characteristicvaluechanged', onValueChanged);
+      characteristicRead.removeEventListener(
+        "characteristicvaluechanged",
+        onValueChanged,
+      );
       resolve(decodedValue);
       isProcessing = false;
       processQueue();
     };
 
-    characteristicRead.addEventListener('characteristicvaluechanged', onValueChanged);
+    characteristicRead.addEventListener(
+      "characteristicvaluechanged",
+      onValueChanged,
+    );
 
     setTimeout(() => {
-      characteristicRead.removeEventListener('characteristicvaluechanged', onValueChanged);
+      characteristicRead.removeEventListener(
+        "characteristicvaluechanged",
+        onValueChanged,
+      );
       reject(new Error(`Timeout waiting for response from ${side} device`));
       isProcessing = false;
       processQueue();

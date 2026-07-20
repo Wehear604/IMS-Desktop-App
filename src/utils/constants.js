@@ -339,7 +339,7 @@ export const DEVICES = {
   RIC_OPTIMA_8: 18,
   RIC_OPTIMA: 6,
   ITE_PRIME: 12,
-  // ITE_OPTIMA: 9,
+  ITE_OPTIMA: 9,
   // POWER_BTE: 10,
   // RIC_32: 11,
   // NECKBAND: 13,
@@ -467,4 +467,11 @@ export const ITE_MODE = {
   "02": 1,
   "03": 2,
   "04": 3,
+};
+
+export const ITE_MODE_COMMANDS = {
+  0: "AA 02 01 01",
+  1: "AA 02 02 02",
+  2: "AA 02 03 03",
+  3: "AA 02 04 04",
 };
