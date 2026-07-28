@@ -759,7 +759,7 @@ export const FetchVolumeSafebudsDevice = (device_type) => {
             ? actions.SET_HEAR_NU_PRO_VOLUME
             : device_type === DEVICES.ITE_OPTIMA
               ? actions.SET_ITE_OPTIMA_VOLUME
-              : actions.SET_SAFE_BUDS_CURRENT_VOLUME,
+              : actions.FETCH_VOLUME_SAFE_BUDS,
         volume: data.volume,
       });
     } catch (err) {
