@@ -244,7 +244,7 @@ function createWindow() {
     }
   });
 
-  if (true) {
+  if (false) {
     win.loadFile(path.join(__dirname, "..", "build", "index.html"));
     console.log(
       "Forcing static build load from:",

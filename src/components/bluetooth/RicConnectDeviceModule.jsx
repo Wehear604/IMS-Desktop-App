@@ -230,13 +230,22 @@ const RicConnectDevice = ({
           filters: [{ namePrefix: "HearNU" }],
           optionalServices: [serviceUuid],
         });
+      } else if (fitting.device_type == DEVICES.RIC_OPTIMA_8) {
+        device = await navigator.bluetooth.requestDevice({
+          filters: [{ namePrefix: "RIC 8" }],
+          optionalServices: [serviceUuid],
+        });
+      } else if (fitting.device_type == DEVICES.RIC_OPTIMA) {
+        device = await navigator.bluetooth.requestDevice({
+          filters: [{ namePrefix: "RIC 16" }],
+          optionalServices: [serviceUuid],
+        });
       } else {
         device = await navigator.bluetooth.requestDevice({
           ...filterData,
           optionalServices: [serviceUuid],
         });
       }
-
       if (!device) {
         setLoadingMessage("No device selected.");
 
