@@ -155,8 +155,12 @@ const SafeBudsUi = () => {
         console.error("Audio play failed:", err);
       });
     }
-    dispatch(DeviceIsAudioCheck(true));
+    // dispatch(DeviceIsAudioCheck(true));
     setIsPlaying((prev) => !prev);
+  };
+
+  const handleAudioCheckChange = (event) => {
+    dispatch(DeviceIsAudioCheck(event.target.checked));
   };
 
   const onComplete = (e) => {
@@ -447,16 +451,23 @@ const SafeBudsUi = () => {
             subtitle="Test device audio output"
             checked={device.is_Audio_play}
             action={
-              <Button
-                variant="contained"
-                onClick={handlePlayPause}
-                startIcon={isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
-                sx={{
-                  bgcolor: "#0d5966",
-                  borderRadius: "25%",
-                  height: "6vh",
-                }}
-              />
+              <Box display="flex" alignItems="center" gap={1}>
+                <Checkbox
+                  checked={Boolean(device.is_Audio_play)}
+                  onChange={handleAudioCheckChange}
+                  inputProps={{ "aria-label": "manual audio check" }}
+                />
+                <Button
+                  variant="contained"
+                  onClick={handlePlayPause}
+                  startIcon={isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
+                  sx={{
+                    bgcolor: "#0d5966",
+                    borderRadius: "25%",
+                    height: "6vh",
+                  }}
+                />
+              </Box>
             }
           />
           <StepCard

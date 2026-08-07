@@ -302,8 +302,10 @@ const DeviceAudioMicCheckUi = () => {
               ? deviceQc.modeLeft
               : deviceQc.modeRight,
             {
-              volumeIncrease: deviceQc?.volumeIncrease,
-              volumeDecrease: deviceQc?.volumeDecrease,
+              volumeIncrease:
+                deviceQc?.volumeIncrease || deviceQc?.volumeDecrease,
+              volumeDecrease:
+                deviceQc?.volumeDecrease || deviceQc?.volumeIncrease,
             },
             {
               body1: fields.body1,

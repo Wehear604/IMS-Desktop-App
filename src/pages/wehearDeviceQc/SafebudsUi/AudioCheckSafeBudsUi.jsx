@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import StepCard from "../../../components/StepCard";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Checkbox, Typography } from "@mui/material";
 import PauseIcon from "@mui/icons-material/Pause";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import { FetchVolumeSafebudsDevice } from "../../../store/actions/deviceQcAction";
@@ -27,8 +27,12 @@ const AudioCheckSafeBudsUi = ({
         console.error("Audio play failed:", err);
       });
     }
-    dispatch(DeviceIsAudioCheck(true));
+
     setIsPlaying((prev) => !prev);
+  };
+
+  const handleAudioCheckChange = (event) => {
+    dispatch(DeviceIsAudioCheck(event.target.checked));
   };
   useEffect(() => {
     audioRef.current = new Audio(audioUrl);
@@ -60,19 +64,26 @@ const AudioCheckSafeBudsUi = ({
       <StepCard
         isChecked={true}
         title="Audio Check"
-        subtitle="Test device audio output"
+        subtitle="Test device audio output from receiver"
         checked={device.is_Audio_play}
         action={
-          <Button
-            variant="contained"
-            onClick={handlePlayPause}
-            startIcon={isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
-            sx={{
-              bgcolor: "#0d5966",
-              borderRadius: "25%",
-              height: "6vh",
-            }}
-          />
+          <Box display="flex" alignItems="center" gap={1}>
+            <Checkbox
+              checked={Boolean(device.is_Audio_play)}
+              onChange={handleAudioCheckChange}
+              inputProps={{ "aria-label": "manual audio check" }}
+            />
+            <Button
+              variant="contained"
+              onClick={handlePlayPause}
+              startIcon={isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
+              sx={{
+                bgcolor: "#0d5966",
+                borderRadius: "25%",
+                height: "6vh",
+              }}
+            />
+          </Box>
         }
       />
       <StepCard

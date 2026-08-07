@@ -261,7 +261,10 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                   fields?.device === DEVICES.SAFE_BUDS ||
                   fields?.device === DEVICES.ITE_PRIME ||
                   fields?.device === DEVICES.BTE_OPTIMA ||
-                  fields?.device === DEVICES.BTE_PRIME
+                  fields?.device === DEVICES.BTE_PRIME ||
+                  fields?.device === DEVICES.RIC_OPTIMA ||
+                  fields?.device === DEVICES.HEAR_NU_PRO ||
+                  fields?.device === DEVICES.ITE_OPTIMA
                 ),
                 label: "Device Audio Test :",
                 value: (
