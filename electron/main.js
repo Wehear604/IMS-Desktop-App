@@ -11,6 +11,7 @@ const { autoUpdater } = require("electron-updater");
 const log = require("electron-log");
 const loudness = require("loudness");
 const tracker = require("./tracker");
+const { getBluetoothVersion } = require("./bluetooth-version");
 let hasCheckedForUpdates = false;
 let bluetoothPinCallback = null;
 let selectBluetoothCallback = null;
@@ -192,6 +193,12 @@ function createWindow() {
       }
     },
   );
+
+  ipcMain.handle("get-bluetooth-version", async () => {
+    const result = await getBluetoothVersion();
+    console.log("[bluetooth] version result:", JSON.stringify(result, null, 2));
+    return result;
+  });
 
   ipcMain.handle("check-safe-buds-connected", async () => {
     return await isSafeBudsConnected();

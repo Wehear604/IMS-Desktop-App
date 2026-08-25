@@ -13,6 +13,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     return await ipcRenderer.invoke("get-tracking-data");
   },
 
+  getBluetoothVersion: () => ipcRenderer.invoke("get-bluetooth-version"),
+
   // --- NEW: Window Controls ---
   minimizeWindow: () => ipcRenderer.send("minimize-window"),
   maximizeWindow: () => ipcRenderer.send("maximize-window"),

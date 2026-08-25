@@ -13,6 +13,7 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
   const dispatch = useDispatch();
   const [fields, setFields] = useState({});
   const [loading, setLoading] = useState(false);
+  const [btInfo, setBtInfo] = useState(null);
   const device = fields.device === DEVICES.SAFE_BUDS;
   const fetchById = useCallback(
     (id) => {
@@ -37,6 +38,19 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
   useEffect(() => {
     if (id) fetchById(id);
   }, [id, fetchById]);
+
+  useEffect(() => {
+    if (window.electronAPI && window.electronAPI.getBluetoothVersion) {
+      window.electronAPI
+        .getBluetoothVersion()
+        .then((res) => setBtInfo(res))
+        .catch((err) =>
+          setBtInfo({ success: false, error: err?.message || String(err) }),
+        );
+    } else {
+      setBtInfo({ success: false, error: "electronAPI unavailable" });
+    }
+  }, []);
 
   console.log("object fields", fields);
   return (
@@ -759,6 +773,60 @@ const DeviceQcInformationUi = ({ id, IsVeiw }) => {
                     />
                   </Box>
                 ),
+              },
+            ]}
+          />
+        </Box>
+
+        <Box mt={4}>
+          <Typography variant="h4" fontWeight="bold" mb={2}>
+            System Bluetooth Details :
+          </Typography>
+          <InformationUI
+            Data={[
+              {
+                label: "Bluetooth Provider :",
+                value:
+                  btInfo?.adapters?.length > 0
+                    ? btInfo.adapters.map((a) => a.manufacturer).join(", ")
+                    : "NA",
+              },
+              {
+                label: "Bluetooth Adapter :",
+                value:
+                  btInfo?.adapters?.length > 0
+                    ? btInfo.adapters.map((a) => a.name).join(", ")
+                    : "NA",
+              },
+              {
+                label: "Driver Version :",
+                value:
+                  btInfo?.adapters?.length > 0
+                    ? btInfo.adapters.map((a) => a.driverVersion).join(", ")
+                    : "NA",
+              },
+              {
+                label: "Bluetooth Version :",
+                value:
+                  btInfo?.adapters?.length > 0
+                    ? btInfo.adapters
+                        .map((a) =>
+                          a.bluetoothVersion
+                            ? a.bluetoothVersion
+                            : `N/A (driver ${a.driverVersion || "unknown"})`,
+                        )
+                        .join(", ")
+                    : "NA",
+              },
+              {
+                label: "Status :",
+                value: !btInfo
+                  ? "Detecting..."
+                  : btInfo.success
+                    ? btInfo.adapters?.length > 0
+                      ? "Detected"
+                      : "No Bluetooth adapter found"
+                    : `Error: ${btInfo.error}`,
               },
             ]}
           />
