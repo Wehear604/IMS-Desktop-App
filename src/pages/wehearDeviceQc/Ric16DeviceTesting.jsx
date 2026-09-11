@@ -76,7 +76,7 @@ const Ric16DeviceTesting = (isUpdate) => {
     findObjectKeyByValue(device?.device_side, LISTENING_SIDE) ?? "";
 
   useEffect(() => {
-    if (device?.device_type === DEVICES.RIC_OPTIMA) {
+    if (device?.device_type === DEVICES.RIC_OPTIMA || device?.device_type === DEVICES.RIC_OPTIMA_8) {
       dispatch(
         DeviceContainsAction([
           { charging_Case: false },

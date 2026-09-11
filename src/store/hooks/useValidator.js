@@ -35,11 +35,3 @@ const useValidate = () => {
 
 }
 export default useValidate
-
-// const xyz = {
-//     required: true,
-//     value: 'attual value',
-//     field: 'name of field',
-//     isEmail: true,
-
-// }

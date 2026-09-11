@@ -544,7 +544,7 @@ const DeviceConnectUi = () => {
         return null;
     }
   };
-
+console.log("deviceDataStore", deviceDataStore);
   const isSingleCardType = [
     DEVICES.SAFE_BUDS,
     DEVICES.WEHEAR_2_0,
@@ -586,7 +586,10 @@ const DeviceConnectUi = () => {
     }
   }, [device.connected, device.left_connected]);
   useEffect(() => {
-    if (device?.device_type === DEVICES.RIC_OPTIMA) {
+    if (
+      device?.device_type === DEVICES.RIC_OPTIMA ||
+      device?.device_type === DEVICES.RIC_OPTIMA_8
+    ) {
       dispatch(
         DeviceContainsAction([
           { charging_Case: false },

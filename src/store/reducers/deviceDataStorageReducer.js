@@ -1,4 +1,3 @@
-import { all } from "axios";
 import { actions, LISTENING_SIDE } from "../../utils/constants";
 
 const initialState = {

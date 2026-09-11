@@ -16,6 +16,7 @@ import ProductDetailsQcUi from "./ProductDetailsQcUi";
 import { useDispatch, useSelector } from "react-redux";
 import {
   DeviceBoxDetailsAction,
+  DeviceContainsAction,
   DeviceSideAction,
   resetDeviceDataStore,
 } from "../../store/actions/deviceDataAction";
@@ -142,6 +143,49 @@ const DeviceQcListController = ({
   useEffect(() => {
     dispatch(resetDeviceDataStore(true));
   }, []);
+  useEffect(() => {
+    if (
+      device?.device_type === DEVICES.RIC_OPTIMA ||
+      device?.device_type === DEVICES.RIC_OPTIMA_8
+    ) {
+      dispatch(
+        DeviceContainsAction([
+          { charging_Case: false },
+          { warranty_Card: false },
+          { device_user_guide: false },
+          { cleaning_Brush: false },
+          { slicone_domes: false },
+          { type_c_cable: false },
+          { adapter: false },
+          { wax_guard: false },
+        ]),
+      );
+    } else if (device?.device_type === DEVICES.HEAR_NU_PRO) {
+      dispatch(
+        DeviceContainsAction([
+          { manual: false },
+          { type_c_cable: false },
+          { adapter: false },
+          { silicone_Strap: false },
+          { cleaning_Fabric: false },
+          { carry_Pouch: false },
+        ]),
+      );
+    } else if (device?.device_type === DEVICES.ITE_OPTIMA) {
+      dispatch(
+        DeviceContainsAction([
+          { manual: false },
+          { type_c_cable: false },
+          { adapter: false },
+          { cleaning_Fabric: false },
+          { charging_Case: false },
+          { cleaning_Brush: false },
+          { warranty_Card: false },
+          { doms: false },
+        ]),
+      );
+    }
+  }, [device.device_type]);
   return (
     <>
       <Paper

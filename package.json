@@ -1,12 +1,11 @@
 {
   "name": "inventory-management-frontend",
   "homepage": "./",
-  "version": "8.0.0",
+  "version": "8.0.1",
   "private": true,
   "description": "Desktop Inventory Management System",
   "author": "Rudren Patel",
   "main": "electron/main.js",
-  
   "dependencies": {
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
@@ -17,7 +16,7 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "axios": "^1.7.2",
+    "axios": "^1.20.0",
     "child_process": "^1.0.2",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.13",
@@ -116,6 +115,7 @@
     "cross-env": "^10.1.0",
     "electron": "^39.2.3",
     "electron-builder": "^26.0.12",
-    "nodemon": "^3.1.11"
+    "nodemon": "^3.1.11",
+    "wait-on": "^9.1.0"
   }
 }
