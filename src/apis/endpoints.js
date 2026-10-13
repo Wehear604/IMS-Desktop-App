@@ -1,4 +1,4 @@
-export const mode = "production1";
+export const mode = "production";
 let domain = "";
 
 switch (mode) {
@@ -9,10 +9,13 @@ switch (mode) {
     domain = "http://localhost:8000/";
     break;
   case "development":
-    domain = "https://imsdevelopment.wehear.in/";
+    domain = "https://imsdevserver.wehear.in/";
     break;
   case "production1":
     domain = "https://serverims.wehear.in/";     
+    break;
+  case "production":
+    domain = "https://imsprodserver.wehear.in/";     
     break;
   default:
     domain = "http://localhost:8000/";
