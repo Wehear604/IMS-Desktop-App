@@ -39,6 +39,7 @@ import {
   getITEPrimeVolume,
   readRic8Volume,
   readRicMode,
+  readRicSerialNumber,
   readRicVolumeLevel,
   RicDeviceCurrentVolume,
 } from "../../store/actions/deviceQcAction";
@@ -159,8 +160,11 @@ const DeviceAudioMicCheckUi = () => {
     ) {
       if (step === 1)
         dispatch(readRicVolumeLevel(dev.device_side, BLE_STORE.deviceObj));
+      dispatch(readRicSerialNumber(dev.device_side));
+
       if (step === 2)
         dispatch(readRicMode(dev.device_side, BLE_STORE.deviceObj));
+      dispatch(readRicSerialNumber(dev.device_side));
     }
 
     if (dev?.device_type === DEVICES.RIC_OPTIMA_8C) {

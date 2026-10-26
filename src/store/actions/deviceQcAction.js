@@ -343,6 +343,51 @@ export const readRicMode = (side, deviceObj, onSuccess = () => {}) => {
     }
   };
 };
+
+import WriteSnToDevice from "../../components/bluetooth/WriteSereialNumberToRic";
+import ReadRicSerialNumberToDevice from "../../pages/wehearDeviceQc/ric/ReadRicSerialNumberToDevice";
+
+const MAX_SN_LENGTH = 8; // ASSUMPTION from your friend's example (AHNRCOPS026W1006 -> AHNRCOPS). Confirm, or remove.
+
+const parseSn = (text) => text?.match(/<sn=([^>]*)>/i)?.[1] ?? null;
+
+export const writeDeviceSn = (SnValue, deviceSide, deviceObj) => {
+  return async (dispatch, getState) => {
+    try {
+      const fullSn = String(SnValue ?? "").trim();
+
+      if (!fullSn) {
+        return {
+          success: false,
+          status: "invalid",
+          message: "Serial number is empty",
+        };
+      }
+
+      // only the last 8 characters go to the device
+      const snToWrite = fullSn.slice(-8);
+
+      // resolves only after the device replies
+      const savedSn = await WriteSnToDevice(snToWrite, deviceSide, deviceObj);
+
+      console.log("savedSn", savedSn);
+      if (savedSn === "<st_sn=OK>") {
+        return { success: true, status: "success", SnValue: snToWrite, fullSn };
+      }
+
+      return {
+        success: false,
+        status: "mismatch",
+        savedSn,
+        message: `Device replied "${savedSn}" when writing "${snToWrite}"`,
+      };
+    } catch (error) {
+      console.error("Error writing serial number:", error);
+      return { success: false, status: "error", message: error.message };
+    }
+  };
+};
+
 export const changeRightRicMode = (mode = 0, deviceSide, deviceObj) => {
   return async (dispatch, getState) => {
     try {
@@ -830,6 +875,41 @@ export const AllDeviceAudioCheck = (isMic) => {
       });
     } catch (err) {
       console.error("read failed", err);
+    }
+  };
+};
+
+export const readRicSerialNumber = (side) => {
+  return async (dispatch) => {
+    try {
+      let command = "3C 52 44 5F 53 4E 3E";
+      let rightResponse = await ReadRicSerialNumberToDevice(
+        command,
+        side,
+        BLE_STORE.deviceObj,
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      let leftResponse = await ReadRicSerialNumberToDevice(
+        command,
+        side,
+        BLE_STORE.LeftdeviceObj,
+      );
+
+      console.log("first response", leftResponse);
+
+      if (rightResponse && leftResponse) {
+        dispatch({
+          type: actions.SET_DEVICE_SERIAL_NUMBER,
+          rightResponse: rightResponse,
+          leftResponse: leftResponse,
+        });
+      }
+
+      return response;
+    } catch (err) {
+      console.error("RicDeviceCurrentVolume read failed", err);
     }
   };
 };

@@ -34,6 +34,17 @@ export const disconnectDevice = (side, flag) => {
   };
 };
 
+const getErrorMessage = (response) => {
+  return (
+    response?.response?.data?.data?.[0]?.msg ||
+    response?.response?.data?.message ||
+    response?.data?.message ||
+    response?.data?.[0]?.message ||
+    response?.message ||
+    "OOPS! Something went wrong"
+  );
+};
+
 export const callApiAction = (
   asyncFun,
   onSuccess = () => {},
@@ -49,13 +60,7 @@ export const callApiAction = (
         } else await onSuccess(response.data);
       } else {
         if (response.code === 400) {
-          if (response?.code === 400) {
-            if (response?.response?.status === 400) {
-              onError(response?.response?.data?.data[0]?.msg);
-            } else {
-              onError(response?.data[0]?.msg);
-            }
-          }
+          onError(getErrorMessage(response));
         } else if (response.code === 401) {
           const resetFunResponse = await resetTokenApi();
           if (resetFunResponse.status === 1) {

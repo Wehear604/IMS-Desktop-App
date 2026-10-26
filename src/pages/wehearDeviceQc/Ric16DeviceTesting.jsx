@@ -32,6 +32,7 @@ import {
   changeRicMode,
   readEqualizer,
   readRicMode,
+  readRicSerialNumber,
   readRicVolumeLevel,
   RicDeviceCurrentVolume,
 } from "../../store/actions/deviceQcAction";
@@ -76,7 +77,10 @@ const Ric16DeviceTesting = (isUpdate) => {
     findObjectKeyByValue(device?.device_side, LISTENING_SIDE) ?? "";
 
   useEffect(() => {
-    if (device?.device_type === DEVICES.RIC_OPTIMA || device?.device_type === DEVICES.RIC_OPTIMA_8) {
+    if (
+      device?.device_type === DEVICES.RIC_OPTIMA ||
+      device?.device_type === DEVICES.RIC_OPTIMA_8
+    ) {
       dispatch(
         DeviceContainsAction([
           { charging_Case: false },
@@ -326,6 +330,8 @@ const Ric16DeviceTesting = (isUpdate) => {
             : BLE_STORE.deviceObj,
         ),
       );
+
+      dispatch(readRicSerialNumber(device.device_side));
     }, 1500);
 
     return () => clearInterval(interval);

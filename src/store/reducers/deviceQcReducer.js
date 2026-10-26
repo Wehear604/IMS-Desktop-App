@@ -11,10 +11,11 @@ const initialState = {
   volumeDecrease: false,
   volumeIncrease: false,
   tapSide: null,
+  deviceSerialNumber: false,
 };
 
 const deviceQcReducer = (state = initialState, action) => {
-  console.log("first", state.currentVolume, action.volume);
+  console.log("first", state.deviceSerialNumber, action.deviceSerialNumber);
   switch (action.type) {
     case actions.SET_DEVICE_SIDE:
       return {
@@ -324,6 +325,16 @@ const deviceQcReducer = (state = initialState, action) => {
       return {
         ...state,
         currentVolume: action.currentVolume,
+      };
+
+    case actions.SET_DEVICE_SERIAL_NUMBER:
+      return {
+        ...state,
+        deviceSerialNumber:
+          action.rightResponse == "3c 73 6e 3d 00 00 00 00 00 00 00 00 3e" &&
+          action.leftResponse == "3c 73 6e 3d 00 00 00 00 00 00 00 00 3e"
+            ? true
+            : false,
       };
 
     case actions.FETCH_VOLUME_HEAR_NU_PRO:

@@ -55,11 +55,22 @@ const initialState = {
   device: null,
   isNewric16: false,
   classicMac: "",
+  deviceSerialNumber: false,
 };
 
 const deviceDataStorageReducer = (state = initialState, action) => {
   console.log("action", action);
   switch (action.type) {
+    case actions.SET_DEVICE_SERIAL_NUMBER:
+      return {
+        ...state,
+        deviceSerialNumber:
+          action.rightResponse == "3c 73 6e 3d 00 00 00 00 00 00 00 00 3e" &&
+          action.leftResponse == "3c 73 6e 3d 00 00 00 00 00 00 00 00 3e"
+            ? true
+            : false,
+      };
+
     case actions.SET_DEVICE_STORAGE:
       if (action.device_side === LISTENING_SIDE.LEFT) {
         return {
