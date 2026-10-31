@@ -330,13 +330,15 @@ const Ric16DeviceTesting = (isUpdate) => {
             : BLE_STORE.deviceObj,
         ),
       );
-
-      dispatch(readRicSerialNumber(device.device_side));
     }, 1500);
 
     return () => clearInterval(interval);
   }, [step, device, deviceQc, deviceDataStore, BLE_STORE]);
-
+  useEffect(() => {
+    if (device.device_side && device.device_type) {
+      dispatch(readRicSerialNumber(device.device_side, device.device_type));
+    }
+  }, [device.device_side]);
   useEffect(() => {
     if (step !== 1 || !device) return;
 

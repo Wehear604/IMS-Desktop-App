@@ -913,3 +913,46 @@ export const readRicSerialNumber = (side) => {
     }
   };
 };
+
+export const readRic8SerialNumber = (side) => {
+  return async (dispatch) => {
+    try {
+      let command = "3C 52 44 5F 53 4E 3E";
+      console.log("first side", side);
+      if (side === LISTENING_SIDE.RIGHT) {
+        let rightResponse = await ReadRicSerialNumberToDevice(
+          command,
+          side,
+          BLE_STORE.deviceObj,
+        );
+        console.log("rightResponse", rightResponse);
+        if (rightResponse) {
+          dispatch({
+            type: actions.SET_DEVICE_SERIAL_NUMBER,
+            leftResponse: "3c 73 6e 3d 00 00 00 00 00 00 00 00 3e",
+            rightResponse: "3c 73 6e 3d 00 00 00 00 00 00 00 00 3e",
+          });
+        }
+
+        return rightResponse;
+      } else {
+        let leftResponse = await ReadRicSerialNumberToDevice(
+          command,
+          side,
+          BLE_STORE.deviceObj,
+        );
+        console.log("leftResponse", leftResponse);
+        if (leftResponse) {
+          dispatch({
+            type: actions.SET_DEVICE_SERIAL_NUMBER,
+            leftResponse: "3c 73 6e 3d 00 00 00 00 00 00 00 00 3e",
+            rightResponse: "3c 73 6e 3d 00 00 00 00 00 00 00 00 3e",
+          });
+        }
+        return leftResponse;
+      }
+    } catch (err) {
+      console.error("RicDeviceCurrentVolume read failed", err);
+    }
+  };
+};

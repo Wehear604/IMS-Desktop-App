@@ -75,6 +75,7 @@ const deviceDataStorageReducer = (state = initialState, action) => {
       if (action.device_side === LISTENING_SIDE.LEFT) {
         return {
           ...state,
+          device: action.device_type,
           left: {
             device_type: action.device_type,
             mode: action.mode,
@@ -93,6 +94,7 @@ const deviceDataStorageReducer = (state = initialState, action) => {
       } else if (action.device_side === LISTENING_SIDE.RIGHT) {
         return {
           ...state,
+          device: action.device_type,
           right: {
             device_type: action.device_type,
             mode: action.mode,
@@ -158,7 +160,7 @@ const deviceDataStorageReducer = (state = initialState, action) => {
       return {
         ...state,
         box_Contains: action.box_Contains,
-        device: action.device_type,
+        // device: action.device_type,
       };
     case actions.SET_VOLUME_LEVEL:
       if (action.side === LISTENING_SIDE.LEFT) {

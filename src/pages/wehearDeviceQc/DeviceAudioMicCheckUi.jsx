@@ -4,6 +4,7 @@ import {
   Button,
   Card,
   Checkbox,
+  InputAdornment,
   List,
   ListItem,
   ListItemText,
@@ -37,13 +38,16 @@ import {
   getITEOptimaData,
   getITEPrimeMode,
   getITEPrimeVolume,
+  readRic8SerialNumber,
   readRic8Volume,
   readRicMode,
   readRicSerialNumber,
   readRicVolumeLevel,
   RicDeviceCurrentVolume,
+  writeDeviceSn,
 } from "../../store/actions/deviceQcAction";
 import {
+  DeviceBoxIDAction,
   DeviceStoreAction,
   disconnectAction,
   resetDeviceDataStore,
@@ -56,6 +60,8 @@ import BoxContainsUI from "./AllDevice/BoxContainsUI";
 import MessageDilog from "../../components/texts/MessageDilog";
 import { createDeviceQcApi } from "../../apis/deviceQc.api";
 import { callApiAction } from "../../store/actions/commonAction";
+import BarcodeIcon from "@mui/icons-material/QrCode2";
+import CustomInput from "../../components/inputs/CustomInputs";
 
 const StepCard = ({
   isChecked,
@@ -160,11 +166,9 @@ const DeviceAudioMicCheckUi = () => {
     ) {
       if (step === 1)
         dispatch(readRicVolumeLevel(dev.device_side, BLE_STORE.deviceObj));
-      dispatch(readRicSerialNumber(dev.device_side));
 
       if (step === 2)
         dispatch(readRicMode(dev.device_side, BLE_STORE.deviceObj));
-      dispatch(readRicSerialNumber(dev.device_side));
     }
 
     if (dev?.device_type === DEVICES.RIC_OPTIMA_8C) {
@@ -181,6 +185,12 @@ const DeviceAudioMicCheckUi = () => {
         dispatch(getITEPrimeMode(dev.device_side, BLE_STORE.deviceObj));
     }
   };
+
+  useEffect(() => {
+    if (device.device_side && device.device_type == DEVICES.RIC_OPTIMA_8) {
+      dispatch(readRic8SerialNumber(device.device_side, device.device_type));
+    }
+  }, [device.device_side]);
 
   const startReading = useCallback(() => {
     if (isReading.current) return;
@@ -281,12 +291,13 @@ const DeviceAudioMicCheckUi = () => {
     findObjectKeyByValue(device?.device_side, LISTENING_SIDE) ?? "";
 
   const onComplete = useCallback(
-    (e) => {
+    async (e) => {
       e.preventDefault();
+      console.log("Oncomplete invoked");
       if (
         device?.device_type &&
         device?.device_side &&
-        (deviceQc?.device_side === LISTENING_SIDE.LEFT
+        (device?.device_side === LISTENING_SIDE.LEFT
           ? deviceQc?.modeLeft
           : deviceQc?.modeRight) &&
         (deviceQc?.volumeIncrease || deviceQc?.volumeDecrease) &&
@@ -298,6 +309,54 @@ const DeviceAudioMicCheckUi = () => {
           ? device?.is_Audio_play && device?.isMic
           : device?.isMic && device?.mac
       ) {
+        if (
+          device?.device_type === DEVICES.RIC_OPTIMA_8 &&
+          BLE_STORE.deviceObj &&
+          // deviceDataStore?.deviceSerialNumber &&
+          deviceDataStore?.boxId &&
+          device?.device_side == LISTENING_SIDE.RIGHT
+        ) {
+          console.log("Inside Right write");
+
+          const snResult = await dispatch(
+            writeDeviceSn(deviceDataStore.boxId, "RIGHT", BLE_STORE.deviceObj), // see notes below for snValue / deviceSide
+          );
+          if (!snResult.success) {
+            setLoading(false);
+            dispatch(
+              callSnackBar(
+                snResult.message ||
+                  "Failed to RIGHT SIDE write serial number to device",
+                SNACK_BAR_VARIETNS.error,
+              ),
+            );
+            return;
+          }
+        }
+
+        if (
+          device?.device_type == DEVICES.RIC_OPTIMA_8 &&
+          BLE_STORE.deviceObj &&
+          // deviceDataStore?.deviceSerialNumber &&
+          deviceDataStore?.boxId &&
+          device?.device_side == LISTENING_SIDE.LEFT
+        ) {
+          console.log("Inside Left write");
+          const snResult = await dispatch(
+            writeDeviceSn(deviceDataStore.boxId, "LEFT", BLE_STORE.deviceObj),
+          );
+          if (!snResult.success) {
+            // setLoading(false);
+            dispatch(
+              callSnackBar(
+                snResult.message ||
+                  "Failed to LEFT SIDE write serial number to device",
+                SNACK_BAR_VARIETNS.error,
+              ),
+            );
+            return;
+          }
+        }
         dispatch(
           DeviceStoreAction(
             device?.device_type,
@@ -350,7 +409,7 @@ const DeviceAudioMicCheckUi = () => {
         );
       }
     },
-    [dispatch, device, deviceQc, fields],
+    [dispatch, device, deviceQc, fields, deviceDataStore.boxId],
   );
 
   const disabledSubmit = (() => {
@@ -372,7 +431,10 @@ const DeviceAudioMicCheckUi = () => {
         : !(Array.isArray(modes) && modes.length === 4);
     }
     if (step === 3) {
-      return !(fields.body1 && fields.body2 && fields.charging);
+      return device?.device_type === DEVICES.RIC_OPTIMA_8
+        ? !(fields.body1 && fields.body2 && fields.charging) &&
+            !(deviceDataStore?.deviceSerialNumber && deviceDataStore?.boxId)
+        : !(fields.body1 && fields.body2 && fields.charging);
     }
     return true;
   })();
@@ -750,7 +812,6 @@ const DeviceAudioMicCheckUi = () => {
                 Body Check
               </Typography>
             </Box>
-
             <Box ml={2}>
               <StepCard
                 checkBox={
@@ -766,14 +827,12 @@ const DeviceAudioMicCheckUi = () => {
                 title="Body checked for scratches"
               />
             </Box>
-
             {/* CHARGING CHECK */}
             <Box width="100%">
               <Typography variant="h3" fontWeight={700} mb={2}>
                 Charging
               </Typography>
             </Box>
-
             <Box ml={2}>
               <StepCard
                 checkBox={
@@ -785,6 +844,30 @@ const DeviceAudioMicCheckUi = () => {
                 title="Charging function verified"
               />
             </Box>
+
+            {device?.device_type === DEVICES.RIC_OPTIMA_8 &&
+              deviceDataStore?.deviceSerialNumber && (
+                <CustomInput
+                  disabled={
+                    deviceDataStore?.left.result ||
+                    deviceDataStore?.right?.result
+                      ? deviceDataStore?.boxId
+                      : false
+                  }
+                  autoFocus
+                  value={deviceDataStore?.boxId}
+                  onChange={(e) => dispatch(DeviceBoxIDAction(e.target.value))}
+                  type="text"
+                  label="Barcode Scanner"
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <BarcodeIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              )}
           </>
         )}
       </Box>

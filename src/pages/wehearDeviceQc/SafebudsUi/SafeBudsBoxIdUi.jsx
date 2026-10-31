@@ -17,6 +17,7 @@ import {
 } from "../../../store/actions/deviceDataAction";
 import qrScanLogo from "../../../assets/images/qrScanLogo.svg";
 import CameraCaptureComponent from "../../../components/layouts/upload/CameraCaptureComponent";
+import { DEVICES } from "../../../utils/constants";
 
 const SafeBudsBoxIdUi = () => {
   const [Barcode, setBarcode] = useState(true);
@@ -110,6 +111,12 @@ const SafeBudsBoxIdUi = () => {
         {Barcode ? (
           <CustomInput
             autoFocus
+            disabled={
+              deviceDataStore?.boxId &&
+              deviceDataStore?.device == DEVICES.RIC_OPTIMA_8
+                ? true
+                : false
+            }
             value={deviceDataStore?.boxId}
             onChange={(e) => dispatch(DeviceBoxIDAction(e.target.value))}
             type="text"

@@ -12,10 +12,10 @@ switch (mode) {
     domain = "https://imsdevserver.wehear.in/";
     break;
   case "production1":
-    domain = "https://serverims.wehear.in/";     
+    domain = "https://serverims.wehear.in/";
     break;
   case "production":
-    domain = "https://imsprodserver.wehear.in/";     
+    domain = "https://imsprodserver.wehear.in/";
     break;
   default:
     domain = "http://localhost:8000/";

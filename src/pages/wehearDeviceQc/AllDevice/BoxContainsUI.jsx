@@ -44,47 +44,12 @@ const BoxContainsUI = ({ fields }) => {
   const onComplete = async (e) => {
     e.preventDefault();
     setLoading(true);
+
     console.log("data", data);
     console.log(
       "deviceQc?.deviceSerialNumber",
       deviceDataStore?.deviceSerialNumber,
     );
-    if (
-      (data.device == DEVICES.RIC_OPTIMA ||
-        data.device == DEVICES.RIC_OPTIMA_8) &&
-      deviceDataStore?.deviceSerialNumber
-    ) {
-      const snResult = await dispatch(
-        writeDeviceSn(data.boxId, "RIGHT", BLE_STORE.deviceObj), // see notes below for snValue / deviceSide
-      );
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // wait for 1 second before writing the left side
-      const snResult1 = await dispatch(
-        writeDeviceSn(data.boxId, "LEFT", BLE_STORE.LeftdeviceObj), // see notes below for snValue / deviceSide
-      );
-
-      if (!snResult1.success) {
-        setLoading(false);
-        dispatch(
-          callSnackBar(
-            snResult1.message ||
-              "Failed to LEFT SIDE write serial number to device",
-            SNACK_BAR_VARIETNS.error,
-          ),
-        );
-        return;
-      }
-      if (!snResult.success) {
-        setLoading(false);
-        dispatch(
-          callSnackBar(
-            snResult.message ||
-              "Failed to RIGHT SIDE write serial number to device",
-            SNACK_BAR_VARIETNS.error,
-          ),
-        );
-        return;
-      }
-    }
 
     dispatch(
       callApiAction(
@@ -95,22 +60,79 @@ const BoxContainsUI = ({ fields }) => {
             right: { ...data.right, result: true },
             macBeforeOta: device.mac,
           }),
+
         async (response) => {
+          console.log("API response:", response);
+
+          // Continue only if API returns 200
+          if (!response?._id) {
+            setLoading(false);
+            return;
+          }
+
+          // Existing BLE writing logic (unchanged)
+          if (
+            data.device == DEVICES.RIC_OPTIMA ||
+            data.device == DEVICES.RIC_OPTIMA_8
+            // deviceDataStore?.deviceSerialNumber
+          ) {
+            console.log("Writing serial numbers to devices...");
+            const snResult = await dispatch(
+              writeDeviceSn(data.boxId, "RIGHT", BLE_STORE.deviceObj),
+            );
+            console.log("snResult", snResult);
+
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+
+            const snResult1 = await dispatch(
+              writeDeviceSn(data.boxId, "LEFT", BLE_STORE.LeftdeviceObj),
+            );
+
+            console.log("snResult1", snResult1);
+
+            if (!snResult1.success) {
+              setLoading(false);
+              dispatch(
+                callSnackBar(
+                  snResult1.message ||
+                    "Failed to LEFT SIDE write serial number to device",
+                  SNACK_BAR_VARIETNS.error,
+                ),
+              );
+              return;
+            }
+
+            if (!snResult.success) {
+              setLoading(false);
+              dispatch(
+                callSnackBar(
+                  snResult.message ||
+                    "Failed to RIGHT SIDE write serial number to device",
+                  SNACK_BAR_VARIETNS.error,
+                ),
+              );
+              return;
+            }
+          }
+
+          // Existing success flow
           dispatch(
             callSnackBar(
               "Device QC Created Successfully",
               SNACK_BAR_VARIETNS.suceess,
             ),
           );
+
           setLoading(false);
           BLE_STORE.BTEdisconnect = true;
+
           dispatch(SetStepAction(0));
           dispatch(closeModal("deviceAudioMicCheck"));
-
           dispatch(resetDeviceDataStore(true));
         },
+
         (err) => {
-          setLoading(false); // was missing: spinner stayed on after an API error
+          setLoading(false);
           dispatch(callSnackBar(err, SNACK_BAR_VARIETNS.error));
         },
       ),
