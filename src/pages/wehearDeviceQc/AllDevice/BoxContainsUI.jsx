@@ -72,8 +72,8 @@ const BoxContainsUI = ({ fields }) => {
 
           // Existing BLE writing logic (unchanged)
           if (
-            data.device == DEVICES.RIC_OPTIMA ||
-            data.device == DEVICES.RIC_OPTIMA_8
+            data.device == DEVICES.RIC_OPTIMA 
+            // data.device == DEVICES.RIC_OPTIMA_8
             // deviceDataStore?.deviceSerialNumber
           ) {
             console.log("Writing serial numbers to devices...");
@@ -88,7 +88,6 @@ const BoxContainsUI = ({ fields }) => {
               writeDeviceSn(data.boxId, "LEFT", BLE_STORE.LeftdeviceObj),
             );
 
-            console.log("snResult1", snResult1);
 
             if (!snResult1.success) {
               setLoading(false);
