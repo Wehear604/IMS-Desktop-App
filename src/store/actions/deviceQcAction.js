@@ -365,7 +365,8 @@ export const writeDeviceSn = (SnValue, deviceSide, deviceObj) => {
       }
 
       // only the last 8 characters go to the device
-      const snToWrite = fullSn.slice(-8);
+      const sideSuffix = deviceSide === "LEFT" ? "L" : "R";
+      const snToWrite = `${sideSuffix}${fullSn.slice(-7)}`;
 
       // resolves only after the device replies
       const savedSn = await WriteSnToDevice(snToWrite, deviceSide, deviceObj);
